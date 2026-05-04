@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>متابعة أداء العمال | NATAC</title>
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-1: #eaf1ff;
+      --bg-2: #f7f1ea;
+      --text: #101827;
+      --muted: #667085;
+      --line: rgba(16, 24, 39, 0.12);
+      --card: rgba(255, 255, 255, 0.88);
+      --input: rgba(255, 255, 255, 0.98);
+      --blue: #0066ff;
+      --blue-dark: #004ec2;
+      --purple: #6d28d9;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #f97316;
+      --shadow: 0 22px 60px rgba(16, 24, 39, 0.14);
+      --topbar-height: 78px;
+      --sidebar-width: 310px;
+      --radius-xl: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Tajawal", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 12%, rgba(0, 102, 255, 0.28), transparent 28%),
+        radial-gradient(circle at 90% 10%, rgba(109, 40, 217, 0.20), transparent 30%),
+        linear-gradient(135deg, var(--bg-1), #ffffff 52%, var(--bg-2));
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    .floating-topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      min-height: var(--topbar-height);
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid rgba(16, 24, 39, 0.10);
+      box-shadow: 0 12px 32px rgba(16, 24, 39, 0.10);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 22px;
+    }
+
+    .topbar-side {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .menu-btn,
+    .language-toggle {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .menu-btn {
+      width: 42px;
+      height: 42px;
+      font-size: 30px;
+      display: grid;
+      place-items: center;
+    }
+
+    .language-toggle {
+      min-width: 44px;
+      height: 42px;
+      font-size: 16px;
+    }
+
+    .factory-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .factory-logo,
+    .sidebar-logo {
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(16,24,39,0.08);
+      flex-shrink: 0;
+    }
+
+    .factory-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+    }
+
+    .sidebar-logo {
+      width: 49px;
+      height: 49px;
+      border-radius: 18px;
+    }
+
+    .factory-logo img,
+    .sidebar-logo img {
+      width: 86%;
+      height: 86%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .factory-info,
+    .user-info,
+    .sidebar-title {
+      min-width: 0;
+      text-align: start;
+    }
+
+    .factory-info strong {
+      display: block;
+      font-size: 19px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .factory-info span {
+      display: block;
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-user-box {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--blue), var(--purple));
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px rgba(0,102,255,0.20);
+    }
+
+    .user-info strong,
+    .user-info span {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-info strong {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .user-info span {
+      margin-top: 1px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(16, 24, 39, 0.28);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--sidebar-width);
+      max-width: 88vw;
+      height: 100vh;
+      z-index: 200;
+      padding: 22px 18px;
+      overflow-y: auto;
+      transform: translateX(105%);
+      transition: transform 0.26s cubic-bezier(.2,.8,.2,1);
+      background: rgba(255,255,255,0.94);
+      border-left: 1px solid rgba(16,24,39,0.10);
+      box-shadow: -28px 0 70px rgba(16, 24, 39, 0.18);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+    }
+
+    html[dir="ltr"] .sidebar {
+      right: auto;
+      left: 0;
+      transform: translateX(-105%);
+      border-left: 0;
+      border-right: 1px solid rgba(16,24,39,0.10);
+      box-shadow: 28px 0 70px rgba(16, 24, 39, 0.18);
+    }
+
+    .sidebar.open,
+    html[dir="ltr"] .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .sidebar-title strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .sidebar-title span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .close-sidebar {
+      width: 43px;
+      height: 43px;
+      border: 0;
+      border-radius: 14px;
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--red);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .nav {
+      display: grid;
+    }
+
+    .nav a,
+    .logout-btn {
+      width: 100%;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 13px 4px;
+      border: 0;
+      border-bottom: 1px solid rgba(16,24,39,0.10);
+      background: transparent;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: start;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .nav a:hover,
+    .logout-btn:hover,
+    .nav a.active {
+      color: var(--blue-dark);
+      padding-inline-start: 10px;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 1450px;
+      margin: 0 auto;
+      padding: 116px 24px 32px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      border: 1px solid rgba(16,24,39,0.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px) saturate(170%);
+      -webkit-backdrop-filter: blur(24px) saturate(170%);
+    }
+
+    .page-title {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(16,24,39,0.10);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      text-align: start;
+    }
+
+    .page-title h1 {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      min-height: 46px;
+      border: 1px solid rgba(0, 102, 255, 0.22);
+      border-radius: 16px;
+      padding: 0 18px;
+      background: #fff;
+      color: var(--blue-dark);
+      font-family: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(145deg, #0066ff, #5b21b6);
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(0, 102, 255, 0.22);
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      text-align: start;
+    }
+
+    label {
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid rgba(16,24,39,0.18);
+      border-radius: 16px;
+      padding: 0 14px;
+      font-family: inherit;
+      font-size: 15px;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 2px 0 rgba(16,24,39,0.03);
+      transition: 0.18s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(0, 102, 255, 0.65);
+      box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.13);
+      background: #fff;
+    }
+
+    .btn {
+      min-height: 46px;
+      border: 0;
+      border-radius: 16px;
+      padding: 0 18px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, #0066ff, #5b21b6);
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(0, 102, 255, 0.22);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--blue-dark);
+      border: 1px solid rgba(0, 102, 255, 0.28);
+      box-shadow: 0 8px 20px rgba(16,24,39,0.06);
+    }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      background: #fff;
+      border: 1px solid rgba(16,24,39,0.10);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: 0 10px 24px rgba(16,24,39,0.06);
+      text-align: start;
+    }
+
+    .summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 7px;
+    }
+
+    .summary-card strong {
+      display: block;
+      color: var(--text);
+      font-size: 24px;
+      font-weight: 900;
+      direction: ltr;
+      text-align: start;
+      font-family: Arial, sans-serif;
+    }
+
+    .table-wrap {
+      border-radius: 18px;
+      overflow-x: auto;
+      border: 1px solid rgba(16,24,39,0.16);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border: 1px solid rgba(16,24,39,0.12);
+      padding: 12px;
+      text-align: start;
+      vertical-align: middle;
+      font-weight: 800;
+    }
+
+    th {
+      background: #eef4ff;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    td {
+      background: #fff;
+    }
+
+    .number-cell,
+    .date-cell {
+      direction: ltr;
+      text-align: start;
+      font-family: Arial, sans-serif;
+      font-weight: 900;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .status-good {
+      background: rgba(22, 163, 74, 0.10);
+      color: #166534;
+      border-color: rgba(22, 163, 74, 0.22);
+    }
+
+    .status-medium {
+      background: rgba(249, 115, 22, 0.10);
+      color: #9a3412;
+      border-color: rgba(249, 115, 22, 0.22);
+    }
+
+    .status-bad {
+      background: rgba(220, 38, 38, 0.10);
+      color: #991b1b;
+      border-color: rgba(220, 38, 38, 0.22);
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      background: #f9fafb;
+      color: var(--muted);
+      font-weight: 900;
+      text-align: center;
+      border: 1px dashed rgba(16,24,39,0.16);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 900;
+      margin-bottom: 16px;
+      padding: 13px 15px;
+      width: fit-content;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid rgba(16,24,39,0.10);
+      box-shadow: 0 8px 22px rgba(16,24,39,0.07);
+    }
+
+    .spinner,
+    .mini-spinner {
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 102, 255, 0.14);
+      border-top-color: var(--blue);
+    }
+
+    .mini-spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.45);
+      border-top-color: #fff;
+      display: inline-block;
+    }
+
+    .message {
+      display: none;
+      position: fixed;
+      top: 92px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1200;
+      min-width: min(520px, calc(100vw - 28px));
+      max-width: calc(100vw - 28px);
+      padding: 14px 18px;
+      border-radius: 18px;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.7;
+      border: 1px solid transparent;
+      box-shadow: 0 18px 48px rgba(16, 24, 39, 0.24);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      text-align: center;
+    }
+
+    .message.error {
+      display: block;
+      color: #991b1b;
+      background: rgba(254, 242, 242, 0.98);
+      border-color: #fecaca;
+    }
+
+    .message.success {
+      display: block;
+      color: #166534;
+      background: rgba(240, 253, 244, 0.98);
+      border-color: #bbf7d0;
+    }
+
+    .message.warning {
+      display: block;
+      color: #9a3412;
+      background: rgba(255, 247, 237, 0.98);
+      border-color: #fed7aa;
+    }
+
+
+
+    .user-menu-wrapper {
+      position: relative;
+    }
+
+    .top-user-box {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      inset-inline-end: 0;
+      width: 235px;
+      z-index: 500;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(16,24,39,0.10);
+      box-shadow: 0 18px 48px rgba(16,24,39,0.18);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .user-dropdown.show {
+      display: grid;
+    }
+
+    .user-dropdown a,
+    .user-dropdown button {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-bottom: 1px solid rgba(16,24,39,0.08);
+      background: transparent;
+      color: var(--text);
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: start;
+      padding: 0 4px;
+    }
+
+    .user-dropdown a:last-child,
+    .user-dropdown button:last-child {
+      border-bottom: 0;
+    }
+
+    .user-dropdown a:hover,
+    .user-dropdown button:hover {
+      color: var(--blue-dark);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .filters-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .floating-topbar {
+        min-height: 72px;
+        padding: 10px 12px;
+      }
+
+      .menu-btn,
+      .factory-logo {
+        width: 44px;
+        height: 44px;
+      }
+
+      .factory-info strong {
+        font-size: 15px;
+      }
+
+      .factory-info span {
+        font-size: 12px;
+      }
+
+      .top-user-box {
+        max-width: 130px;
+      }
+
+      .user-info span {
+        display: none;
+      }
+
+      .language-toggle {
+        min-width: 36px;
+        font-size: 14px;
+      }
+
+      .main {
+        padding: 94px 14px 24px;
+      }
+
+      .panel {
+        padding: 16px;
+        border-radius: 24px;
+      }
+
+      .page-title h1 {
+        font-size: 26px;
+      }
+
+      .filters-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-btn,
+      .btn {
+        width: 100%;
+      }
+
+      .message {
+        top: 82px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="floating-topbar">
+    <div class="topbar-side">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
+
+      <div class="factory-brand">
+        <div class="factory-logo">
+          <img src="assets/img/logo.png" alt="NATAC Logo">
+        </div>
+        <div class="factory-info">
+          <strong id="factoryName">ناتاك</strong>
+          <span id="factorySubtitle">نظام متابعة الإنتاج اليومي</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-side">
+      <button id="languageToggleBtn" class="language-toggle" type="button">EN</button>
+
+      <div class="user-menu-wrapper">
+        <button class="top-user-box" id="topUserMenuBtn" type="button">
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="userName">مستخدم</strong>
+            <span id="userRole">---</span>
+          </div>
+        </button>
+
+        <div class="user-dropdown" id="userDropdown">
+          <a href="profile.html">
+            <span>👤</span>
+            <span data-i18n="profile">الملف الشخصي</span>
+          </a>
+
+          <a href="users.html" data-permission="usersPage">
+            <span>👥</span>
+            <span data-i18n="usersManagement">إدارة المستخدمين</span>
+          </a>
+
+          <button type="button" id="logoutDropdownBtn">
+            <span>🚪</span>
+            <span data-i18n="logout">تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-title">
+        <div class="sidebar-logo">
+          <img src="assets/img/logo.png" alt="NATAC Logo">
+        </div>
+        <div>
+          <strong data-i18n="mainMenu">القائمة الرئيسية</strong>
+          <span data-i18n="productionSystem">نظام الإنتاج</span>
+        </div>
+      </div>
+
+      <button class="close-sidebar" id="closeSidebarBtn" type="button" aria-label="إغلاق القائمة">×</button>
+    </div>
+
+    <nav class="nav">
+      <a href="dashboard.html">
+        <span data-i18n="dashboard">لوحة التحكم</span>
+        <span class="nav-icon">📊</span>
+      </a>
+
+      <a href="production.html" data-permission="productionEntry">
+        <span data-i18n="productionEntry">إدخال الإنتاج</span>
+        <span class="nav-icon">🏭</span>
+      </a>
+
+      <a href="evaluation.html" data-permission="supervisorEvaluation">
+        <span data-i18n="supervisorEvaluation">تقييم المشرف</span>
+        <span class="nav-icon">⭐</span>
+      </a>
+
+      <a href="history.html" data-permission="productionHistory">
+        <span data-i18n="productionHistory">سجل الإنتاج</span>
+        <span class="nav-icon">📋</span>
+      </a>
+
+      <a href="performance.html" class="active" data-permission="workerPerformance">
+        <span data-i18n="workerPerformance">متابعة أداء العمال</span>
+        <span class="nav-icon">📈</span>
+      </a>
+
+      <a href="workers.html" data-permission="workersPage">
+        <span data-i18n="workers">العمال</span>
+        <span class="nav-icon">👷</span>
+      </a>
+
+      <a href="products.html" data-permission="productsPage">
+        <span data-i18n="products">المنتجات</span>
+        <span class="nav-icon">📦</span>
+      </a>
+
+      <a href="machines.html" data-permission="machinesPage">
+        <span data-i18n="machines">المكائن</span>
+        <span class="nav-icon">⚙️</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div id="loadingBox" class="loading">
+      <span class="spinner"></span>
+      <span data-i18n="loadingData">جاري تحميل البيانات...</span>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+
+    <section class="panel">
+      <div class="page-title">
+        <div>
+          <h1 data-i18n="workerPerformance">متابعة أداء العمال</h1>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" type="button" id="singleTabBtn" data-mode="single" data-i18n="singleWorkerMode">
+          أداء عامل محدد
+        </button>
+
+        <button class="tab-btn" type="button" id="allTabBtn" data-mode="all" data-i18n="allWorkersMode">
+          متوسط جميع العمال
+        </button>
+      </div>
+
+      <div id="singleFilters" class="filters-grid">
+        <div class="field">
+          <label for="singleWorkerInput" data-i18n="worker">العامل</label>
+          <select id="singleWorkerInput">
+            <option value="" data-i18n="chooseWorker">اختر العامل</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="singleFromDateInput" data-i18n="fromDate">من تاريخ</label>
+          <input type="date" id="singleFromDateInput">
+        </div>
+
+        <div class="field">
+          <label for="singleToDateInput" data-i18n="toDate">إلى تاريخ</label>
+          <input type="date" id="singleToDateInput">
+        </div>
+
+        <div class="field">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" type="button" id="loadSingleBtn" data-i18n="showResults">عرض النتائج</button>
+        </div>
+      </div>
+
+      <div id="allFilters" class="filters-grid" style="display:none;">
+        <div class="field">
+          <label for="allFromDateInput" data-i18n="fromDate">من تاريخ</label>
+          <input type="date" id="allFromDateInput">
+        </div>
+
+        <div class="field">
+          <label for="allToDateInput" data-i18n="toDate">إلى تاريخ</label>
+          <input type="date" id="allToDateInput">
+        </div>
+
+        <div class="field">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" type="button" id="loadAllBtn" data-i18n="showResults">عرض النتائج</button>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span data-i18n="totalProduction">إجمالي الإنتاج</span>
+          <strong id="totalProductionValue">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span data-i18n="avgEvaluation">متوسط تقييم المشرف</span>
+          <strong id="avgEvaluationValue">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span data-i18n="actualWaste">الهدر الفعلي</span>
+          <strong id="actualWasteValue">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span data-i18n="expectedWaste">الهدر المتوقع</span>
+          <strong id="expectedWasteValue">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span data-i18n="rawWasteIndex">مؤشر هدر المواد الخام</span>
+          <strong id="wasteIndexValue">0</strong>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead id="resultTableHead"></thead>
+          <tbody id="resultTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /********************************************************
+     * Supabase Settings
+     * لا تضع service_role key هنا نهائيًا
+     ********************************************************/
+    const SUPABASE_URL = "https://zwycwrewpuqlfysmqivg.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_4Mqa7nNhB7Y0Xh9X0ubdNQ_Gt6Ck0zZ";
+
+    const supabaseClient = window.supabase
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
+    const API_URL = SUPABASE_URL; // للتوافق مع شروط التحقق القديمة داخل الصفحة
+    const SESSION_KEY = "factoryUserSession";
+    const LANGUAGE_KEY = "factoryLanguage";
+    const INITIAL_CACHE_KEY = "performance_initial_data_v2";
+    const PERFORMANCE_CACHE_PREFIX = "performance_result_cache_v2_";
+
+    const i18n = {
+      ar: {
+        htmlLang: "ar",
+        dir: "rtl",
+        languageButton: "EN",
+        pageTitle: "متابعة أداء العمال | ناتاك",
+        factoryName: "ناتاك",
+        factorySubtitle: "نظام متابعة الإنتاج اليومي",
+        mainMenu: "القائمة الرئيسية",
+        productionSystem: "نظام الإنتاج",
+        dashboard: "لوحة التحكم",
+        productionEntry: "إدخال الإنتاج",
+        supervisorEvaluation: "تقييم المشرف",
+        productionHistory: "سجل الإنتاج",
+        workerPerformance: "متابعة أداء العمال",
+        workers: "العمال",
+        products: "المنتجات",
+        machines: "المكائن",
+        usersManagement: "إدارة المستخدمين",
+        profile: "الملف الشخصي",
+        logout: "تسجيل الخروج",
+        loadingData: "جاري تحميل البيانات...",
+        singleWorkerMode: "أداء عامل محدد",
+        allWorkersMode: "متوسط جميع العمال",
+        worker: "العامل",
+        chooseWorker: "اختر العامل",
+        fromDate: "من تاريخ",
+        toDate: "إلى تاريخ",
+        showResults: "عرض النتائج",
+        totalProduction: "إجمالي الإنتاج",
+        avgEvaluation: "متوسط تقييم المشرف",
+        actualWaste: "الهدر الفعلي",
+        expectedWaste: "الهدر المتوقع",
+        rawWasteIndex: "مؤشر هدر المواد الخام",
+        date: "التاريخ",
+        productionQty: "كمية الإنتاج",
+        expectedHours: "ساعات العمل النظرية",
+        supervisorEvaluationAvg: "متوسط تقييم المشرف",
+        quality: "الجودة",
+        cleanliness: "النظافة",
+        attendance: "الحضور والانضباط",
+        cooperation: "التعاون والسلوك",
+        problemSolving: "حل المشكلات",
+        innovation: "الابتكار",
+        performanceLevel: "مستوى الأداء",
+        excellent: "ممتاز",
+        good: "جيد",
+        average: "متوسط",
+        weak: "ضعيف",
+        emptyData: "لا توجد بيانات للعرض.",
+        roleAdmin: "مدير النظام",
+        roleSupervisor: "مشرف",
+        tokenMissing: "لم يتم العثور على رمز الجلسة token.",
+        serverError: "تعذر الاتصال بالخادم. تحقق من رابط Apps Script أو اتصال الإنترنت.",
+        loadFailed: "تعذر تحميل البيانات.",
+        notAllowed: "ليس لديك صلاحية لدخول صفحة متابعة أداء العمال.",
+        sessionExpired: "انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى.",
+        dateRequired: "يرجى اختيار فترة صحيحة.",
+        workerRequired: "يرجى اختيار العامل.",
+        invalidDates: "تاريخ البداية لا يمكن أن يكون بعد تاريخ النهاية.",
+        saving: "جاري التحميل..."
+      },
+      en: {
+        htmlLang: "en",
+        dir: "ltr",
+        languageButton: "عربي",
+        pageTitle: "Worker Performance | NATAC",
+        factoryName: "NATAC",
+        factorySubtitle: "Daily Production Monitoring System",
+        mainMenu: "Main Menu",
+        productionSystem: "Production System",
+        dashboard: "Dashboard",
+        productionEntry: "Production Entry",
+        supervisorEvaluation: "Supervisor Evaluation",
+        productionHistory: "Production History",
+        workerPerformance: "Worker Performance",
+        workers: "Workers",
+        products: "Products",
+        machines: "Machines",
+        usersManagement: "Users Management",
+        profile: "Profile",
+        logout: "Logout",
+        loadingData: "Loading data...",
+        singleWorkerMode: "Single Worker Performance",
+        allWorkersMode: "All Workers Average",
+        worker: "Worker",
+        chooseWorker: "Choose Worker",
+        fromDate: "From Date",
+        toDate: "To Date",
+        showResults: "Show Results",
+        totalProduction: "Total Production",
+        avgEvaluation: "Average Supervisor Evaluation",
+        actualWaste: "Actual Waste",
+        expectedWaste: "Expected Waste",
+        rawWasteIndex: "Raw Material Waste Index",
+        date: "Date",
+        productionQty: "Production Quantity",
+        expectedHours: "Theoretical Hours",
+        supervisorEvaluationAvg: "Average Supervisor Evaluation",
+        quality: "Quality",
+        cleanliness: "Cleanliness",
+        attendance: "Attendance & Discipline",
+        cooperation: "Cooperation & Behavior",
+        problemSolving: "Problem Solving",
+        innovation: "Innovation",
+        performanceLevel: "Performance Level",
+        excellent: "Excellent",
+        good: "Good",
+        average: "Average",
+        weak: "Weak",
+        emptyData: "No data to display.",
+        roleAdmin: "System Admin",
+        roleSupervisor: "Supervisor",
+        tokenMissing: "Session token not found.",
+        serverError: "Unable to connect to server.",
+        loadFailed: "Unable to load data.",
+        notAllowed: "You do not have permission to access Worker Performance.",
+        sessionExpired: "Session expired. Please login again.",
+        dateRequired: "Please choose a valid date range.",
+        workerRequired: "Please choose worker.",
+        invalidDates: "Start date cannot be after end date.",
+        saving: "Loading..."
+      }
+    };
+
+    let currentLang = localStorage.getItem(LANGUAGE_KEY) || "ar";
+    let currentUser = null;
+    let workers = [];
+    let currentMode = "single";
+    let messageTimer = null;
+
+    const loadingBox = document.getElementById("loadingBox");
+    const messageBox = document.getElementById("messageBox");
+
+    const factoryName = document.getElementById("factoryName");
+    const factorySubtitle = document.getElementById("factorySubtitle");
+
+    const userName = document.getElementById("userName");
+    const userRole = document.getElementById("userRole");
+    const userAvatar = document.getElementById("userAvatar");
+
+    const menuBtn = document.getElementById("menuBtn");
+    const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const languageToggleBtn = document.getElementById("languageToggleBtn");
+
+    const topUserMenuBtn = document.getElementById("topUserMenuBtn");
+    const userDropdown = document.getElementById("userDropdown");
+    const logoutDropdownBtn = document.getElementById("logoutDropdownBtn");
+
+    const singleTabBtn = document.getElementById("singleTabBtn");
+    const allTabBtn = document.getElementById("allTabBtn");
+    const singleFilters = document.getElementById("singleFilters");
+    const allFilters = document.getElementById("allFilters");
+
+    const singleWorkerInput = document.getElementById("singleWorkerInput");
+    const singleFromDateInput = document.getElementById("singleFromDateInput");
+    const singleToDateInput = document.getElementById("singleToDateInput");
+    const allFromDateInput = document.getElementById("allFromDateInput");
+    const allToDateInput = document.getElementById("allToDateInput");
+
+    const loadSingleBtn = document.getElementById("loadSingleBtn");
+    const loadAllBtn = document.getElementById("loadAllBtn");
+
+    const totalProductionValue = document.getElementById("totalProductionValue");
+    const avgEvaluationValue = document.getElementById("avgEvaluationValue");
+    const actualWasteValue = document.getElementById("actualWasteValue");
+    const expectedWasteValue = document.getElementById("expectedWasteValue");
+    const wasteIndexValue = document.getElementById("wasteIndexValue");
+
+    const resultTableHead = document.getElementById("resultTableHead");
+    const resultTableBody = document.getElementById("resultTableBody");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applyLanguage(currentLang);
+      initSidebar();
+      initLanguage();
+      initUserDropdown();
+      bindEvents();
+      setDefaultDates();
+      protectPageAndLoadInitialData();
+    });
+
+    function t(key) {
+      return i18n[currentLang][key] || key;
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem(LANGUAGE_KEY, lang);
+
+      document.documentElement.lang = i18n[lang].htmlLang;
+      document.documentElement.dir = i18n[lang].dir;
+      document.title = i18n[lang].pageTitle;
+
+      factoryName.textContent = i18n[lang].factoryName;
+      factorySubtitle.textContent = i18n[lang].factorySubtitle;
+      languageToggleBtn.textContent = i18n[lang].languageButton;
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (i18n[lang][key]) {
+          el.textContent = i18n[lang][key];
+        }
+      });
+
+      if (currentUser) {
+        renderUser(currentUser);
+        applyPermissionsUI();
+      }
+
+      renderWorkersOptions();
+      renderEmptyTable();
+    }
+
+    async function protectPageAndLoadInitialData() {
+      const session = getSession();
+
+      if (!session || !session.token) {
+        redirectToLogin();
+        return;
+      }
+
+      try {
+        const sessionResult = await apiPost({
+          action: "checkSession",
+          token: session.token
+        });
+
+        if (!sessionResult || !sessionResult.success) {
+          localStorage.removeItem(SESSION_KEY);
+          showMessage((sessionResult && sessionResult.message) || t("sessionExpired"), "error");
+
+          setTimeout(() => {
+            redirectToLogin();
+          }, 800);
+
+          return;
+        }
+
+        currentUser = normalizeSession({
+          ...session,
+          user: sessionResult.user
+        });
+
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+          token: session.token,
+          user: currentUser
+        }));
+
+        renderUser(currentUser);
+        applyPermissionsUI();
+
+        if (!hasClientPermission("workerPerformance")) {
+          hideLoading();
+          showMessage(t("notAllowed"), "error");
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1000);
+
+          return;
+        }
+
+        await loadInitialData();
+
+      } catch (error) {
+        console.error(error);
+        hideLoading();
+        showMessage(t("serverError"), "error");
+      }
+    }
+
+    function normalizeSession(session) {
+      const user = session.user || session.User || {};
+
+      return {
+        ...user,
+        token: session.token || user.token || "",
+        UserID: user.UserID || session.UserID || "",
+        FullName: user.FullName || user.fullName || session.FullName || session.fullName || user.name || session.name || user.Username || user.username || "",
+        Username: user.Username || user.username || session.Username || session.username || "",
+        Role: user.Role || user.role || session.Role || session.role || "",
+        Status: user.Status || user.status || session.Status || session.status || "",
+        Permissions: user.Permissions || user.permissions || session.Permissions || session.permissions || {}
+      };
+    }
+
+    function renderUser(user) {
+      const name =
+        user.FullName ||
+        user.fullName ||
+        user.name ||
+        user.Username ||
+        user.username ||
+        "User";
+
+      userName.textContent = name;
+      userRole.textContent = normalizeRoleLabel(user.Role || user.role);
+
+      const firstLetter = String(name).trim().charAt(0) || "U";
+      userAvatar.textContent = firstLetter;
+    }
+
+    function normalizeRoleLabel(role) {
+      const cleanRole = String(role || "").toLowerCase();
+
+      if (cleanRole === "admin") return t("roleAdmin");
+      if (cleanRole === "supervisor") return t("roleSupervisor");
+
+      return role || "---";
+    }
+
+    function hasClientPermission(permissionKey) {
+      const role = String(currentUser?.Role || currentUser?.role || "").toLowerCase();
+
+      if (role === "admin") return true;
+
+      const permissions = currentUser?.Permissions || currentUser?.permissions || {};
+
+      return permissions[permissionKey] === true;
+    }
+
+    function applyPermissionsUI() {
+      document.querySelectorAll("[data-permission]").forEach(element => {
+        const permissionKey = element.getAttribute("data-permission");
+        element.style.display = hasClientPermission(permissionKey) ? "" : "none";
+      });
+    }
+
+    function bindEvents() {
+      singleTabBtn.addEventListener("click", () => switchMode("single"));
+      allTabBtn.addEventListener("click", () => switchMode("all"));
+
+      loadSingleBtn.addEventListener("click", loadSinglePerformance);
+      loadAllBtn.addEventListener("click", loadAllPerformance);
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+
+      singleTabBtn.classList.toggle("active", mode === "single");
+      allTabBtn.classList.toggle("active", mode === "all");
+
+      singleFilters.style.display = mode === "single" ? "grid" : "none";
+      allFilters.style.display = mode === "all" ? "grid" : "none";
+
+      clearSummary();
+      renderEmptyTable();
+    }
+
+    function setDefaultDates() {
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      singleFromDateInput.value = toISODate(firstDay);
+      singleToDateInput.value = toISODate(today);
+      allFromDateInput.value = toISODate(firstDay);
+      allToDateInput.value = toISODate(today);
+    }
+
+    async function loadInitialData() {
+      if (!currentUser || !currentUser.token) {
+        hideLoading();
+        showMessage(t("tokenMissing"), "error");
+        return;
+      }
+
+      const cached = getLocalCache_(INITIAL_CACHE_KEY, 300000);
+
+      if (cached) {
+        workers = cached.workers || [];
+        renderWorkersOptions();
+        renderEmptyTable();
+        hideLoading();
+      }
+
+      try {
+        const result = await apiPost({
+          action: "getInitialData",
+          token: currentUser.token
+        });
+
+        if (!result || !result.success) {
+          if (!cached) {
+            hideLoading();
+            showMessage((result && result.message) || t("loadFailed"), "error");
+          }
+          return;
+        }
+
+        workers = result.workers || [];
+        setLocalCache_(INITIAL_CACHE_KEY, {
+          workers: workers
+        });
+
+        renderWorkersOptions();
+        renderEmptyTable();
+        hideLoading();
+
+      } catch (error) {
+        console.error(error);
+
+        if (!cached) {
+          hideLoading();
+          showMessage(t("serverError"), "error");
+        }
+      }
+    }
+
+    function renderWorkersOptions() {
+      const currentValue = singleWorkerInput.value || "";
+
+      singleWorkerInput.innerHTML = `<option value="">${t("chooseWorker")}</option>`;
+
+      workers.forEach(worker => {
+        const option = document.createElement("option");
+        option.value = worker.WorkerID || "";
+        option.textContent = worker.WorkerName || worker.WorkerID || "";
+        singleWorkerInput.appendChild(option);
+      });
+
+      if ([...singleWorkerInput.options].some(option => option.value === currentValue)) {
+        singleWorkerInput.value = currentValue;
+      }
+    }
+
+    async function loadSinglePerformance() {
+      const workerId = singleWorkerInput.value || "";
+      const fromDate = singleFromDateInput.value || "";
+      const toDate = singleToDateInput.value || "";
+
+      if (!workerId) {
+        showMessage(t("workerRequired"), "error");
+        return;
+      }
+
+      if (!validateDates(fromDate, toDate)) {
+        return;
+      }
+
+      const cacheKey = PERFORMANCE_CACHE_PREFIX + "single_" + workerId + "_" + fromDate + "_" + toDate;
+      const cached = getLocalCache_(cacheKey, 60000);
+
+      if (cached) {
+        renderSummary(cached.summary || {});
+        renderSingleTable(cached.records || []);
+      }
+
+      setButtonLoading(loadSingleBtn, true, t("saving"));
+
+      try {
+        const result = await apiPost({
+          action: "getWorkerPerformance",
+          token: currentUser.token,
+          mode: "single",
+          filters: {
+            workerId,
+            fromDate,
+            toDate
+          }
+        });
+
+        setButtonLoading(loadSingleBtn, false, t("showResults"));
+
+        if (!result || !result.success) {
+          if (!cached) showMessage((result && result.message) || t("loadFailed"), "error");
+          return;
+        }
+
+        setLocalCache_(cacheKey, result);
+        renderSummary(result.summary || {});
+        renderSingleTable(result.records || []);
+
+      } catch (error) {
+        console.error(error);
+        setButtonLoading(loadSingleBtn, false, t("showResults"));
+        if (!cached) showMessage(t("serverError"), "error");
+      }
+    }
+
+    async function loadAllPerformance() {
+      const fromDate = allFromDateInput.value || "";
+      const toDate = allToDateInput.value || "";
+
+      if (!validateDates(fromDate, toDate)) {
+        return;
+      }
+
+      const cacheKey = PERFORMANCE_CACHE_PREFIX + "all_" + fromDate + "_" + toDate;
+      const cached = getLocalCache_(cacheKey, 60000);
+
+      if (cached) {
+        renderSummary(cached.summary || {});
+        renderAllTable(cached.records || []);
+      }
+
+      setButtonLoading(loadAllBtn, true, t("saving"));
+
+      try {
+        const result = await apiPost({
+          action: "getWorkerPerformance",
+          token: currentUser.token,
+          mode: "all",
+          filters: {
+            fromDate,
+            toDate
+          }
+        });
+
+        setButtonLoading(loadAllBtn, false, t("showResults"));
+
+        if (!result || !result.success) {
+          if (!cached) showMessage((result && result.message) || t("loadFailed"), "error");
+          return;
+        }
+
+        setLocalCache_(cacheKey, result);
+        renderSummary(result.summary || {});
+        renderAllTable(result.records || []);
+
+      } catch (error) {
+        console.error(error);
+        setButtonLoading(loadAllBtn, false, t("showResults"));
+        if (!cached) showMessage(t("serverError"), "error");
+      }
+    }
+
+    function validateDates(fromDate, toDate) {
+      if (!fromDate || !toDate) {
+        showMessage(t("dateRequired"), "error");
+        return false;
+      }
+
+      if (fromDate > toDate) {
+        showMessage(t("invalidDates"), "error");
+        return false;
+      }
+
+      return true;
+    }
+
+    function renderSummary(summary) {
+      totalProductionValue.textContent = formatNumber(summary.totalQuantity || 0);
+      avgEvaluationValue.textContent = formatDecimal(summary.averageEvaluation || 0);
+      actualWasteValue.textContent = formatDecimal(summary.actualWaste || 0);
+      expectedWasteValue.textContent = formatDecimal(summary.expectedWaste || 0);
+      wasteIndexValue.textContent = formatDecimal(summary.wasteIndex || 0);
+    }
+
+    function clearSummary() {
+      renderSummary({
+        totalQuantity: 0,
+        averageEvaluation: 0,
+        actualWaste: 0,
+        expectedWaste: 0,
+        wasteIndex: 0
+      });
+    }
+
+    function renderEmptyTable() {
+      if (currentMode === "single") {
+        resultTableHead.innerHTML = `
+          <tr>
+            <th>${t("date")}</th>
+            <th>${t("productionQty")}</th>
+            <th>${t("actualWaste")}</th>
+            <th>${t("expectedWaste")}</th>
+            <th>${t("rawWasteIndex")}</th>
+            <th>${t("expectedHours")}</th>
+            <th>${t("supervisorEvaluationAvg")}</th>
+            <th>${t("performanceLevel")}</th>
+          </tr>
+        `;
+        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+      } else {
+        resultTableHead.innerHTML = `
+          <tr>
+            <th>${t("worker")}</th>
+            <th>${t("productionQty")}</th>
+            <th>${t("actualWaste")}</th>
+            <th>${t("expectedWaste")}</th>
+            <th>${t("rawWasteIndex")}</th>
+            <th>${t("expectedHours")}</th>
+            <th>${t("supervisorEvaluationAvg")}</th>
+            <th>${t("performanceLevel")}</th>
+          </tr>
+        `;
+        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+      }
+    }
+
+    function renderSingleTable(records) {
+      resultTableHead.innerHTML = `
+        <tr>
+          <th>${t("date")}</th>
+          <th>${t("productionQty")}</th>
+          <th>${t("actualWaste")}</th>
+          <th>${t("expectedWaste")}</th>
+          <th>${t("rawWasteIndex")}</th>
+          <th>${t("expectedHours")}</th>
+          <th>${t("supervisorEvaluationAvg")}</th>
+          <th>${t("performanceLevel")}</th>
+        </tr>
+      `;
+
+      if (!records.length) {
+        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        return;
+      }
+
+      resultTableBody.innerHTML = "";
+
+      records.forEach(row => {
+        const tr = document.createElement("tr");
+        const level = getLevel(row.averageEvaluation, row.wasteIndex);
+
+        tr.innerHTML = `
+          <td class="date-cell">${escapeHtml(row.date || "")}</td>
+          <td class="number-cell">${formatNumber(row.totalQuantity || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.actualWaste || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.expectedWaste || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.wasteIndex || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.theoreticalHours || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.averageEvaluation || 0)}</td>
+          <td>${renderLevel(level)}</td>
+        `;
+
+        resultTableBody.appendChild(tr);
+      });
+    }
+
+    function renderAllTable(records) {
+      resultTableHead.innerHTML = `
+        <tr>
+          <th>${t("worker")}</th>
+          <th>${t("productionQty")}</th>
+          <th>${t("actualWaste")}</th>
+          <th>${t("expectedWaste")}</th>
+          <th>${t("rawWasteIndex")}</th>
+          <th>${t("expectedHours")}</th>
+          <th>${t("supervisorEvaluationAvg")}</th>
+          <th>${t("performanceLevel")}</th>
+        </tr>
+      `;
+
+      if (!records.length) {
+        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        return;
+      }
+
+      resultTableBody.innerHTML = "";
+
+      records.forEach(row => {
+        const tr = document.createElement("tr");
+        const level = getLevel(row.averageEvaluation, row.wasteIndex);
+
+        tr.innerHTML = `
+          <td>${escapeHtml(row.workerName || row.workerId || "")}</td>
+          <td class="number-cell">${formatNumber(row.totalQuantity || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.actualWaste || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.expectedWaste || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.wasteIndex || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.theoreticalHours || 0)}</td>
+          <td class="number-cell">${formatDecimal(row.averageEvaluation || 0)}</td>
+          <td>${renderLevel(level)}</td>
+        `;
+
+        resultTableBody.appendChild(tr);
+      });
+    }
+
+    function getLevel(avgEvaluation, wasteIndex) {
+      const evaluation = Number(avgEvaluation || 0);
+      const waste = Number(wasteIndex || 0);
+
+      if (evaluation >= 9 && waste <= 1) return "excellent";
+      if (evaluation >= 7 && waste <= 1.2) return "good";
+      if (evaluation >= 5 && waste <= 1.5) return "average";
+      return "weak";
+    }
+
+    function renderLevel(level) {
+      const map = {
+        excellent: { label: t("excellent"), cls: "status-good" },
+        good: { label: t("good"), cls: "status-good" },
+        average: { label: t("average"), cls: "status-medium" },
+        weak: { label: t("weak"), cls: "status-bad" }
+      };
+
+      const item = map[level] || map.weak;
+
+      return `<span class="status-pill ${item.cls}">${item.label}</span>`;
+    }
+
+    function getLocalCache_(key, maxAgeMs) {
+      try {
+        const raw = localStorage.getItem(key);
+
+        if (!raw) return null;
+
+        const cached = JSON.parse(raw);
+
+        if (!cached || !cached.savedAt || !cached.data) {
+          localStorage.removeItem(key);
+          return null;
+        }
+
+        const age = Date.now() - cached.savedAt;
+
+        if (age > maxAgeMs) {
+          localStorage.removeItem(key);
+          return null;
+        }
+
+        return cached.data;
+
+      } catch (error) {
+        localStorage.removeItem(key);
+        return null;
+      }
+    }
+
+    function setLocalCache_(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify({
+          savedAt: Date.now(),
+          data: data
+        }));
+      } catch (error) {
+        console.warn("Local cache failed:", error);
+      }
+    }
+
+    function clearPerformanceLocalCache_() {
+      Object.keys(localStorage).forEach(key => {
+        if (
+          key.indexOf(INITIAL_CACHE_KEY) === 0 ||
+          key.indexOf(PERFORMANCE_CACHE_PREFIX) === 0
+        ) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+
+    async function apiPost(payload) {
+      if (!supabaseClient) {
+        return {
+          success: false,
+          message: typeof t === "function" ? t("serverError") : "تعذر الاتصال بقاعدة البيانات"
+        };
+      }
+
+      payload = payload || {};
+      const action = payload.action;
+      const token = payload.token || (typeof currentUser !== "undefined" && currentUser ? currentUser.token : "");
+
+      try {
+        if (action === "login") {
+          const result = await rpcSafe_("custom_login", {
+            p_username: payload.username || payload.Username || "",
+            p_password: payload.password || payload.Password || ""
+          });
+          if (result && result.user) result.user = normalizeUser_(result.user);
+          return result;
+        }
+
+        if (action === "checkSession") {
+          return await rpcSafe_("get_session_user", { p_token: token });
+        }
+
+        if (action === "logout") {
+          const result = await rpcSafe_("custom_logout", { p_token: token }, true);
+          return result || { success: true };
+        }
+
+        if (action === "getInitialData") {
+          const result = await rpcSafe_("get_initial_data", { p_token: token });
+          return normalizeInitialDataResult_(result);
+        }
+
+        if (action === "getDashboardData" || action === "getDashboardStats") {
+          return await rpcSafe_("get_dashboard_data", { p_token: token });
+        }
+
+        if (action === "getWorkers") {
+          const result = await rpcSafe_("get_workers", { p_token: token });
+          result.workers = normalizeWorkers_(result.workers || []);
+          return result;
+        }
+
+        if (action === "addWorker") {
+          const worker = payload.worker || {};
+          return await rpcSafe_("add_worker", {
+            p_token: token,
+            p_worker_name: worker.workerName || worker.WorkerName || "",
+            p_status: normalizeStatusForDb_(worker.status || worker.Status || "Active")
+          });
+        }
+
+        if (action === "updateWorker") {
+          const worker = payload.worker || {};
+          return await rpcSafe_("update_worker", {
+            p_token: token,
+            p_worker_id: worker.workerId || worker.WorkerID || null,
+            p_worker_name: worker.workerName || worker.WorkerName || "",
+            p_status: normalizeStatusForDb_(worker.status || worker.Status || "Active")
+          });
+        }
+
+        if (action === "getCategories") {
+          const result = await rpcSafe_("get_categories", { p_token: token });
+          result.categories = normalizeCategories_(result.categories || []);
+          return result;
+        }
+
+        if (action === "addCategory") {
+          const category = payload.category || {};
+          const categoryType = category.categoryType || category.CategoryType || payload.categoryType ||
+            (payload.scope === "machines" || typeof machineCategoryInput !== "undefined" ? "Machine" : "Product");
+
+          return await rpcSafe_("add_category", {
+            p_token: token,
+            p_category_name: category.categoryName || category.CategoryName || "",
+            p_category_type: categoryType,
+            p_status: normalizeStatusForDb_(category.status || category.Status || "Active")
+          });
+        }
+
+        if (action === "updateCategory") {
+          const category = payload.category || {};
+          return await rpcSafe_("update_category", {
+            p_token: token,
+            p_category_id: category.categoryId || category.CategoryID || category.id || null,
+            p_category_name: category.categoryName || category.CategoryName || "",
+            p_category_type: category.categoryType || category.CategoryType || payload.categoryType || "Product",
+            p_status: normalizeStatusForDb_(category.status || category.Status || "Active")
+          });
+        }
+
+        if (action === "getMachines") {
+          const result = await rpcSafe_("get_machines", { p_token: token });
+          result.machines = normalizeMachines_(result.machines || []);
+          result.categories = normalizeCategories_(result.categories || []);
+          return result;
+        }
+
+        if (action === "addMachine") {
+          const machine = payload.machine || {};
+          const categoryId = machine.machineCategoryId || machine.MachineCategoryID || findCategoryIdByName_(machine.machineCategory || machine.MachineCategory, "Machine");
+
+          return await rpcSafe_("add_machine", {
+            p_token: token,
+            p_machine_name: machine.machineName || machine.MachineName || "",
+            p_machine_category_id: categoryId || null,
+            p_status: normalizeStatusForDb_(machine.status || machine.Status || "Active")
+          });
+        }
+
+        if (action === "updateMachine") {
+          const machine = payload.machine || {};
+          const categoryId = machine.machineCategoryId || machine.MachineCategoryID || findCategoryIdByName_(machine.machineCategory || machine.MachineCategory, "Machine");
+
+          return await rpcSafe_("update_machine", {
+            p_token: token,
+            p_machine_id: machine.machineId || machine.MachineID || null,
+            p_machine_name: machine.machineName || machine.MachineName || "",
+            p_machine_category_id: categoryId || null,
+            p_status: normalizeStatusForDb_(machine.status || machine.Status || "Active")
+          });
+        }
+
+        if (action === "getProducts") {
+          const result = await rpcSafe_("get_products", { p_token: token });
+          result.products = normalizeProducts_(result.products || []);
+          result.categories = normalizeCategories_(result.categories || []);
+          result.machines = normalizeMachines_(result.machines || []);
+          return result;
+        }
+
+        if (action === "addProduct") {
+          const product = payload.product || {};
+          const categoryId = product.productCategoryId || product.ProductCategoryID || findCategoryIdByName_(product.productCategory || product.ProductCategory, "Product");
+
+          return await rpcSafe_("add_product", {
+            p_token: token,
+            p_product_name: product.productName || product.ProductName || "",
+            p_product_category_id: categoryId || null,
+            p_machine_id: product.machineId || product.MachineID || null,
+            p_time_per_unit: Number(product.timePerUnit ?? product.TimePerUnit ?? 0),
+            p_waste_kg_per_unit: Number(product.wasteKgPerUnit ?? product.WasteKgPerUnit ?? 0),
+            p_status: normalizeStatusForDb_(product.status || product.Status || "Active")
+          });
+        }
+
+        if (action === "updateProduct") {
+          const product = payload.product || {};
+          const categoryId = product.productCategoryId || product.ProductCategoryID || findCategoryIdByName_(product.productCategory || product.ProductCategory, "Product");
+
+          return await rpcSafe_("update_product", {
+            p_token: token,
+            p_product_id: product.productId || product.ProductID || null,
+            p_product_name: product.productName || product.ProductName || "",
+            p_product_category_id: categoryId || null,
+            p_machine_id: product.machineId || product.MachineID || null,
+            p_time_per_unit: Number(product.timePerUnit ?? product.TimePerUnit ?? 0),
+            p_waste_kg_per_unit: Number(product.wasteKgPerUnit ?? product.WasteKgPerUnit ?? 0),
+            p_status: normalizeStatusForDb_(product.status || product.Status || "Active")
+          });
+        }
+
+        if (action === "saveProduction") {
+          const production = payload.production || {};
+          const items = (payload.items || []).map(item => ({
+            product_id: item.productId || item.ProductID,
+            machine_id: item.machineId || item.MachineID,
+            quantity: Number(item.quantity ?? item.Quantity ?? 0)
+          }));
+
+          return await rpcSafe_("save_production", {
+            p_token: token,
+            p_production_date: production.date || production.Date || null,
+            p_shift: production.shift || production.Shift || "",
+            p_worker_id: production.workerId || production.WorkerID || null,
+            p_raw_waste_kg: Number(production.rawWasteKg ?? production.RawWasteKg ?? 0),
+            p_notes: production.notes || production.Notes || "",
+            p_image_path: getImagePathForDb_(production.image || production.Image),
+            p_items: items
+          });
+        }
+
+        if (action === "getProductionHistory") {
+          const filters = payload.filters || {};
+          const result = await rpcSafe_("get_production_history", {
+            p_token: token,
+            p_from_date: filters.fromDate || filters.from_date || null,
+            p_to_date: filters.toDate || filters.to_date || null,
+            p_worker_id: filters.workerId || filters.worker_id || null
+          });
+
+          const records = flattenHistoryRecords_(result.data || result.records || []);
+          result.records = filterHistoryRecords_(records, filters);
+          return result;
+        }
+
+        if (action === "updateProduction") {
+          const production = payload.production || {};
+          const items = (payload.items || []).map(item => ({
+            item_id: item.itemId || item.ItemID || null,
+            product_id: item.productId || item.ProductID,
+            machine_id: item.machineId || item.MachineID,
+            quantity: Number(item.quantity ?? item.Quantity ?? 0)
+          }));
+
+          return await rpcSafe_("update_production", {
+            p_token: token,
+            p_production_id: production.productionId || production.ProductionID || null,
+            p_production_date: production.date || production.Date || null,
+            p_shift: production.shift || production.Shift || "",
+            p_worker_id: production.workerId || production.WorkerID || null,
+            p_raw_waste_kg: Number(production.rawWasteKg ?? production.RawWasteKg ?? 0),
+            p_notes: production.notes || production.Notes || "",
+            p_image_action: production.imageAction || "keep",
+            p_image_path: getImagePathForDb_(production.image || production.Image),
+            p_items: items
+          });
+        }
+
+        if (action === "saveSupervisorEvaluation") {
+          const evaluation = payload.evaluation || {};
+          return await rpcSafe_("save_supervisor_evaluation", {
+            p_token: token,
+            p_evaluation_date: evaluation.date || evaluation.evaluationDate || null,
+            p_worker_id: evaluation.workerId || evaluation.WorkerID || null,
+            p_quality: Number(evaluation.quality || 0),
+            p_cleanliness: Number(evaluation.cleanliness || 0),
+            p_attendance: Number(evaluation.attendance || 0),
+            p_cooperation: Number(evaluation.cooperation || 0),
+            p_problem_solving: Number(evaluation.problemSolving || evaluation.problem_solving || 0),
+            p_innovation: Number(evaluation.innovation || 0),
+            p_notes: evaluation.notes || ""
+          });
+        }
+
+        if (action === "getWorkerPerformance") {
+          const filters = payload.filters || {};
+          const result = await rpcSafe_("get_worker_performance_v2", {
+            p_token: token,
+            p_mode: payload.mode || "all",
+            p_from_date: filters.fromDate || filters.from_date || null,
+            p_to_date: filters.toDate || filters.to_date || null,
+            p_worker_id: filters.workerId || filters.worker_id || null
+          });
+
+          return normalizePerformanceResult_(result);
+        }
+
+        if (action === "getUsers") {
+          const result = await rpcSafe_("get_users", { p_token: token });
+          result.users = normalizeUsers_(result.users || []);
+          return result;
+        }
+
+        if (action === "addUser") {
+          const user = payload.user || {};
+          return await rpcSafe_("add_app_user", {
+            p_token: token,
+            p_full_name: user.fullName || user.FullName || "",
+            p_username: user.username || user.Username || "",
+            p_password: user.password || user.Password || "",
+            p_role: normalizeRoleForDb_(user.role || user.Role || "Supervisor"),
+            p_status: normalizeStatusForDb_(user.status || user.Status || "Active"),
+            p_permissions: user.permissions || user.Permissions || {}
+          });
+        }
+
+        if (action === "updateUser") {
+          const user = payload.user || {};
+          const oldUser = findUserById_(user.userId || user.UserID);
+          return await rpcSafe_("update_app_user", {
+            p_token: token,
+            p_user_id: user.userId || user.UserID || null,
+            p_full_name: user.fullName || user.FullName || oldUser.FullName || "",
+            p_username: user.username || user.Username || oldUser.Username || "",
+            p_role: normalizeRoleForDb_(user.role || user.Role || oldUser.Role || "Supervisor"),
+            p_status: normalizeStatusForDb_(user.status || user.Status || oldUser.Status || "Active"),
+            p_permissions: user.permissions || user.Permissions || oldUser.Permissions || {},
+            p_new_password: user.password || user.Password || null
+          });
+        }
+
+        if (action === "getProfile") {
+          const result = await rpcSafe_("get_session_user", { p_token: token });
+          if (result && result.user) {
+            result.user = normalizeUser_(result.user);
+            result.profile = result.user;
+          }
+          return result;
+        }
+
+        if (action === "updateProfile") {
+          const result = await rpcSafe_("update_profile", {
+            p_token: token,
+            p_full_name: payload.fullName || payload.full_name || ""
+          });
+          if (result && result.user) {
+            result.user = normalizeUser_(result.user);
+            result.profile = result.user;
+          }
+          return result;
+        }
+
+        if (action === "changePassword") {
+          return await rpcSafe_("change_password", {
+            p_token: token,
+            p_old_password: payload.currentPassword || payload.oldPassword || "",
+            p_new_password: payload.newPassword || ""
+          });
+        }
+
+        return {
+          success: false,
+          message: "عملية غير مدعومة في نسخة Supabase: " + action
+        };
+
+      } catch (error) {
+        console.error("Supabase action failed:", action, error);
+        return {
+          success: false,
+          message: error && error.message ? error.message : (typeof t === "function" ? t("serverError") : "تعذر الاتصال بقاعدة البيانات")
+        };
+      }
+    }
+
+    async function rpcSafe_(fnName, args, allowLogoutFailure) {
+      const { data, error } = await supabaseClient.rpc(fnName, args || {});
+
+      if (error) {
+        console.error(fnName + " error:", error);
+        if (allowLogoutFailure) return { success: true };
+        throw new Error(error.message || "Supabase RPC error");
+      }
+
+      return data || { success: true };
+    }
+
+    function normalizeInitialDataResult_(result) {
+      result = result || { success: false };
+      result.workers = normalizeWorkers_(result.workers || []);
+      result.categories = normalizeCategories_(result.categories || []);
+      result.machines = normalizeMachines_(result.machines || []);
+      result.products = normalizeProducts_(result.products || []);
+      if (result.user) result.user = normalizeUser_(result.user);
+      return result;
+    }
+
+    function normalizeUser_(user) {
+      user = user || {};
+      const permissions = user.Permissions || user.permissions || {};
+      return {
+        ...user,
+        UserID: user.UserID || user.userId || user.userCode || user.user_code || user.id || "",
+        UserCode: user.UserCode || user.userCode || user.user_code || "",
+        FullName: user.FullName || user.fullName || user.full_name || "",
+        Username: user.Username || user.username || "",
+        Role: user.Role || user.role || "",
+        Status: user.Status || user.status || "",
+        Permissions: permissions,
+        id: user.id || user.UserID || user.userId || "",
+        fullName: user.fullName || user.FullName || user.full_name || "",
+        username: user.username || user.Username || "",
+        role: user.role || user.Role || "",
+        status: user.status || user.Status || "",
+        permissions: permissions
+      };
+    }
+
+    function normalizeUsers_(items) {
+      return (items || []).map(normalizeUser_);
+    }
+
+    function normalizeWorkers_(items) {
+      return (items || []).map(item => ({
+        ...item,
+        WorkerID: item.WorkerID || item.workerId || item.worker_id || item.id || "",
+        WorkerCode: item.WorkerCode || item.workerCode || item.worker_code || "",
+        WorkerName: item.WorkerName || item.workerName || item.worker_name || "",
+        Status: item.Status || item.status || "Active"
+      }));
+    }
+
+    function normalizeCategories_(items) {
+      return (items || []).map(item => ({
+        ...item,
+        CategoryID: item.CategoryID || item.categoryId || item.category_id || item.id || "",
+        CategoryCode: item.CategoryCode || item.categoryCode || item.category_code || "",
+        CategoryName: item.CategoryName || item.categoryName || item.category_name || "",
+        CategoryType: item.CategoryType || item.categoryType || item.category_type || "",
+        Status: item.Status || item.status || "Active"
+      }));
+    }
+
+    function normalizeMachines_(items) {
+      return (items || []).map(item => ({
+        ...item,
+        MachineID: item.MachineID || item.machineId || item.machine_id || item.id || "",
+        MachineCode: item.MachineCode || item.machineCode || item.machine_code || "",
+        MachineName: item.MachineName || item.machineName || item.machine_name || "",
+        MachineCategoryID: item.MachineCategoryID || item.machineCategoryId || item.machine_category_id || "",
+        MachineCategory: item.MachineCategory || item.machineCategoryName || item.machine_category_name || item.categoryName || "",
+        Status: item.Status || item.status || "Active"
+      }));
+    }
+
+    function normalizeProducts_(items) {
+      return (items || []).map(item => ({
+        ...item,
+        ProductID: item.ProductID || item.productId || item.product_id || item.id || "",
+        ProductCode: item.ProductCode || item.productCode || item.product_code || "",
+        ProductName: item.ProductName || item.productName || item.product_name || "",
+        ProductCategoryID: item.ProductCategoryID || item.productCategoryId || item.product_category_id || "",
+        ProductCategory: item.ProductCategory || item.productCategoryName || item.product_category_name || item.categoryName || "",
+        MachineID: item.MachineID || item.machineId || item.machine_id || "",
+        MachineName: item.MachineName || item.machineName || item.machine_name || "",
+        TimePerUnit: Number(item.TimePerUnit ?? item.timePerUnit ?? item.time_per_unit ?? 0),
+        WasteKgPerUnit: Number(item.WasteKgPerUnit ?? item.wasteKgPerUnit ?? item.waste_kg_per_unit ?? 0),
+        Status: item.Status || item.status || "Active"
+      }));
+    }
+
+    function flattenHistoryRecords_(items) {
+      const output = [];
+
+      (items || []).forEach(group => {
+        const productionId = group.ProductionID || group.productionCode || group.productionId || group.production_id || group.id || "";
+        const base = {
+          ProductionID: productionId,
+          Date: group.Date || group.productionDate || group.production_date || "",
+          Shift: group.Shift || group.shift || "",
+          WorkerID: group.WorkerID || group.workerId || group.worker_id || "",
+          WorkerName: group.WorkerName || group.workerName || group.worker_name || "",
+          RawWasteKg: Number(group.RawWasteKg ?? group.rawWasteKg ?? group.raw_waste_kg ?? 0),
+          Notes: group.Notes || group.notes || "",
+          ImageURL: group.ImageURL || group.imageUrl || group.imagePath || group.image_path || ""
+        };
+
+        const groupItems = group.items || [];
+        if (!groupItems.length) {
+          output.push({ ...base, ItemID: "", ProductID: "", ProductCategory: "", ProductName: "", MachineID: "", MachineName: "", Quantity: 0 });
+          return;
+        }
+
+        groupItems.forEach(item => {
+          const productId = item.ProductID || item.productId || item.product_id || "";
+          const product = findProductById_(productId);
+          output.push({
+            ...base,
+            ItemID: item.ItemID || item.itemId || item.item_id || item.id || "",
+            ProductID: productId,
+            ProductCategory: item.ProductCategory || item.productCategory || item.product_category || product.ProductCategory || "",
+            ProductName: item.ProductName || item.productName || item.product_name || product.ProductName || "",
+            MachineID: item.MachineID || item.machineId || item.machine_id || "",
+            MachineName: item.MachineName || item.machineName || item.machine_name || "",
+            Quantity: Number(item.Quantity ?? item.quantity ?? 0)
+          });
+        });
+      });
+
+      return output;
+    }
+
+    function filterHistoryRecords_(records, filters) {
+      filters = filters || {};
+      const productId = String(filters.productId || "");
+      const machineId = String(filters.machineId || "");
+      if (!productId && !machineId) return records;
+      return records.filter(row => {
+        if (productId && String(row.ProductID || "") !== productId) return false;
+        if (machineId && String(row.MachineID || "") !== machineId) return false;
+        return true;
+      });
+    }
+
+    function normalizePerformanceResult_(result) {
+      result = result || { success: false, records: [], summary: {} };
+      const records = result.records || result.data || [];
+      result.records = records.map(row => ({
+        date: row.date || row.production_date || "",
+        workerId: row.workerId || row.worker_id || "",
+        workerName: row.workerName || row.worker_name || "",
+        totalQuantity: Number(row.totalQuantity ?? row.total_quantity ?? 0),
+        actualWaste: Number(row.actualWaste ?? row.actual_waste ?? row.total_raw_waste ?? 0),
+        expectedWaste: Number(row.expectedWaste ?? row.expected_waste ?? 0),
+        wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? 0),
+        theoreticalHours: Number(row.theoreticalHours ?? row.theoretical_hours ?? 0),
+        averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? 0)
+      }));
+      result.summary = result.summary || calculatePerformanceSummary_(result.records);
+      return result;
+    }
+
+    function calculatePerformanceSummary_(records) {
+      const summary = { totalQuantity: 0, averageEvaluation: 0, actualWaste: 0, expectedWaste: 0, wasteIndex: 0 };
+      let evalSum = 0;
+      let evalCount = 0;
+      (records || []).forEach(row => {
+        summary.totalQuantity += Number(row.totalQuantity || 0);
+        summary.actualWaste += Number(row.actualWaste || 0);
+        summary.expectedWaste += Number(row.expectedWaste || 0);
+        if (Number(row.averageEvaluation || 0) > 0) {
+          evalSum += Number(row.averageEvaluation || 0);
+          evalCount++;
+        }
+      });
+      summary.averageEvaluation = evalCount ? evalSum / evalCount : 0;
+      summary.wasteIndex = summary.expectedWaste > 0 ? summary.actualWaste / summary.expectedWaste : 0;
+      return summary;
+    }
+
+    function findCategoryIdByName_(name, type) {
+      const cleanName = normalizeTextForLookup_(name);
+      let source = [];
+      try {
+        source = typeof categories !== "undefined" ? categories : [];
+      } catch (error) {
+        source = [];
+      }
+      const item = (source || []).find(category => {
+        const sameName = normalizeTextForLookup_(category.CategoryName || category.categoryName || category.category_name) === cleanName;
+        const sameType = !type || !category.CategoryType || category.CategoryType === type || category.categoryType === type || category.category_type === type;
+        return sameName && sameType;
+      });
+      return item ? (item.CategoryID || item.categoryId || item.id || null) : null;
+    }
+
+    function findProductById_(productId) {
+      let source = [];
+      try {
+        source = typeof products !== "undefined" ? products : [];
+      } catch (error) {
+        source = [];
+      }
+      return (source || []).find(product => String(product.ProductID || product.productId || product.id || "") === String(productId || "")) || {};
+    }
+
+    function findUserById_(userId) {
+      let source = [];
+      try {
+        source = typeof users !== "undefined" ? users : [];
+      } catch (error) {
+        source = [];
+      }
+      return (source || []).find(user => String(user.UserID || user.userId || user.id || "") === String(userId || "")) || {};
+    }
+
+    function normalizeTextForLookup_(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function normalizeStatusForDb_(status) {
+      const value = String(status || "").toLowerCase();
+      return value === "inactive" || value === "غير نشط" || value === "معطل" ? "Inactive" : "Active";
+    }
+
+    function normalizeRoleForDb_(role) {
+      const value = String(role || "").toLowerCase();
+      return value === "admin" || value === "مدير" || value === "مدير النظام" ? "Admin" : "Supervisor";
+    }
+
+    function getImagePathForDb_(image) {
+      if (!image) return "";
+      if (typeof image === "string") return image;
+      return image.dataUrl || image.url || image.path || "";
+    }
+
+    function getSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (error) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+    }
+
+    function redirectToLogin() {
+      window.location.href = "index.html";
+    }
+
+    function initSidebar() {
+      menuBtn.addEventListener("click", openSidebar);
+      closeSidebarBtn.addEventListener("click", closeSidebar);
+      overlay.addEventListener("click", closeSidebar);
+
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          closeSidebar();
+          closeUserDropdown();
+        }
+      });
+
+      document.querySelectorAll(".nav a").forEach(link => {
+        link.addEventListener("click", closeSidebar);
+      });
+    }
+
+    function openSidebar() {
+      sidebar.classList.add("open");
+      overlay.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    function initLanguage() {
+      languageToggleBtn.addEventListener("click", () => {
+        const nextLang = currentLang === "ar" ? "en" : "ar";
+        applyLanguage(nextLang);
+      });
+    }
+
+    function initUserDropdown() {
+      topUserMenuBtn.addEventListener("click", event => {
+        event.stopPropagation();
+        userDropdown.classList.toggle("show");
+      });
+
+      userDropdown.addEventListener("click", event => {
+        event.stopPropagation();
+      });
+
+      document.addEventListener("click", event => {
+        if (!event.target.closest(".user-menu-wrapper")) {
+          closeUserDropdown();
+        }
+      });
+
+      logoutDropdownBtn.addEventListener("click", logoutUser);
+    }
+
+    function closeUserDropdown() {
+      userDropdown.classList.remove("show");
+    }
+
+    async function logoutUser() {
+      const session = getSession();
+
+      try {
+        if (session && session.token && API_URL) {
+          await apiPost({
+            action: "logout",
+            token: session.token
+          });
+        }
+      } catch (error) {
+        console.warn(error);
+      }
+
+      localStorage.removeItem(SESSION_KEY);
+      clearPerformanceLocalCache_();
+      redirectToLogin();
+    }
+
+    function hideLoading() {
+      loadingBox.style.display = "none";
+    }
+
+    function setButtonLoading(button, isLoading, text) {
+      button.disabled = isLoading;
+
+      if (isLoading) {
+        button.innerHTML = '<span class="mini-spinner"></span>' + text;
+      } else {
+        button.textContent = text;
+      }
+    }
+
+    function showMessage(text, type) {
+      clearTimeout(messageTimer);
+
+      messageBox.textContent = text;
+      messageBox.className = "message " + type;
+
+      messageTimer = setTimeout(() => {
+        clearMessage();
+      }, 3000);
+    }
+
+    function clearMessage() {
+      clearTimeout(messageTimer);
+      messageBox.textContent = "";
+      messageBox.className = "message";
+    }
+
+    function formatNumber(value) {
+      const number = Number(value || 0);
+
+      return number.toLocaleString("en-US", {
+        maximumFractionDigits: 0
+      });
+    }
+
+    function formatDecimal(value) {
+      const number = Number(value || 0);
+
+      return number.toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function toISODate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
