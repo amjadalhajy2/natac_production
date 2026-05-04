@@ -1354,7 +1354,7 @@
         loadingUsers: "جاري تحميل المستخدمين...",
         addUser: "إضافة مستخدم",
         editUser: "تعديل مستخدم",
-        userId: "رقم المستخدم",
+        userId: "كود المستخدم",
         fullName: "الاسم الكامل",
         username: "اسم المستخدم",
         password: "كلمة المرور",
@@ -1428,7 +1428,7 @@
         loadingUsers: "Loading users...",
         addUser: "Add User",
         editUser: "Edit User",
-        userId: "User ID",
+        userId: "User Code",
         fullName: "Full Name",
         username: "Username",
         password: "Password",
@@ -1747,7 +1747,8 @@
 
         if (!keyword) return true;
 
-        return String(user.UserID || "").toLowerCase().includes(keyword) ||
+        return String(user.UserCode || "").toLowerCase().includes(keyword) ||
+          String(user.UserID || "").toLowerCase().includes(keyword) ||
           String(user.FullName || "").toLowerCase().includes(keyword) ||
           String(user.Username || "").toLowerCase().includes(keyword) ||
           normalizeRoleLabel(role).toLowerCase().includes(keyword) ||
@@ -1775,6 +1776,7 @@
 
       filteredUsers.forEach(user => {
         const userId = user.UserID || "";
+        const userCode = user.UserCode || user.UserID || "";
         const role = normalizeRole(user.Role || "");
         const status = normalizeStatus(user.Status || "");
         const active = status === "Active";
@@ -1783,7 +1785,7 @@
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td class="id-cell">${escapeHtml(userId)}</td>
+          <td class="id-cell">${escapeHtml(userCode)}</td>
           <td>${escapeHtml(user.FullName || "")}</td>
           <td>${escapeHtml(user.Username || "")}</td>
           <td>
