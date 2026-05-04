@@ -32,6 +32,7 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body, input, select, textarea, button, table { font-variant-numeric: tabular-nums; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -212,8 +213,8 @@
       <div class="factory-brand">
         <div class="factory-logo"><img src="assets/img/logo.png" alt="NATAC"></div>
         <div class="factory-info">
-          <strong>ناتاك</strong>
-          <span>نظام إدارة الإنتاج</span>
+          <strong data-i18n="factoryName">ناتاك</strong>
+          <span data-i18n="systemName">نظام إدارة الإنتاج</span>
         </div>
       </div>
     </div>
@@ -229,8 +230,8 @@
           </div>
         </button>
         <div class="user-dropdown" id="userDropdown">
-          <a class="dropdown-item" href="profile.html">👤 الملف الشخصي</a>
-          <button class="dropdown-item danger" id="logoutBtn" type="button">↩ تسجيل الخروج</button>
+          <a class="dropdown-item" href="profile.html">👤 <span data-i18n="profile">الملف الشخصي</span></a>
+          <button class="dropdown-item danger" id="logoutBtn" type="button">↩ <span data-i18n="logout">تسجيل الخروج</span></button>
         </div>
       </div>
     </div>
@@ -241,73 +242,72 @@
     <div class="sidebar-head">
       <div class="sidebar-title">
         <div class="sidebar-logo"><img src="assets/img/logo.png" alt="NATAC"></div>
-        <div><strong>ناتاك</strong><span>القائمة الرئيسية</span></div>
+        <div><strong data-i18n="factoryName">ناتاك</strong><span data-i18n="mainMenu">القائمة الرئيسية</span></div>
       </div>
       <button class="close-sidebar" id="closeSidebarBtn" type="button">×</button>
     </div>
     <nav class="nav">
-      <a href="dashboard.html"><span class="nav-icon">📊</span><span>لوحة التحكم</span></a>
-      <a href="production.html"><span class="nav-icon">🏭</span><span>إدخال الإنتاج</span></a>
-      <a href="evaluation.html"><span class="nav-icon">⭐</span><span>تقييم المشرف</span></a>
-      <a href="history.html"><span class="nav-icon">📋</span><span>سجل الإنتاج</span></a>
-      <a href="performance.html"><span class="nav-icon">📈</span><span>أداء العمال</span></a>
-      <a href="workers.html"><span class="nav-icon">👷</span><span>العمال</span></a>
-      <a href="products.html"><span class="nav-icon">📦</span><span>المنتجات</span></a>
-      <a href="machines.html"><span class="nav-icon">⚙️</span><span>المكائن</span></a>
-      <a class="active" href="spare-parts.html"><span class="nav-icon">🧰</span><span>قطع الغيار</span></a>
-      <a href="users.html"><span class="nav-icon">👥</span><span>المستخدمون</span></a>
+      <a href="dashboard.html"><span class="nav-icon">📊</span><span data-i18n="navDashboard">لوحة التحكم</span></a>
+      <a href="production.html"><span class="nav-icon">🏭</span><span data-i18n="navProduction">إدخال الإنتاج</span></a>
+      <a href="evaluation.html"><span class="nav-icon">⭐</span><span data-i18n="navEvaluation">تقييم المشرف</span></a>
+      <a href="history.html"><span class="nav-icon">📋</span><span data-i18n="navHistory">سجل الإنتاج</span></a>
+      <a href="performance.html"><span class="nav-icon">📈</span><span data-i18n="navPerformance">أداء العمال</span></a>
+      <a href="workers.html"><span class="nav-icon">👷</span><span data-i18n="navWorkers">العمال</span></a>
+      <a href="products.html"><span class="nav-icon">📦</span><span data-i18n="navProducts">المنتجات</span></a>
+      <a href="machines.html"><span class="nav-icon">⚙️</span><span data-i18n="navMachines">المكائن</span></a>
+      <a class="active" href="spare-parts.html"><span class="nav-icon">🧰</span><span data-i18n="navSpareParts">قطع الغيار</span></a>
+      <a href="users.html"><span class="nav-icon">👥</span><span data-i18n="navUsers">المستخدمون</span></a>
     </nav>
   </aside>
 
   <main class="app-main">
     <section class="page-head">
       <div>
-        <h1 class="page-title">مخزون قطع الغيار</h1>
-        <p class="page-subtitle">إدارة قطع الغيار، الاستلام، الصرف، وتتبع سجل الحركة مع تنبيهات المخزون المنخفض.</p>
+        <h1 class="page-title" data-i18n="pageTitle">مخزون قطع الغيار</h1>
       </div>
       <div class="actions-row">
-        <button class="btn btn-green" id="openReceiveBtn" type="button">➕ استلام قطعة غيار</button>
-        <button class="btn btn-orange" id="openIssueBtn" type="button">➖ صرف قطعة غيار</button>
-        <button class="btn btn-primary" id="openPartBtn" type="button">🧰 إضافة قطعة غيار جديدة</button>
-        <button class="btn btn-soft" id="openCategoryBtn" type="button">🏷 إضافة تصنيف جديد</button>
+        <button class="btn btn-green" id="openReceiveBtn" type="button">➕ <span data-i18n="receivePart">استلام قطعة غيار</span></button>
+        <button class="btn btn-orange" id="openIssueBtn" type="button">➖ <span data-i18n="issuePart">صرف قطعة غيار</span></button>
+        <button class="btn btn-primary" id="openPartBtn" type="button">🧰 <span data-i18n="addPart">إضافة قطعة غيار جديدة</span></button>
+        <button class="btn btn-soft" id="openCategoryBtn" type="button">🏷 <span data-i18n="addCategory">إضافة تصنيف جديد</span></button>
       </div>
     </section>
 
     <section class="cards-grid">
       <div class="stat-card clickable-stat" id="mostUsedCard">
-        <div class="stat-label">أكثر قطع الغيار استخدامًا</div>
+        <div class="stat-label" data-i18n="mostUsed">أكثر قطع الغيار استخدامًا</div>
         <div class="stat-value" id="mostUsedName">-</div>
-        <div class="stat-meta" id="mostUsedMeta">اضغط لعرض أعلى 10 قطع</div>
+        <div class="stat-meta" id="mostUsedMeta" data-i18n="top10Hint">اضغط لعرض أعلى 10 قطع</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">إجمالي الكميات بالمخزون</div>
+        <div class="stat-label" data-i18n="totalStockQty">إجمالي الكميات بالمخزون</div>
         <div class="stat-value" id="totalQuantityCard">0</div>
-        <div class="stat-meta">مجموع العدد المتوفر لكل القطع</div>
+        <div class="stat-meta" data-i18n="totalStockQtyMeta">مجموع العدد المتوفر لكل القطع</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">عدد القطع منخفضة المخزون</div>
+        <div class="stat-label" data-i18n="lowStockCount">عدد القطع منخفضة المخزون</div>
         <div class="stat-value" id="lowStockCard">0</div>
-        <div class="stat-meta">أعلى من صفر وأقل من الحد الأدنى</div>
+        <div class="stat-meta" data-i18n="lowStockMeta">أعلى من صفر وأقل من الحد الأدنى</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">عدد القطع النافدة</div>
+        <div class="stat-label" data-i18n="outStockCount">عدد القطع النافدة</div>
         <div class="stat-value" id="outStockCard">0</div>
-        <div class="stat-meta">الكمية المتوفرة تساوي صفر</div>
+        <div class="stat-meta" data-i18n="outStockMeta">الكمية المتوفرة تساوي صفر</div>
       </div>
     </section>
 
     <section class="panel" id="inventoryPanel">
       <div class="panel-head">
-        <h2 class="panel-title">جدول مخزون قطع الغيار</h2>
-        <button class="btn btn-soft" id="refreshBtn" type="button">↻ تحديث</button>
+        <h2 class="panel-title" data-i18n="inventoryTable">جدول مخزون قطع الغيار</h2>
+        <button class="btn btn-soft" id="refreshBtn" type="button">↻ <span data-i18n="refresh">تحديث</span></button>
         <div class="filters">
-          <input id="searchInput" type="search" placeholder="بحث حسب الكود، الاسم، التصنيف، أو الوصف">
-          <select id="categoryFilter"><option value="">كل التصنيفات</option></select>
+          <input id="searchInput" type="search" placeholder="بحث حسب الكود، الاسم، التصنيف، أو الوصف" data-i18n-placeholder="searchPlaceholder">
+          <select id="categoryFilter"><option value="" data-i18n="allCategories">كل التصنيفات</option></select>
           <select id="stockFilter">
-            <option value="">كل حالات المخزون</option>
-            <option value="available">متوفر</option>
-            <option value="low">أقل من الحد الأدنى</option>
-            <option value="out">نفدت</option>
+            <option value="" data-i18n="allStockStatuses">كل حالات المخزون</option>
+            <option value="available" data-i18n="available">متوفر</option>
+            <option value="low" data-i18n="belowMinimum">أقل من الحد الأدنى</option>
+            <option value="out" data-i18n="outOfStock">نفدت</option>
           </select>
         </div>
       </div>
@@ -315,48 +315,44 @@
         <table>
           <thead>
             <tr>
-              <th>كود القطعة</th>
-              <th>تصنيف القطعة</th>
-              <th>اسم قطعة الغيار</th>
-              <th>وصف القطعة</th>
-              <th>العدد المتوفر</th>
-              <th>آخر سعر شراء</th>
-              <th>موقع القطعة</th>
-              <th>صورة القطعة</th>
-              <th>الحد الأدنى</th>
+              <th data-i18n="partCode">كود القطعة</th>
+              <th data-i18n="partCategory">تصنيف القطعة</th>
+              <th data-i18n="partName">اسم قطعة الغيار</th>
+              <th data-i18n="partDescription">وصف القطعة</th>
+              <th data-i18n="availableQty">العدد المتوفر</th>
+              <th data-i18n="lastPurchasePrice">آخر سعر شراء</th>
+              <th data-i18n="partLocation">موقع القطعة</th>
+              <th data-i18n="partImage">صورة القطعة</th>
+              <th data-i18n="minimumStock">الحد الأدنى</th>
             </tr>
           </thead>
           <tbody id="partsTableBody"></tbody>
         </table>
       </div>
-      <div class="empty" id="emptyState" style="display:none;">لا توجد قطع غيار مطابقة للبحث.</div>
+      <div class="empty" id="emptyState" style="display:none;" data-i18n="noMatchingParts">لا توجد قطع غيار مطابقة للبحث.</div>
     </section>
 
     <section class="panel detail-view" id="detailView">
       <div class="panel-head">
         <h2 class="panel-title" id="detailTitle">سجل حركة قطعة الغيار</h2>
         <div class="actions-row">
-          <button class="btn btn-soft" id="backToInventoryBtn" type="button">← رجوع للمخزون</button>
-          <button class="btn btn-primary" id="editSelectedPartBtn" type="button">✏ تعديل بيانات القطعة</button>
-          <button class="btn btn-red" id="deleteSelectedPartBtn" type="button">🗑 حذف القطعة</button>
+          <button class="btn btn-soft" id="backToInventoryBtn" type="button">← <span data-i18n="backToInventory">رجوع للمخزون</span></button>
+          <button class="btn btn-primary" id="editSelectedPartBtn" type="button">✏ <span data-i18n="editPartData">تعديل بيانات القطعة</span></button>
+          <button class="btn btn-red" id="deleteSelectedPartBtn" type="button">🗑 <span data-i18n="deletePart">حذف القطعة</span></button>
         </div>
-      </div>
-      <div class="detail-grid">
-        <img id="detailImage" class="detail-img" alt="صورة القطعة">
-        <div class="detail-info" id="detailInfo"></div>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>تاريخ الحركة</th>
-              <th>نوع الحركة</th>
-              <th>كمية الحركة</th>
-              <th>الكمية قبل الحركة</th>
-              <th>الكمية بعد الحركة</th>
-              <th>سعر الوحدة</th>
-              <th>إجمالي السعر</th>
-              <th>ملاحظات</th>
+              <th data-i18n="movementDate">تاريخ الحركة</th>
+              <th data-i18n="movementType">نوع الحركة</th>
+              <th data-i18n="movementQty">كمية الحركة</th>
+              <th data-i18n="qtyBefore">الكمية قبل الحركة</th>
+              <th data-i18n="qtyAfter">الكمية بعد الحركة</th>
+              <th data-i18n="unitPrice">سعر الوحدة</th>
+              <th data-i18n="totalPrice">إجمالي السعر</th>
+              
             </tr>
           </thead>
           <tbody id="movementsTableBody"></tbody>
@@ -367,69 +363,69 @@
 
   <div class="modal-overlay" id="partModalOverlay">
     <form class="modal" id="partForm">
-      <div class="modal-head"><h3 class="modal-title" id="partModalTitle">إضافة قطعة غيار جديدة</h3><button class="close-sidebar" type="button" data-close-modal="partModalOverlay">×</button></div>
+      <div class="modal-head"><h3 class="modal-title" id="partModalTitle" data-i18n="addPartTitle">إضافة قطعة غيار جديدة</h3><button class="close-sidebar" type="button" data-close-modal="partModalOverlay">×</button></div>
       <div class="modal-body">
         <div class="form-grid">
-          <div class="field"><label>تصنيف القطعة</label><select id="partCategoryInput" required></select></div>
-          <div class="field"><label>اسم القطعة</label><input id="partNameInput" required></div>
-          <div class="field full"><label>وصف القطعة</label><textarea id="partDescriptionInput"></textarea></div>
-          <div class="field"><label>العدد الابتدائي</label><input id="partInitialQuantityInput" type="number" min="0" step="1" value="0"></div>
-          <div class="field"><label>سعر الشراء، اختياري</label><input id="partPurchasePriceInput" type="number" min="0" step="0.001"></div>
-          <div class="field"><label>الحد الأدنى للمخزون</label><input id="partMinStockInput" type="number" min="0" step="1" value="0"></div>
-          <div class="field"><label>موقع القطعة</label><input id="partLocationInput"></div>
-          <div class="field full"><label>صورة القطعة، اختياري</label><input id="partImageInput" type="file" accept="image/*"><div class="hint">يتم رفع الصورة إلى Bucket خاص عبر Edge Function.</div></div>
-          <div class="field" id="partStatusField" style="display:none;"><label>حالة القطعة</label><select id="partStatusInput"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+          <div class="field"><label data-i18n="partCategory">تصنيف القطعة</label><select id="partCategoryInput" required></select></div>
+          <div class="field"><label data-i18n="partName">اسم القطعة</label><input id="partNameInput" required></div>
+          <div class="field full"><label data-i18n="partDescription">وصف القطعة</label><textarea id="partDescriptionInput"></textarea></div>
+          <div class="field"><label data-i18n="initialQty">العدد الابتدائي</label><input id="partInitialQuantityInput" type="number" min="0" step="1" value="0"></div>
+          <div class="field"><label data-i18n="purchasePriceOptional">سعر الشراء، اختياري</label><input id="partPurchasePriceInput" type="number" min="0" step="0.001"></div>
+          <div class="field"><label data-i18n="minimumStock">الحد الأدنى للمخزون</label><input id="partMinStockInput" type="number" min="0" step="1" value="0"></div>
+          <div class="field"><label data-i18n="partLocation">موقع القطعة</label><input id="partLocationInput"></div>
+          <div class="field full"><label data-i18n="partImageOptional">صورة القطعة، اختياري</label><input id="partImageInput" type="file" accept="image/*"></div>
+          <div class="field" id="partStatusField" style="display:none;"><label data-i18n="partStatus">حالة القطعة</label><select id="partStatusInput"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
         </div>
       </div>
-      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="partModalOverlay">إلغاء</button><button class="btn btn-primary" id="savePartBtn" type="submit">حفظ</button></div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="partModalOverlay" data-i18n="cancel">إلغاء</button><button class="btn btn-primary" id="savePartBtn" type="submit" data-i18n="save">حفظ</button></div>
     </form>
   </div>
 
   <div class="modal-overlay" id="categoryModalOverlay">
     <form class="modal" id="categoryForm">
-      <div class="modal-head"><h3 class="modal-title">إضافة تصنيف جديد</h3><button class="close-sidebar" type="button" data-close-modal="categoryModalOverlay">×</button></div>
-      <div class="modal-body"><div class="form-grid"><div class="field full"><label>اسم التصنيف</label><input id="categoryNameInput" required></div></div></div>
-      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="categoryModalOverlay">إلغاء</button><button class="btn btn-primary" id="saveCategoryBtn" type="submit">حفظ التصنيف</button></div>
+      <div class="modal-head"><h3 class="modal-title" data-i18n="addCategoryTitle">إضافة تصنيف جديد</h3><button class="close-sidebar" type="button" data-close-modal="categoryModalOverlay">×</button></div>
+      <div class="modal-body"><div class="form-grid"><div class="field full"><label data-i18n="categoryName">اسم التصنيف</label><input id="categoryNameInput" required></div></div></div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="categoryModalOverlay" data-i18n="cancel">إلغاء</button><button class="btn btn-primary" id="saveCategoryBtn" type="submit" data-i18n="saveCategory">حفظ التصنيف</button></div>
     </form>
   </div>
 
   <div class="modal-overlay" id="receiveModalOverlay">
     <form class="modal" id="receiveForm">
-      <div class="modal-head"><h3 class="modal-title">استلام قطعة غيار</h3><button class="close-sidebar" type="button" data-close-modal="receiveModalOverlay">×</button></div>
+      <div class="modal-head"><h3 class="modal-title" data-i18n="receivePart">استلام قطعة غيار</h3><button class="close-sidebar" type="button" data-close-modal="receiveModalOverlay">×</button></div>
       <div class="modal-body">
         <div class="form-grid">
-          <div class="field full"><label>اختيار القطعة</label><input id="receivePartSearch" list="partsDatalist" placeholder="ابحث بالكود أو الاسم أو التصنيف أو الوصف" required><input id="receivePartId" type="hidden"></div>
-          <div class="field"><label>عدد القطع الموردة</label><input id="receiveQuantityInput" type="number" min="1" step="1" required></div>
-          <div class="field"><label>إجمالي سعر القطع الموردة</label><input id="receiveTotalPriceInput" type="number" min="0" step="0.001"></div>
-          <div class="field"><label>سعر الوحدة</label><input id="receiveUnitPriceInput" type="number" readonly></div>
-          <div class="field"><label>تاريخ الاستلام</label><input id="receiveDateInput" type="date" required></div>
-          <div class="field full"><label>ملاحظات، اختياري</label><textarea id="receiveNotesInput"></textarea></div>
+          <div class="field full"><label data-i18n="selectPart">اختيار القطعة</label><input id="receivePartSearch" list="partsDatalist" placeholder="ابحث بالكود أو الاسم أو التصنيف أو الوصف" data-i18n-placeholder="searchPartPlaceholder" required><input id="receivePartId" type="hidden"></div>
+          <div class="field"><label data-i18n="receivedQty">عدد القطع الموردة</label><input id="receiveQuantityInput" type="number" min="1" step="1" required></div>
+          <div class="field"><label data-i18n="receivedTotalPrice">إجمالي سعر القطع الموردة</label><input id="receiveTotalPriceInput" type="number" min="0" step="0.001"></div>
+          <div class="field"><label data-i18n="unitPrice">سعر الوحدة</label><input id="receiveUnitPriceInput" type="number" readonly></div>
+          <div class="field"><label data-i18n="receiveDate">تاريخ الاستلام</label><input id="receiveDateInput" type="date" required></div>
+          <div class="field full"><label data-i18n="notesOptional">ملاحظات، اختياري</label><textarea id="receiveNotesInput"></textarea></div>
         </div>
       </div>
-      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="receiveModalOverlay">إلغاء</button><button class="btn btn-green" id="saveReceiveBtn" type="submit">حفظ الاستلام</button></div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="receiveModalOverlay" data-i18n="cancel">إلغاء</button><button class="btn btn-green" id="saveReceiveBtn" type="submit" data-i18n="saveReceive">حفظ الاستلام</button></div>
     </form>
   </div>
 
   <div class="modal-overlay" id="issueModalOverlay">
     <form class="modal" id="issueForm">
-      <div class="modal-head"><h3 class="modal-title">صرف قطعة غيار</h3><button class="close-sidebar" type="button" data-close-modal="issueModalOverlay">×</button></div>
+      <div class="modal-head"><h3 class="modal-title" data-i18n="issuePart">صرف قطعة غيار</h3><button class="close-sidebar" type="button" data-close-modal="issueModalOverlay">×</button></div>
       <div class="modal-body">
         <div class="form-grid">
-          <div class="field full"><label>اختيار القطعة</label><input id="issuePartSearch" list="partsDatalist" placeholder="ابحث بالكود أو الاسم أو التصنيف أو الوصف" required><input id="issuePartId" type="hidden"></div>
-          <div class="field"><label>العدد المصروف</label><input id="issueQuantityInput" type="number" min="1" step="1" required></div>
-          <div class="field"><label>تاريخ الصرف</label><input id="issueDateInput" type="date" required></div>
-          <div class="field full"><label>ملاحظات، اختياري</label><textarea id="issueNotesInput"></textarea></div>
+          <div class="field full"><label data-i18n="selectPart">اختيار القطعة</label><input id="issuePartSearch" list="partsDatalist" placeholder="ابحث بالكود أو الاسم أو التصنيف أو الوصف" data-i18n-placeholder="searchPartPlaceholder" required><input id="issuePartId" type="hidden"></div>
+          <div class="field"><label data-i18n="issuedQty">العدد المصروف</label><input id="issueQuantityInput" type="number" min="1" step="1" required></div>
+          <div class="field"><label data-i18n="issueDate">تاريخ الصرف</label><input id="issueDateInput" type="date" required></div>
+          <div class="field full"><label data-i18n="notesOptional">ملاحظات، اختياري</label><textarea id="issueNotesInput"></textarea></div>
         </div>
       </div>
-      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="issueModalOverlay">إلغاء</button><button class="btn btn-orange" id="saveIssueBtn" type="submit">حفظ الصرف</button></div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="issueModalOverlay" data-i18n="cancel">إلغاء</button><button class="btn btn-orange" id="saveIssueBtn" type="submit" data-i18n="saveIssue">حفظ الصرف</button></div>
     </form>
   </div>
 
   <div class="modal-overlay" id="topUsedModalOverlay">
     <div class="modal">
-      <div class="modal-head"><h3 class="modal-title">أعلى 10 قطع غيار حركة</h3><button class="close-sidebar" type="button" data-close-modal="topUsedModalOverlay">×</button></div>
+      <div class="modal-head"><h3 class="modal-title" data-i18n="top10Title">أعلى 10 قطع غيار حركة</h3><button class="close-sidebar" type="button" data-close-modal="topUsedModalOverlay">×</button></div>
       <div class="modal-body" id="topUsedList"></div>
-      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="topUsedModalOverlay">إغلاق</button></div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="topUsedModalOverlay" data-i18n="close">إغلاق</button></div>
     </div>
   </div>
 
@@ -448,6 +444,40 @@
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const i18n = {
+      ar: {
+        htmlLang: "ar", dir: "rtl", pageTitleDoc: "مخزون قطع الغيار | NATAC", languageButton: "EN",
+        factoryName: "ناتاك", systemName: "نظام إدارة الإنتاج", mainMenu: "القائمة الرئيسية", profile: "الملف الشخصي", logout: "تسجيل الخروج",
+        navDashboard: "لوحة التحكم", navProduction: "إدخال الإنتاج", navEvaluation: "تقييم المشرف", navHistory: "سجل الإنتاج", navPerformance: "أداء العمال", navWorkers: "العمال", navProducts: "المنتجات", navMachines: "المكائن", navSpareParts: "قطع الغيار", navUsers: "المستخدمون",
+        pageTitle: "مخزون قطع الغيار", receivePart: "استلام قطعة غيار", issuePart: "صرف قطعة غيار", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
+        mostUsed: "أكثر قطع الغيار استخدامًا", top10Hint: "اضغط لعرض أعلى 10 قطع", usedQty: "كمية مستخدمة", totalStockQty: "إجمالي الكميات بالمخزون", totalStockQtyMeta: "مجموع العدد المتوفر لكل القطع", lowStockCount: "عدد القطع منخفضة المخزون", lowStockMeta: "أعلى من صفر وأقل من الحد الأدنى", outStockCount: "عدد القطع النافدة", outStockMeta: "الكمية المتوفرة تساوي صفر",
+        inventoryTable: "جدول مخزون قطع الغيار", refresh: "تحديث", refreshing: "جاري التحديث...", searchPlaceholder: "بحث حسب الكود، الاسم، التصنيف، أو الوصف", allCategories: "كل التصنيفات", chooseCategory: "اختر التصنيف", allStockStatuses: "كل حالات المخزون", available: "متوفر", belowMinimum: "أقل من الحد الأدنى", outOfStock: "نفدت", noMatchingParts: "لا توجد قطع غيار مطابقة للبحث.",
+        partCode: "كود القطعة", partCategory: "تصنيف القطعة", partName: "اسم قطعة الغيار", partDescription: "وصف القطعة", availableQty: "العدد المتوفر", lastPurchasePrice: "آخر سعر شراء", partLocation: "موقع القطعة", partImage: "صورة القطعة", minimumStock: "الحد الأدنى", partStatus: "حالة القطعة", partImageOptional: "صورة القطعة، اختياري", initialQty: "العدد الابتدائي", purchasePriceOptional: "سعر الشراء، اختياري",
+        movementHistory: "سجل حركة", movementHistoryFallback: "سجل حركة قطعة الغيار", movementDate: "تاريخ الحركة", movementType: "نوع الحركة", movementQty: "كمية الحركة", qtyBefore: "الكمية قبل الحركة", qtyAfter: "الكمية بعد الحركة", unitPrice: "سعر الوحدة", totalPrice: "إجمالي السعر", noMovements: "لا توجد حركات مسجلة لهذه القطعة.",
+        backToInventory: "رجوع للمخزون", editPartData: "تعديل بيانات القطعة", deletePart: "حذف القطعة", addPartTitle: "إضافة قطعة غيار جديدة", editPartTitle: "تعديل بيانات", addCategoryTitle: "إضافة تصنيف جديد", categoryName: "اسم التصنيف", selectPart: "اختيار القطعة", searchPartPlaceholder: "ابحث بالكود أو الاسم أو التصنيف أو الوصف", receivedQty: "عدد القطع الموردة", receivedTotalPrice: "إجمالي سعر القطع الموردة", receiveDate: "تاريخ الاستلام", issuedQty: "العدد المصروف", issueDate: "تاريخ الصرف", notesOptional: "ملاحظات، اختياري", save: "حفظ", cancel: "إلغاء", close: "إغلاق", saveCategory: "حفظ التصنيف", saveReceive: "حفظ الاستلام", saveIssue: "حفظ الصرف", saving: "جاري الحفظ...", loading: "جاري...",
+        top10Title: "أعلى 10 قطع غيار حركة", movedQty: "الكمية المتحركة صرفًا", issueCount: "عدد الحركات", noIssueMovements: "لا توجد حركات صرف حتى الآن.",
+        movementOpening: "إضافة افتتاحية", movementReceive: "استلام", movementIssue: "صرف",
+        dbLoadError: "تعذر تحميل المخزون", movementLoadError: "تعذر تحميل سجل الحركة", partNotFound: "لم يتم العثور على قطعة الغيار", validPartRequired: "يرجى اختيار قطعة صحيحة من القائمة", savePartError: "تعذر حفظ قطعة الغيار", saveCategoryError: "تعذر حفظ التصنيف", saveReceiveError: "تعذر حفظ الاستلام", saveIssueError: "تعذر حفظ الصرف", deleteConfirm: "هل أنت متأكد من حذف قطعة الغيار؟ سيتم إخفاؤها من المخزون مع بقاء سجل الحركة محفوظًا.", deleteError: "تعذر حذف القطعة", uploadError: "تعذر رفع الصورة", signedUrlError: "تعذر إنشاء رابط الصورة", imageReadError: "تعذر قراءة الصورة", fileReadError: "تعذر قراءة الملف", imageFileOnly: "الملف يجب أن يكون صورة", dbError: "حدث خطأ في قاعدة البيانات", noDbResponse: "لا توجد استجابة من قاعدة البيانات", userFallback: "مستخدم"
+      },
+      en: {
+        htmlLang: "en", dir: "ltr", pageTitleDoc: "Spare Parts Inventory | NATAC", languageButton: "عربي",
+        factoryName: "NATAC", systemName: "Production Management System", mainMenu: "Main Menu", profile: "Profile", logout: "Logout",
+        navDashboard: "Dashboard", navProduction: "Production Entry", navEvaluation: "Supervisor Evaluation", navHistory: "Production History", navPerformance: "Worker Performance", navWorkers: "Workers", navProducts: "Products", navMachines: "Machines", navSpareParts: "Spare Parts", navUsers: "Users",
+        pageTitle: "Spare Parts Inventory", receivePart: "Receive Spare Part", issuePart: "Issue Spare Part", addPart: "Add New Spare Part", addCategory: "Add New Category",
+        mostUsed: "Most Used Spare Part", top10Hint: "Click to view top 10 parts", usedQty: "Used quantity", totalStockQty: "Total Inventory Quantity", totalStockQtyMeta: "Total available quantity for all parts", lowStockCount: "Low Stock Parts", lowStockMeta: "Above zero and below minimum stock", outStockCount: "Out-of-Stock Parts", outStockMeta: "Available quantity equals zero",
+        inventoryTable: "Spare Parts Inventory Table", refresh: "Refresh", refreshing: "Refreshing...", searchPlaceholder: "Search by code, name, category, or description", allCategories: "All Categories", chooseCategory: "Choose category", allStockStatuses: "All Stock Statuses", available: "Available", belowMinimum: "Below Minimum", outOfStock: "Out of Stock", noMatchingParts: "No spare parts match your search.",
+        partCode: "Part Code", partCategory: "Part Category", partName: "Spare Part Name", partDescription: "Part Description", availableQty: "Available Quantity", lastPurchasePrice: "Last Purchase Price", partLocation: "Part Location", partImage: "Part Image", minimumStock: "Minimum Stock", partStatus: "Part Status", partImageOptional: "Part Image, optional", initialQty: "Initial Quantity", purchasePriceOptional: "Purchase Price, optional",
+        movementHistory: "Movement History", movementHistoryFallback: "Spare Part Movement History", movementDate: "Movement Date", movementType: "Movement Type", movementQty: "Movement Quantity", qtyBefore: "Quantity Before", qtyAfter: "Quantity After", unitPrice: "Unit Price", totalPrice: "Total Price", noMovements: "No movements are recorded for this part.",
+        backToInventory: "Back to Inventory", editPartData: "Edit Part Data", deletePart: "Delete Part", addPartTitle: "Add New Spare Part", editPartTitle: "Edit Data", addCategoryTitle: "Add New Category", categoryName: "Category Name", selectPart: "Select Part", searchPartPlaceholder: "Search by code, name, category, or description", receivedQty: "Received Quantity", receivedTotalPrice: "Total Received Price", receiveDate: "Receive Date", issuedQty: "Issued Quantity", issueDate: "Issue Date", notesOptional: "Notes, optional", save: "Save", cancel: "Cancel", close: "Close", saveCategory: "Save Category", saveReceive: "Save Receive", saveIssue: "Save Issue", saving: "Saving...", loading: "Loading...",
+        top10Title: "Top 10 Moving Spare Parts", movedQty: "Issued moving quantity", issueCount: "Movements", noIssueMovements: "No issue movements yet.",
+        movementOpening: "Opening Balance", movementReceive: "Receive", movementIssue: "Issue",
+        dbLoadError: "Unable to load inventory", movementLoadError: "Unable to load movement history", partNotFound: "Spare part was not found", validPartRequired: "Please choose a valid part from the list", savePartError: "Unable to save spare part", saveCategoryError: "Unable to save category", saveReceiveError: "Unable to save receive transaction", saveIssueError: "Unable to save issue transaction", deleteConfirm: "Are you sure you want to delete this spare part? It will be hidden from inventory while its movement history remains saved.", deleteError: "Unable to delete part", uploadError: "Unable to upload image", signedUrlError: "Unable to create image link", imageReadError: "Unable to read image", fileReadError: "Unable to read file", imageFileOnly: "The file must be an image", dbError: "A database error occurred", noDbResponse: "No response from database", userFallback: "User"
+      }
+    };
+
+    let currentLang = localStorage.getItem(LANGUAGE_KEY) || "ar";
+    const t = (key) => (i18n[currentLang] && i18n[currentLang][key]) || i18n.ar[key] || key;
+
     let currentUser = null;
     let currentToken = "";
     let categories = [];
@@ -460,13 +490,15 @@
 
     const $ = (id) => document.getElementById(id);
     const today = () => new Date().toISOString().slice(0, 10);
+    const toEnglishDigits = (value) => String(value ?? "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
     const num = (v) => Number(v || 0);
-    const money = (v) => v === null || v === undefined || v === "" ? "-" : Number(v).toLocaleString("ar-OM", { maximumFractionDigits: 3 });
-    const qty = (v) => Number(v || 0).toLocaleString("ar-OM", { maximumFractionDigits: 2 });
+    const money = (v) => v === null || v === undefined || v === "" ? "-" : toEnglishDigits(Number(v).toLocaleString("en-US", { maximumFractionDigits: 3 }));
+    const qty = (v) => toEnglishDigits(Number(v || 0).toLocaleString("en-US", { maximumFractionDigits: 2 }));
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
+      applyLanguage(currentLang);
       bindLayoutEvents();
       bindInventoryEvents();
       const session = getSession();
@@ -488,7 +520,7 @@
       $("userMenuBtn").addEventListener("click", () => $("userDropdown").classList.toggle("show"));
       document.addEventListener("click", (e) => { if (!e.target.closest(".user-menu-wrapper")) $("userDropdown").classList.remove("show"); });
       $("logoutBtn").addEventListener("click", logout);
-      $("languageToggleBtn").addEventListener("click", () => showMessage("سيتم تفعيل النسخة الإنجليزية لاحقًا", "warning"));
+      $("languageToggleBtn").addEventListener("click", () => applyLanguage(currentLang === "ar" ? "en" : "ar"));
       document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.closeModal)));
       document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(overlay.id); }));
     }
@@ -520,6 +552,27 @@
     function openModal(id) { $(id).classList.add("show"); }
     function closeModal(id) { $(id).classList.remove("show"); }
 
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem(LANGUAGE_KEY, lang);
+      document.documentElement.lang = i18n[lang].htmlLang;
+      document.documentElement.dir = i18n[lang].dir;
+      document.title = i18n[lang].pageTitleDoc;
+      $("languageToggleBtn").textContent = i18n[lang].languageButton;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.dataset.i18n;
+        if (i18n[lang][key]) el.textContent = i18n[lang][key];
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        if (i18n[lang][key]) el.placeholder = i18n[lang][key];
+      });
+      renderStats();
+      renderCategories();
+      renderPartsTable();
+      if (selectedPart) $("detailTitle").textContent = `${t("movementHistory")} ${selectedPart.partName || ""}`.trim();
+    }
+
     function getSession() {
       try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
       catch { localStorage.removeItem(SESSION_KEY); return null; }
@@ -528,7 +581,7 @@
       const permissions = user.permissions || user.Permissions || {};
       return {
         id: user.id || user.UserID || "",
-        fullName: user.fullName || user.FullName || user.full_name || "مستخدم",
+        fullName: user.fullName || user.FullName || user.full_name || t("userFallback"),
         username: user.username || user.Username || "",
         role: user.role || user.Role || "",
         permissions
@@ -560,10 +613,10 @@
     }
 
     async function loadInventory() {
-      setButtonLoading("refreshBtn", true, "جاري التحديث...");
+      setButtonLoading("refreshBtn", true, t("refreshing"));
       const result = await rpcSafe("get_spare_inventory_data", { p_token: currentToken });
-      setButtonLoading("refreshBtn", false, "↻ تحديث");
-      if (!result.success) { showMessage(result.message || "تعذر تحميل المخزون", "error"); return; }
+      setButtonLoading("refreshBtn", false, `↻ ${t("refresh")}`);
+      if (!result.success) { showMessage(result.message || t("dbLoadError"), "error"); return; }
       categories = result.categories || [];
       parts = result.parts || [];
       stats = result.stats || {};
@@ -579,17 +632,17 @@
 
     function renderStats() {
       $("totalQuantityCard").textContent = qty(stats.totalQuantity || 0);
-      $("lowStockCard").textContent = stats.lowStockCount || 0;
-      $("outStockCard").textContent = stats.outOfStockCount || 0;
+      $("lowStockCard").textContent = qty(stats.lowStockCount || 0);
+      $("outStockCard").textContent = qty(stats.outOfStockCount || 0);
       const most = stats.mostUsed || {};
       $("mostUsedName").textContent = most.partName || "-";
-      $("mostUsedMeta").textContent = most.usedQuantity ? `${most.partCode || ""} • كمية مستخدمة ${qty(most.usedQuantity)}` : "اضغط لعرض أعلى 10 قطع";
+      $("mostUsedMeta").textContent = most.usedQuantity ? `${most.partCode || ""} • ${t("usedQty")} ${qty(most.usedQuantity)}` : t("top10Hint");
     }
 
     function renderCategories() {
-      const options = [`<option value="">كل التصنيفات</option>`].concat(categories.map(c => `<option value="${escapeHtml(c.categoryId)}">${escapeHtml(c.categoryName)}</option>`)).join("");
+      const options = [`<option value="">${escapeHtml(t("allCategories"))}</option>`].concat(categories.map(c => `<option value="${escapeHtml(c.categoryId)}">${escapeHtml(c.categoryName)}</option>`)).join("");
       $("categoryFilter").innerHTML = options;
-      const formOptions = [`<option value="">اختر التصنيف</option>`].concat(categories.map(c => `<option value="${escapeHtml(c.categoryId)}">${escapeHtml(c.categoryName)}</option>`)).join("");
+      const formOptions = [`<option value="">${escapeHtml(t("chooseCategory"))}</option>`].concat(categories.map(c => `<option value="${escapeHtml(c.categoryId)}">${escapeHtml(c.categoryName)}</option>`)).join("");
       $("partCategoryInput").innerHTML = formOptions;
     }
 
@@ -658,10 +711,10 @@
 
     async function openPartDetails(partId) {
       const result = await rpcSafe("get_spare_part_details", { p_token: currentToken, p_part_id: partId });
-      if (!result.success) { showMessage(result.message || "تعذر تحميل سجل الحركة", "error"); return; }
+      if (!result.success) { showMessage(result.message || t("movementLoadError"), "error"); return; }
       selectedPart = result.part;
       const movements = result.movements || [];
-      if (!selectedPart) { showMessage("لم يتم العثور على قطعة الغيار", "error"); return; }
+      if (!selectedPart) { showMessage(t("partNotFound"), "error"); return; }
       renderDetail(selectedPart, movements);
       $("inventoryPanel").style.display = "none";
       $("detailView").classList.add("show");
@@ -669,17 +722,7 @@
     }
 
     async function renderDetail(part, movements) {
-      $("detailTitle").textContent = `سجل حركة ${part.partName || "قطعة الغيار"}`;
-      $("detailInfo").innerHTML = [
-        ["كود القطعة", part.partCode], ["التصنيف", part.categoryName], ["اسم القطعة", part.partName], ["الوصف", part.description || "-"],
-        ["العدد المتوفر", qty(part.quantityAvailable)], ["الحد الأدنى", qty(part.minStock)], ["آخر سعر شراء", money(part.lastPurchasePrice)], ["موقع القطعة", part.location || "-"],
-        ["الحالة", part.status || "-"]
-      ].map(([k,v]) => `<div class="info-box"><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join("");
-      $("detailImage").src = "";
-      if (part.imagePath) {
-        const url = await getSignedUrl(part.imagePath).catch(() => "");
-        if (url) $("detailImage").src = url;
-      }
+      $("detailTitle").textContent = `${t("movementHistory")} ${part.partName || t("movementHistoryFallback")}`;
       $("movementsTableBody").innerHTML = movements.length ? movements.map(m => {
         const isNeg = num(m.quantityChange) < 0;
         return `<tr>
@@ -690,9 +733,8 @@
           <td>${qty(m.quantityAfter)}</td>
           <td>${money(m.unitPrice)}</td>
           <td>${money(m.totalPrice)}</td>
-          <td>${escapeHtml(m.notes || "-")}</td>
         </tr>`;
-      }).join("") : `<tr><td colspan="8" class="empty">لا توجد حركات مسجلة لهذه القطعة.</td></tr>`;
+      }).join("") : `<tr><td colspan="7" class="empty">${escapeHtml(t("noMovements"))}</td></tr>`;
     }
 
     function showInventoryView() {
@@ -703,7 +745,7 @@
 
     function openAddPartModal() {
       currentEditPart = null;
-      $("partModalTitle").textContent = "إضافة قطعة غيار جديدة";
+      $("partModalTitle").textContent = t("addPartTitle");
       $("partForm").reset();
       $("partInitialQuantityInput").disabled = false;
       $("partInitialQuantityInput").value = 0;
@@ -714,7 +756,7 @@
 
     function openEditPartModal(part) {
       currentEditPart = part;
-      $("partModalTitle").textContent = `تعديل بيانات ${part.partName}`;
+      $("partModalTitle").textContent = `${t("editPartTitle")} ${part.partName || ""}`;
       $("partForm").reset();
       $("partCategoryInput").value = part.categoryId || "";
       $("partNameInput").value = part.partName || "";
@@ -733,7 +775,7 @@
       e.preventDefault();
       const file = $("partImageInput").files[0];
       let imagePath = currentEditPart?.imagePath || null;
-      setButtonLoading("savePartBtn", true, "جاري الحفظ...");
+      setButtonLoading("savePartBtn", true, t("saving"));
       try {
         if (file) imagePath = await uploadImage(file, "spare-parts");
         const common = {
@@ -749,22 +791,22 @@
         const result = currentEditPart
           ? await rpcSafe("update_spare_part", { ...common, p_part_id: currentEditPart.partId, p_status: $("partStatusInput").value || "Active" })
           : await rpcSafe("add_spare_part", { ...common, p_initial_quantity: Number($("partInitialQuantityInput").value || 0) });
-        if (!result.success) { showMessage(result.message || "تعذر حفظ قطعة الغيار", "error"); return; }
+        if (!result.success) { showMessage(result.message || t("savePartError"), "error"); return; }
         closeModal("partModalOverlay");
         showMessage(result.message, "success");
         await loadInventory();
         if (selectedPart && currentEditPart) await openPartDetails(currentEditPart.partId);
       } finally {
-        setButtonLoading("savePartBtn", false, "حفظ");
+        setButtonLoading("savePartBtn", false, t("save"));
       }
     }
 
     async function saveCategory(e) {
       e.preventDefault();
-      setButtonLoading("saveCategoryBtn", true, "جاري الحفظ...");
+      setButtonLoading("saveCategoryBtn", true, t("saving"));
       const result = await rpcSafe("add_spare_part_category", { p_token: currentToken, p_category_name: $("categoryNameInput").value.trim() });
-      setButtonLoading("saveCategoryBtn", false, "حفظ التصنيف");
-      if (!result.success) { showMessage(result.message || "تعذر حفظ التصنيف", "error"); return; }
+      setButtonLoading("saveCategoryBtn", false, t("saveCategory"));
+      if (!result.success) { showMessage(result.message || t("saveCategoryError"), "error"); return; }
       closeModal("categoryModalOverlay");
       $("categoryForm").reset();
       showMessage(result.message, "success");
@@ -792,8 +834,8 @@
       e.preventDefault();
       syncPartSearch("receive");
       const partId = $("receivePartId").value;
-      if (!partId) { showMessage("يرجى اختيار قطعة صحيحة من القائمة", "error"); return; }
-      setButtonLoading("saveReceiveBtn", true, "جاري الحفظ...");
+      if (!partId) { showMessage(t("validPartRequired"), "error"); return; }
+      setButtonLoading("saveReceiveBtn", true, t("saving"));
       const result = await rpcSafe("receive_spare_part", {
         p_token: currentToken,
         p_part_id: partId,
@@ -802,8 +844,8 @@
         p_movement_date: $("receiveDateInput").value,
         p_notes: $("receiveNotesInput").value.trim() || null
       });
-      setButtonLoading("saveReceiveBtn", false, "حفظ الاستلام");
-      if (!result.success) { showMessage(result.message || "تعذر حفظ الاستلام", "error"); return; }
+      setButtonLoading("saveReceiveBtn", false, t("saveReceive"));
+      if (!result.success) { showMessage(result.message || t("saveReceiveError"), "error"); return; }
       closeModal("receiveModalOverlay");
       showMessage(result.message, "success");
       await loadInventory();
@@ -812,8 +854,8 @@
       e.preventDefault();
       syncPartSearch("issue");
       const partId = $("issuePartId").value;
-      if (!partId) { showMessage("يرجى اختيار قطعة صحيحة من القائمة", "error"); return; }
-      setButtonLoading("saveIssueBtn", true, "جاري الحفظ...");
+      if (!partId) { showMessage(t("validPartRequired"), "error"); return; }
+      setButtonLoading("saveIssueBtn", true, t("saving"));
       const result = await rpcSafe("issue_spare_part", {
         p_token: currentToken,
         p_part_id: partId,
@@ -821,8 +863,8 @@
         p_movement_date: $("issueDateInput").value,
         p_notes: $("issueNotesInput").value.trim() || null
       });
-      setButtonLoading("saveIssueBtn", false, "حفظ الصرف");
-      if (!result.success) { showMessage(result.message || "تعذر حفظ الصرف", "error"); return; }
+      setButtonLoading("saveIssueBtn", false, t("saveIssue"));
+      if (!result.success) { showMessage(result.message || t("saveIssueError"), "error"); return; }
       closeModal("issueModalOverlay");
       showMessage(result.message, "success");
       await loadInventory();
@@ -830,9 +872,9 @@
 
     async function deleteSelectedPart() {
       if (!selectedPart) return;
-      if (!confirm("هل أنت متأكد من حذف قطعة الغيار؟ سيتم إخفاؤها من المخزون مع بقاء سجل الحركة محفوظًا.")) return;
+      if (!confirm(t("deleteConfirm"))) return;
       const result = await rpcSafe("delete_spare_part", { p_token: currentToken, p_part_id: selectedPart.partId });
-      if (!result.success) { showMessage(result.message || "تعذر حذف القطعة", "error"); return; }
+      if (!result.success) { showMessage(result.message || t("deleteError"), "error"); return; }
       showMessage(result.message, "success");
       showInventoryView();
       await loadInventory();
@@ -842,10 +884,10 @@
       const list = stats.topUsed || [];
       $("topUsedList").innerHTML = list.length ? list.map((item, index) => `
         <div class="info-box" style="margin-bottom:10px;">
-          <span>#${index + 1} • ${escapeHtml(item.partCode || "")}</span>
+          <span>#${qty(index + 1)} • ${escapeHtml(item.partCode || "")}</span>
           <strong>${escapeHtml(item.partName || "-")}</strong>
-          <div class="hint">الكمية المتحركة صرفًا: ${qty(item.usedQuantity || 0)} • عدد الحركات: ${item.issueCount || 0}</div>
-        </div>`).join("") : `<div class="empty">لا توجد حركات صرف حتى الآن.</div>`;
+          <div class="hint">${escapeHtml(t("movedQty"))}: ${qty(item.usedQuantity || 0)} • ${escapeHtml(t("issueCount"))}: ${qty(item.issueCount || 0)}</div>
+        </div>`).join("") : `<div class="empty">${escapeHtml(t("noIssueMovements"))}</div>`;
       openModal("topUsedModalOverlay");
     }
 
@@ -857,7 +899,7 @@
         body: JSON.stringify({ action: "upload", token: currentToken, bucket: STORAGE_BUCKET, folder: folder || "spare-parts", image })
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) throw new Error(result.message || "تعذر رفع الصورة إلى Bucket");
+      if (!response.ok || !result.success) throw new Error(result.message || t("uploadError"));
       return result.path;
     }
     async function getSignedUrl(path) {
@@ -869,14 +911,14 @@
         body: JSON.stringify({ action: "signedUrl", token: currentToken, bucket: STORAGE_BUCKET, path, expiresIn: 900 })
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) throw new Error(result.message || "تعذر إنشاء رابط الصورة");
+      if (!response.ok || !result.success) throw new Error(result.message || t("signedUrlError"));
       signedUrlCache.set(path, result.signedUrl);
       return result.signedUrl;
     }
 
     function fileToCompressedBase64(file) {
       return new Promise((resolve, reject) => {
-        if (!file.type.startsWith("image/")) { reject(new Error("الملف يجب أن يكون صورة")); return; }
+        if (!file.type.startsWith("image/")) { reject(new Error(t("imageFileOnly"))); return; }
         const reader = new FileReader();
         reader.onload = () => {
           const img = new Image();
@@ -897,10 +939,10 @@
             const dataUrl = canvas.toDataURL(mimeType, 0.78);
             resolve({ fileName: file.name, mimeType, base64: dataUrl.split(",")[1] });
           };
-          img.onerror = () => reject(new Error("تعذر قراءة الصورة"));
+          img.onerror = () => reject(new Error(t("imageReadError")));
           img.src = reader.result;
         };
-        reader.onerror = () => reject(new Error("تعذر قراءة الملف"));
+        reader.onerror = () => reject(new Error(t("fileReadError")));
         reader.readAsDataURL(file);
       });
     }
@@ -909,9 +951,9 @@
       const { data, error } = await supabaseClient.rpc(fnName, args || {});
       if (error) {
         console.error(fnName, error);
-        return { success: false, message: error.message || "حدث خطأ في قاعدة البيانات" };
+        return { success: false, message: error.message || t("dbError") };
       }
-      return data || { success: false, message: "لا توجد استجابة من قاعدة البيانات" };
+      return data || { success: false, message: t("noDbResponse") };
     }
 
     async function logout() {
@@ -924,8 +966,8 @@
       const btn = $(id);
       if (!btn) return;
       btn.disabled = !!loading;
-      if (loading) btn.innerHTML = `<span class="mini-spinner"></span>${escapeHtml(text || "جاري...")}`;
-      else btn.textContent = text || btn.dataset.originalText || "حفظ";
+      if (loading) btn.innerHTML = `<span class="mini-spinner"></span>${escapeHtml(text || t("loading"))}`;
+      else btn.textContent = text || btn.dataset.originalText || t("save");
     }
     function showMessage(text, type) {
       clearTimeout(messageTimer);
@@ -938,12 +980,12 @@
       return String(value ?? "").replace(/[&<>'"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[ch]));
     }
     function movementTypeName(type) {
-      return type === "opening" ? "إضافة افتتاحية" : type === "receive" ? "استلام" : type === "issue" ? "صرف" : type;
+      return type === "opening" ? t("movementOpening") : type === "receive" ? t("movementReceive") : type === "issue" ? t("movementIssue") : type;
     }
     function formatDate(value) {
       if (!value) return "-";
-      try { return new Date(value + "T00:00:00").toLocaleDateString("ar-OM"); }
-      catch { return value; }
+      try { return toEnglishDigits(new Date(value + "T00:00:00").toLocaleDateString("en-GB")); }
+      catch { return toEnglishDigits(value); }
     }
   </script>
 </body>
