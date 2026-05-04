@@ -12,10 +12,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-1: #eaf1ff;
-      --bg-2: #f7f1ea;
-      --text: #101827;
-      --muted: #667085;
+      --bg-1: #f7f9ff;
+      --bg-2: #eef4ff;
+      --bg-3: #f8efe7;
+      --text: #172033;
+      --muted: #6d7483;
       --line: rgba(16, 24, 39, 0.12);
       --card: rgba(255, 255, 255, 0.88);
       --input: rgba(255, 255, 255, 0.98);
@@ -25,7 +26,9 @@
       --green: #16a34a;
       --red: #dc2626;
       --orange: #f97316;
-      --shadow: 0 22px 60px rgba(16, 24, 39, 0.14);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --shadow: 0 24px 70px rgba(50, 70, 110, 0.15);
+      --soft-shadow: 0 12px 34px rgba(50, 70, 110, 0.11);
       --topbar-height: 78px;
       --sidebar-width: 310px;
       --radius-xl: 28px;
@@ -40,13 +43,25 @@
       font-family: "Tajawal", Arial, sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 10% 12%, rgba(0, 102, 255, 0.28), transparent 28%),
-        radial-gradient(circle at 90% 10%, rgba(109, 40, 217, 0.20), transparent 30%),
-        linear-gradient(135deg, var(--bg-1), #ffffff 52%, var(--bg-2));
+        radial-gradient(circle at 12% 18%, rgba(0, 122, 255, 0.20), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(124, 58, 237, 0.14), transparent 30%),
+        radial-gradient(circle at 50% 92%, rgba(255, 149, 0, 0.16), transparent 34%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
       background-attachment: fixed;
       overflow-x: hidden;
     }
 
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,0.34), transparent 34%, rgba(255,255,255,0.22)),
+        radial-gradient(circle at 60% 20%, rgba(255,255,255,0.34), transparent 22%);
+      z-index: -1;
+    }
     .floating-topbar {
       position: fixed;
       top: 0;
@@ -54,11 +69,11 @@
       left: 0;
       min-height: var(--topbar-height);
       z-index: 100;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border-bottom: 1px solid rgba(16, 24, 39, 0.10);
-      box-shadow: 0 12px 32px rgba(16, 24, 39, 0.10);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 45px rgba(50, 70, 110, 0.10);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -66,53 +81,345 @@
       padding: 12px 22px;
     }
 
-    .topbar-side, .factory-brand, .top-user-box { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .menu-btn, .language-toggle, .top-user-box, .close-sidebar, .dropdown-item {
-      border: 0; background: transparent; color: var(--text); font-family: inherit; font-weight: 900; cursor: pointer; padding: 0; flex-shrink: 0;
+    .topbar-side {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
     }
-    .menu-btn { width: 42px; height: 42px; font-size: 30px; display: grid; place-items: center; }
-    .language-toggle { min-width: 44px; height: 42px; font-size: 16px; }
-    .factory-logo, .sidebar-logo {
-      display: grid; place-items: center; overflow: hidden; background: rgba(255,255,255,0.65); border: 1px solid rgba(16,24,39,0.08); flex-shrink: 0;
+
+    .menu-btn,
+    .language-toggle {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
     }
-    .factory-logo { width: 50px; height: 50px; border-radius: 18px; }
-    .sidebar-logo { width: 49px; height: 49px; border-radius: 18px; }
-    .factory-logo img, .sidebar-logo img { width: 86%; height: 86%; object-fit: contain; display: block; }
-    .factory-info, .user-info, .sidebar-title { min-width: 0; text-align: start; }
-    .factory-info strong, .user-info strong, .sidebar-title strong { display: block; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .factory-info strong { font-size: 19px; }
-    .factory-info span, .user-info span, .sidebar-title span { display: block; margin-top: 2px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .factory-info span { font-size: 13px; }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(145deg, var(--blue), var(--purple)); color: #fff; font-weight: 900; flex-shrink: 0; box-shadow: 0 8px 18px rgba(0,102,255,0.20); }
-    .user-info strong { font-size: 14px; }
-    .user-info span { font-size: 12px; }
-    .user-menu-wrapper { position: relative; }
-    .top-user-box { font-family: inherit; }
+
+    .menu-btn {
+      width: 42px;
+      height: 42px;
+      font-size: 30px;
+      display: grid;
+      place-items: center;
+    }
+
+    .language-toggle {
+      min-width: 44px;
+      height: 42px;
+      font-size: 16px;
+    }
+
+    .factory-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .factory-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: rgba(255,255,255,0.35);
+      flex-shrink: 0;
+    }
+
+    .factory-logo img {
+      width: 86%;
+      height: 86%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .factory-info {
+      min-width: 0;
+      text-align: start;
+    }
+
+    .factory-info strong {
+      display: block;
+      font-size: 19px;
+      font-weight: 900;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .factory-info span {
+      display: block;
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-menu-wrapper {
+      position: relative;
+    }
+
+    .top-user-box {
+      border: 0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      color: var(--text);
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--blue), var(--purple));
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      min-width: 0;
+      text-align: start;
+    }
+
+    .user-info strong,
+    .user-info span {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-info strong {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .user-info span {
+      margin-top: 1px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .user-dropdown {
-      display: none; position: absolute; top: calc(100% + 12px); inset-inline-end: 0; width: 235px; z-index: 500; padding: 10px; border-radius: 18px;
-      background: rgba(255,255,255,0.96); border: 1px solid rgba(16,24,39,0.10); box-shadow: 0 18px 48px rgba(16,24,39,0.18); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      inset-inline-end: 0;
+      width: 235px;
+      z-index: 500;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow: 0 18px 48px rgba(50,70,110,0.18);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
     }
-    .user-dropdown.show { display: block; }
-    .dropdown-item { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 9px 10px; border-radius: 12px; font-size: 14px; text-decoration: none; }
-    .dropdown-item:hover { background: rgba(0,102,255,0.08); }
-    .dropdown-item.danger { color: var(--red); }
-    .sidebar-overlay { position: fixed; inset: 0; z-index: 190; background: rgba(15,23,42,0.26); display: none; }
-    .sidebar-overlay.show { display: block; }
+
+    .user-dropdown.show {
+      display: grid;
+    }
+
+    .user-dropdown a,
+    .user-dropdown button {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-bottom: 1px solid rgba(50,70,110,0.10);
+      background: transparent;
+      color: var(--text);
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: start;
+      padding: 0 4px;
+    }
+
+    .user-dropdown a:last-child,
+    .user-dropdown button:last-child {
+      border-bottom: 0;
+    }
+
+    .user-dropdown a:hover,
+    .user-dropdown button:hover {
+      color: var(--blue-dark);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(20, 28, 44, 0.26);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
     .sidebar {
-      position: fixed; top: 0; bottom: 0; right: 0; width: var(--sidebar-width); max-width: calc(100vw - 38px); z-index: 200;
-      background: rgba(255,255,255,0.94); border-inline-start: 1px solid rgba(16,24,39,0.12); box-shadow: -24px 0 70px rgba(16,24,39,0.18);
-      transform: translateX(108%); transition: transform 0.25s ease; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 18px; overflow-y: auto;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--sidebar-width);
+      max-width: 88vw;
+      height: 100vh;
+      z-index: 200;
+      padding: 22px 18px;
+      overflow-y: auto;
+      transform: translateX(105%);
+      transition: transform 0.26s cubic-bezier(.2,.8,.2,1);
+      background: rgba(255,255,255,0.72);
+      border-left: 1px solid rgba(255,255,255,0.78);
+      box-shadow: -28px 0 70px rgba(50, 70, 110, 0.18);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
     }
-    html[dir="ltr"] .sidebar { right: auto; left: 0; transform: translateX(-108%); border-inline-start: 0; border-inline-end: 1px solid rgba(16,24,39,0.12); box-shadow: 24px 0 70px rgba(16,24,39,0.18); }
-    .sidebar.open, html[dir="ltr"] .sidebar.open { transform: translateX(0); }
-    .sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 12px; border-bottom: 1px solid rgba(16,24,39,0.10); }
-    .sidebar-title { display: flex; align-items: center; gap: 10px; }
-    .close-sidebar { width: 40px; height: 40px; border-radius: 14px; font-size: 26px; display: grid; place-items: center; }
-    .close-sidebar:hover { background: rgba(16,24,39,0.06); }
-    .nav { display: grid; gap: 8px; }
-    .nav a { min-height: 48px; border-radius: 16px; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; font-weight: 900; border: 1px solid transparent; }
-    .nav a:hover, .nav a.active { background: rgba(0,102,255,0.09); border-color: rgba(0,102,255,0.12); color: var(--blue-dark); }
-    .nav-icon { width: 24px; text-align: center; }
+
+    html[dir="ltr"] .sidebar {
+      right: auto;
+      left: 0;
+      transform: translateX(-105%);
+      border-left: 0;
+      border-right: 1px solid rgba(255,255,255,0.78);
+      box-shadow: 28px 0 70px rgba(50, 70, 110, 0.18);
+    }
+
+    .sidebar.open,
+    html[dir="ltr"] .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(50,70,110,0.12);
+    }
+
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      text-align: start;
+    }
+
+    .sidebar-logo {
+      width: 49px;
+      height: 49px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: rgba(255,255,255,0.42);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo img {
+      width: 86%;
+      height: 86%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .sidebar-title strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .sidebar-title span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .close-sidebar {
+      width: 43px;
+      height: 43px;
+      border: 0;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.42);
+      color: var(--red);
+      font-size: 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .nav {
+      display: grid;
+    }
+
+    .nav a {
+      width: 100%;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 13px 4px;
+      border: 0;
+      border-bottom: 1px solid rgba(50,70,110,0.12);
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: start;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--blue-dark);
+      padding-inline-start: 10px;
+    }
+
+    .nav-icon {
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      display: inline-flex;
+      place-items: initial;
+      background: transparent;
+      box-shadow: none;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
 
     .app-main { width: min(1380px, 100%); margin: 0 auto; padding: calc(var(--topbar-height) + 26px) 22px 34px; }
     .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; }
@@ -210,53 +517,117 @@
   <header class="floating-topbar">
     <div class="topbar-side">
       <button class="menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
+
       <div class="factory-brand">
-        <div class="factory-logo"><img src="assets/img/logo.png" alt="NATAC"></div>
+        <div class="factory-logo">
+          <img src="assets/img/logo.png" alt="NATAC Logo">
+        </div>
         <div class="factory-info">
-          <strong data-i18n="factoryName">ناتاك</strong>
-          <span data-i18n="systemName">نظام إدارة الإنتاج</span>
+          <strong id="factoryName" data-i18n="factoryName">ناتاك</strong>
+          <span id="factorySubtitle" data-i18n="systemName">نظام إدارة الإنتاج</span>
         </div>
       </div>
     </div>
 
     <div class="topbar-side">
-      <button class="language-toggle" id="languageToggleBtn" type="button">EN</button>
+      <button id="languageToggleBtn" class="language-toggle" type="button">EN</button>
+
       <div class="user-menu-wrapper">
-        <button class="top-user-box" id="userMenuBtn" type="button">
-          <div class="avatar" id="userAvatar">N</div>
+        <button class="top-user-box" id="topUserMenuBtn" type="button">
+          <div class="avatar" id="userAvatar">U</div>
           <div class="user-info">
-            <strong id="topUserName">مستخدم</strong>
-            <span id="topUserRole">-</span>
+            <strong id="userName">مستخدم</strong>
+            <span id="userRole">---</span>
           </div>
         </button>
+
         <div class="user-dropdown" id="userDropdown">
-          <a class="dropdown-item" href="profile.html">👤 <span data-i18n="profile">الملف الشخصي</span></a>
-          <button class="dropdown-item danger" id="logoutBtn" type="button">↩ <span data-i18n="logout">تسجيل الخروج</span></button>
+          <a href="profile.html">
+            <span>👤</span>
+            <span data-i18n="profile">الملف الشخصي</span>
+          </a>
+
+          <a href="users.html" data-permission="usersPage">
+            <span>👥</span>
+            <span data-i18n="usersManagement">إدارة المستخدمين</span>
+          </a>
+
+          <button type="button" id="logoutDropdownBtn">
+            <span>🚪</span>
+            <span data-i18n="logout">تسجيل الخروج</span>
+          </button>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="overlay" id="overlay"></div>
+
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
       <div class="sidebar-title">
-        <div class="sidebar-logo"><img src="assets/img/logo.png" alt="NATAC"></div>
-        <div><strong data-i18n="factoryName">ناتاك</strong><span data-i18n="mainMenu">القائمة الرئيسية</span></div>
+        <div class="sidebar-logo">
+          <img src="assets/img/logo.png" alt="NATAC Logo">
+        </div>
+        <div>
+          <strong data-i18n="mainMenu">القائمة الرئيسية</strong>
+          <span data-i18n="systemName">نظام إدارة الإنتاج</span>
+        </div>
       </div>
-      <button class="close-sidebar" id="closeSidebarBtn" type="button">×</button>
+
+      <button class="close-sidebar" id="closeSidebarBtn" type="button" aria-label="إغلاق القائمة">×</button>
     </div>
+
     <nav class="nav">
-      <a href="dashboard.html"><span class="nav-icon">📊</span><span data-i18n="navDashboard">لوحة التحكم</span></a>
-      <a href="production.html"><span class="nav-icon">🏭</span><span data-i18n="navProduction">إدخال الإنتاج</span></a>
-      <a href="evaluation.html"><span class="nav-icon">⭐</span><span data-i18n="navEvaluation">تقييم المشرف</span></a>
-      <a href="history.html"><span class="nav-icon">📋</span><span data-i18n="navHistory">سجل الإنتاج</span></a>
-      <a href="performance.html"><span class="nav-icon">📈</span><span data-i18n="navPerformance">أداء العمال</span></a>
-      <a href="workers.html"><span class="nav-icon">👷</span><span data-i18n="navWorkers">العمال</span></a>
-      <a href="products.html"><span class="nav-icon">📦</span><span data-i18n="navProducts">المنتجات</span></a>
-      <a href="machines.html"><span class="nav-icon">⚙️</span><span data-i18n="navMachines">المكائن</span></a>
-      <a class="active" href="spare-parts.html"><span class="nav-icon">🧰</span><span data-i18n="navSpareParts">قطع الغيار</span></a>
-      <a href="users.html"><span class="nav-icon">👥</span><span data-i18n="navUsers">المستخدمون</span></a>
+      <a href="dashboard.html">
+        <span data-i18n="navDashboard">لوحة التحكم</span>
+        <span class="nav-icon">📊</span>
+      </a>
+
+      <a href="production.html" data-permission="productionEntry">
+        <span data-i18n="navProduction">إدخال الإنتاج</span>
+        <span class="nav-icon">🏭</span>
+      </a>
+
+      <a href="evaluation.html" data-permission="supervisorEvaluation">
+        <span data-i18n="navEvaluation">تقييم المشرف</span>
+        <span class="nav-icon">⭐</span>
+      </a>
+
+      <a href="history.html" data-permission="productionHistory">
+        <span data-i18n="navHistory">سجل الإنتاج</span>
+        <span class="nav-icon">📋</span>
+      </a>
+
+      <a href="performance.html" data-permission="workerPerformance">
+        <span data-i18n="navPerformance">أداء العمال</span>
+        <span class="nav-icon">📈</span>
+      </a>
+
+      <a href="workers.html" data-permission="workersPage">
+        <span data-i18n="navWorkers">العمال</span>
+        <span class="nav-icon">👷</span>
+      </a>
+
+      <a href="products.html" data-permission="productsPage">
+        <span data-i18n="navProducts">المنتجات</span>
+        <span class="nav-icon">📦</span>
+      </a>
+
+      <a href="machines.html" data-permission="machinesPage">
+        <span data-i18n="navMachines">المكائن</span>
+        <span class="nav-icon">⚙️</span>
+      </a>
+
+      <a class="active" href="spare-parts.html" data-permission="inventoryView">
+        <span data-i18n="navSpareParts">قطع الغيار</span>
+        <span class="nav-icon">🧰</span>
+      </a>
+
+      <a href="users.html" data-permission="usersPage">
+        <span data-i18n="navUsers">المستخدمون</span>
+        <span class="nav-icon">👥</span>
+      </a>
     </nav>
   </aside>
 
@@ -447,7 +818,7 @@
     const i18n = {
       ar: {
         htmlLang: "ar", dir: "rtl", pageTitleDoc: "مخزون قطع الغيار | NATAC", languageButton: "EN",
-        factoryName: "ناتاك", systemName: "نظام إدارة الإنتاج", mainMenu: "القائمة الرئيسية", profile: "الملف الشخصي", logout: "تسجيل الخروج",
+        factoryName: "ناتاك", systemName: "نظام إدارة الإنتاج", mainMenu: "القائمة الرئيسية", usersManagement: "إدارة المستخدمين", profile: "الملف الشخصي", logout: "تسجيل الخروج",
         navDashboard: "لوحة التحكم", navProduction: "إدخال الإنتاج", navEvaluation: "تقييم المشرف", navHistory: "سجل الإنتاج", navPerformance: "أداء العمال", navWorkers: "العمال", navProducts: "المنتجات", navMachines: "المكائن", navSpareParts: "قطع الغيار", navUsers: "المستخدمون",
         pageTitle: "مخزون قطع الغيار", receivePart: "استلام قطعة غيار", issuePart: "صرف قطعة غيار", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
         mostUsed: "أكثر قطع الغيار استخدامًا", top10Hint: "اضغط لعرض أعلى 10 قطع", usedQty: "كمية مستخدمة", totalStockQty: "إجمالي الكميات بالمخزون", totalStockQtyMeta: "مجموع العدد المتوفر لكل القطع", lowStockCount: "عدد القطع منخفضة المخزون", lowStockMeta: "أعلى من صفر وأقل من الحد الأدنى", outStockCount: "عدد القطع النافدة", outStockMeta: "الكمية المتوفرة تساوي صفر",
@@ -461,7 +832,7 @@
       },
       en: {
         htmlLang: "en", dir: "ltr", pageTitleDoc: "Spare Parts Inventory | NATAC", languageButton: "عربي",
-        factoryName: "NATAC", systemName: "Production Management System", mainMenu: "Main Menu", profile: "Profile", logout: "Logout",
+        factoryName: "NATAC", systemName: "Production Management System", mainMenu: "Main Menu", usersManagement: "Users Management", profile: "Profile", logout: "Logout",
         navDashboard: "Dashboard", navProduction: "Production Entry", navEvaluation: "Supervisor Evaluation", navHistory: "Production History", navPerformance: "Worker Performance", navWorkers: "Workers", navProducts: "Products", navMachines: "Machines", navSpareParts: "Spare Parts", navUsers: "Users",
         pageTitle: "Spare Parts Inventory", receivePart: "Receive Spare Part", issuePart: "Issue Spare Part", addPart: "Add New Spare Part", addCategory: "Add New Category",
         mostUsed: "Most Used Spare Part", top10Hint: "Click to view top 10 parts", usedQty: "Used quantity", totalStockQty: "Total Inventory Quantity", totalStockQtyMeta: "Total available quantity for all parts", lowStockCount: "Low Stock Parts", lowStockMeta: "Above zero and below minimum stock", outStockCount: "Out-of-Stock Parts", outStockMeta: "Available quantity equals zero",
@@ -514,13 +885,15 @@
     }
 
     function bindLayoutEvents() {
-      $("menuBtn").addEventListener("click", () => { $("sidebar").classList.add("open"); $("sidebarOverlay").classList.add("show"); });
+      $("menuBtn").addEventListener("click", () => { $("sidebar").classList.add("open"); $("overlay").classList.add("show"); document.body.style.overflow = "hidden"; });
       $("closeSidebarBtn").addEventListener("click", closeSidebar);
-      $("sidebarOverlay").addEventListener("click", closeSidebar);
-      $("userMenuBtn").addEventListener("click", () => $("userDropdown").classList.toggle("show"));
+      $("overlay").addEventListener("click", closeSidebar);
+      $("topUserMenuBtn").addEventListener("click", (event) => { event.stopPropagation(); $("userDropdown").classList.toggle("show"); });
+      $("userDropdown").addEventListener("click", (event) => event.stopPropagation());
       document.addEventListener("click", (e) => { if (!e.target.closest(".user-menu-wrapper")) $("userDropdown").classList.remove("show"); });
-      $("logoutBtn").addEventListener("click", logout);
+      $("logoutDropdownBtn").addEventListener("click", logout);
       $("languageToggleBtn").addEventListener("click", () => applyLanguage(currentLang === "ar" ? "en" : "ar"));
+      document.addEventListener("keydown", event => { if (event.key === "Escape") { closeSidebar(); $("userDropdown").classList.remove("show"); } });
       document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.closeModal)));
       document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(overlay.id); }));
     }
@@ -548,7 +921,7 @@
       $("issuePartSearch").addEventListener("change", () => syncPartSearch("issue"));
     }
 
-    function closeSidebar() { $("sidebar").classList.remove("open"); $("sidebarOverlay").classList.remove("show"); }
+    function closeSidebar() { $("sidebar").classList.remove("open"); $("overlay").classList.remove("show"); document.body.style.overflow = ""; }
     function openModal(id) { $(id).classList.add("show"); }
     function closeModal(id) { $(id).classList.remove("show"); }
 
@@ -570,6 +943,7 @@
       renderStats();
       renderCategories();
       renderPartsTable();
+      if (currentUser) renderUser();
       if (selectedPart) $("detailTitle").textContent = `${t("movementHistory")} ${selectedPart.partName || ""}`.trim();
     }
 
@@ -587,19 +961,35 @@
         permissions
       };
     }
-    function hasPermission(key) { return currentUser?.role === "Admin" || currentUser?.permissions?.[key] === true || currentUser?.permissions?.[key] === "true"; }
-    function renderUser() {
-      $("topUserName").textContent = currentUser.fullName;
-      $("topUserRole").textContent = currentUser.role || "-";
-      $("userAvatar").textContent = (currentUser.fullName || currentUser.username || "N").trim().charAt(0).toUpperCase();
-      toggleByPermission("openReceiveBtn", "inventoryReceive");
-      toggleByPermission("openIssueBtn", "inventoryIssue");
-      toggleByPermission("openPartBtn", "inventoryAddPart");
-      toggleByPermission("openCategoryBtn", "inventoryAddCategory");
-      toggleByPermission("editSelectedPartBtn", "inventoryEditPart");
-      toggleByPermission("deleteSelectedPartBtn", "inventoryDeletePart");
+    function hasPermission(key) {
+      const role = String(currentUser?.role || currentUser?.Role || "").toLowerCase();
+      if (role === "admin") return true;
+      const permissions = currentUser?.permissions || currentUser?.Permissions || {};
+      return permissions?.[key] === true || permissions?.[key] === "true";
     }
-    function toggleByPermission(id, permission) { const el = $(id); if (el) el.style.display = hasPermission(permission) ? "inline-flex" : "none"; }
+    function renderUser() {
+      $("userName").textContent = currentUser.fullName;
+      $("userRole").textContent = currentUser.role || "-";
+      $("userAvatar").textContent = (currentUser.fullName || currentUser.username || "N").trim().charAt(0).toUpperCase();
+      applyPermissionsUI();
+    }
+    function applyPermissionsUI() {
+      document.querySelectorAll("[data-permission]").forEach(element => {
+        const permission = element.getAttribute("data-permission");
+        if (element.id) {
+          element.style.display = hasPermission(permission) ? "" : "none";
+        } else {
+          element.style.display = hasPermission(permission) ? "" : "none";
+        }
+      });
+      toggleByPermission("openReceiveBtn", "inventoryReceive", "inline-flex");
+      toggleByPermission("openIssueBtn", "inventoryIssue", "inline-flex");
+      toggleByPermission("openPartBtn", "inventoryAddPart", "inline-flex");
+      toggleByPermission("openCategoryBtn", "inventoryAddCategory", "inline-flex");
+      toggleByPermission("editSelectedPartBtn", "inventoryEditPart", "inline-flex");
+      toggleByPermission("deleteSelectedPartBtn", "inventoryDeletePart", "inline-flex");
+    }
+    function toggleByPermission(id, permission, displayValue) { const el = $(id); if (el) el.style.display = hasPermission(permission) ? (displayValue || "") : "none"; }
 
     async function validateSession() {
       const result = await rpcSafe("get_session_user", { p_token: currentToken });
@@ -777,7 +1167,16 @@
       let imagePath = currentEditPart?.imagePath || null;
       setButtonLoading("savePartBtn", true, t("saving"));
       try {
-        if (file) imagePath = await uploadImage(file, "spare-parts");
+        if (file) {
+          try {
+            imagePath = await uploadImage(file, "spare-parts");
+          } catch (uploadError) {
+            console.error("spare part image upload failed:", uploadError);
+            showMessage((uploadError && uploadError.message) || t("uploadError"), "error");
+            return;
+          }
+        }
+
         const common = {
           p_token: currentToken,
           p_category_id: $("partCategoryInput").value || null,
@@ -796,6 +1195,9 @@
         showMessage(result.message, "success");
         await loadInventory();
         if (selectedPart && currentEditPart) await openPartDetails(currentEditPart.partId);
+      } catch (error) {
+        console.error("save spare part failed:", error);
+        showMessage((error && error.message) || t("savePartError"), "error");
       } finally {
         setButtonLoading("savePartBtn", false, t("save"));
       }
@@ -895,12 +1297,24 @@
       const image = await fileToCompressedBase64(file);
       const response = await fetch(STORAGE_FUNCTION_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
-        body: JSON.stringify({ action: "upload", token: currentToken, bucket: STORAGE_BUCKET, folder: folder || "spare-parts", image })
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          action: "upload",
+          token: currentToken,
+          bucket: STORAGE_BUCKET,
+          folder: folder || "spare-parts",
+          image: image
+        })
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) throw new Error(result.message || t("uploadError"));
-      return result.path;
+      if (!response.ok || !result.success) {
+        const message = result.message || (response.status === 401 ? "Invalid JWT / Unauthorized. تأكد من تعطيل Verify JWT في Edge Function factory-storage." : t("uploadError"));
+        throw new Error(message);
+      }
+      return result.path || result.imagePath || "";
     }
     async function getSignedUrl(path) {
       if (!path) return "";
