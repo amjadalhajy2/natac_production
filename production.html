@@ -1185,6 +1185,9 @@
     const SUPABASE_URL = "https://zwycwrewpuqlfysmqivg.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_4Mqa7nNhB7Y0Xh9X0ubdNQ_Gt6Ck0zZ";
 
+    const STORAGE_BUCKET = "defect-images";
+    const STORAGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/factory-storage";
+
     const supabaseClient = window.supabase
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
@@ -2949,6 +2952,8 @@
             quantity: Number(item.quantity ?? item.Quantity ?? 0)
           }));
 
+          const imagePath = await uploadImageIfNeeded_(production.image || production.Image, token);
+
           return await rpcSafe_("save_production", {
             p_token: token,
             p_production_date: production.date || production.Date || null,
@@ -2956,7 +2961,7 @@
             p_worker_id: production.workerId || production.WorkerID || null,
             p_raw_waste_kg: Number(production.rawWasteKg ?? production.RawWasteKg ?? 0),
             p_notes: production.notes || production.Notes || "",
-            p_image_path: getImagePathForDb_(production.image || production.Image),
+            p_image_path: imagePath,
             p_items: items
           });
         }
@@ -3339,10 +3344,75 @@
       return value === "admin" || value === "مدير" || value === "مدير النظام" ? "Admin" : "Supervisor";
     }
 
+
+    function dataUrlToBase64_(dataUrl) {
+      const value = String(dataUrl || "");
+      const commaIndex = value.indexOf(",");
+      return commaIndex === -1 ? value : value.slice(commaIndex + 1);
+    }
+
+    function looksLikeStoragePath_(value) {
+      return typeof value === "string" && value && !value.startsWith("data:") && !/^https?:\/\//i.test(value);
+    }
+
+    async function invokeFactoryStorage_(payload) {
+      const response = await fetch(STORAGE_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify(payload || {})
+      });
+
+      const text = await response.text();
+      let result = null;
+
+      try {
+        result = text ? JSON.parse(text) : null;
+      } catch (error) {
+        result = { success: false, message: text || "Storage error" };
+      }
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error((result && result.message) || "تعذر حفظ الصورة في Supabase Storage");
+      }
+
+      return result;
+    }
+
+    async function uploadImageIfNeeded_(image, token) {
+      if (!image) return "";
+
+      if (typeof image === "string") {
+        return image.startsWith("data:") ? "" : image;
+      }
+
+      const existingPath = image.path || image.imagePath || image.url || image.publicUrl || "";
+      if (looksLikeStoragePath_(existingPath)) return existingPath;
+
+      const dataUrl = image.dataUrl || image.dataURL || "";
+      if (!dataUrl) return existingPath || "";
+
+      const uploadResult = await invokeFactoryStorage_({
+        action: "upload",
+        token: token,
+        bucket: STORAGE_BUCKET,
+        image: {
+          fileName: image.fileName || createImageFileName(image.originalName || "image.jpg"),
+          mimeType: image.mimeType || "image/jpeg",
+          base64: dataUrlToBase64_(dataUrl)
+        }
+      });
+
+      return uploadResult.path || "";
+    }
+
     function getImagePathForDb_(image) {
       if (!image) return "";
-      if (typeof image === "string") return image;
-      return image.dataUrl || image.url || image.path || "";
+      if (typeof image === "string") return image.startsWith("data:") ? "" : image;
+      return image.path || image.imagePath || image.url || "";
     }
 
     function setSaving(isSaving) {
