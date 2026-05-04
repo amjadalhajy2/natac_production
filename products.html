@@ -1713,10 +1713,7 @@
       productCategoryInput.innerHTML = `<option value="">${t("chooseCategory")}</option>`;
 
       categories
-        .filter(category => {
-          return normalizeStatus(category.Status || "Active") === "Active" &&
-            String(category.CategoryType || "Product") === "Product";
-        })
+        .filter(category => normalizeStatus(category.Status || "Active") === "Active")
         .forEach(category => {
           const option = document.createElement("option");
           option.value = category.CategoryID;
@@ -1983,7 +1980,7 @@
         return;
       }
 
-      if (productExists(productName, productCategory, machineId, editingProductId)) {
+      if (productExists(productName, productCategoryId, machineId, editingProductId)) {
         showMessage(t("duplicateProduct"), "error");
         return;
       }
@@ -2243,8 +2240,7 @@
 
         if (action === "addCategory") {
           const category = payload.category || {};
-          const categoryType = category.categoryType || category.CategoryType || payload.categoryType ||
-            (payload.scope === "machines" || typeof machineCategoryInput !== "undefined" ? "Machine" : "Product");
+          const categoryType = category.categoryType || category.CategoryType || payload.categoryType || "General";
 
           return await rpcSafe_("add_category", {
             p_token: token,
@@ -2260,7 +2256,7 @@
             p_token: token,
             p_category_id: category.categoryId || category.CategoryID || category.id || null,
             p_category_name: category.categoryName || category.CategoryName || "",
-            p_category_type: category.categoryType || category.CategoryType || payload.categoryType || "Product",
+            p_category_type: category.categoryType || category.CategoryType || payload.categoryType || "General",
             p_status: normalizeStatusForDb_(category.status || category.Status || "Active")
           });
         }
@@ -2691,6 +2687,7 @@
     }
 
     function findCategoryIdByName_(name, type) {
+      // الأصناف أصبحت مشتركة بين المنتجات والمكائن، لذلك لا نقوم بالفلترة حسب النوع.
       const cleanName = normalizeTextForLookup_(name);
       let source = [];
       try {
@@ -2699,9 +2696,7 @@
         source = [];
       }
       const item = (source || []).find(category => {
-        const sameName = normalizeTextForLookup_(category.CategoryName || category.categoryName || category.category_name) === cleanName;
-        const sameType = !type || !category.CategoryType || category.CategoryType === type || category.categoryType === type || category.category_type === type;
-        return sameName && sameType;
+        return normalizeTextForLookup_(category.CategoryName || category.categoryName || category.category_name) === cleanName;
       });
       return item ? (item.CategoryID || item.categoryId || item.id || null) : null;
     }
