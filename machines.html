@@ -1201,7 +1201,7 @@
         existingCategories: "الأصناف الموجودة",
         newCategoryName: "اسم الصنف الجديد",
         saveCategory: "حفظ الصنف",
-        machineId: "رقم المكينة",
+        machineId: "كود المكينة",
         machineCategory: "صنف المكينة",
         machineName: "اسم المكينة",
         status: "الحالة",
@@ -1262,7 +1262,7 @@
         existingCategories: "Existing Categories",
         newCategoryName: "New Category Name",
         saveCategory: "Save Category",
-        machineId: "Machine ID",
+        machineId: "Machine Code",
         machineCategory: "Machine Category",
         machineName: "Machine Name",
         status: "Status",
@@ -1703,7 +1703,8 @@
 
         const statusText = status === "Active" ? t("active") : t("inactive");
 
-        return String(machine.MachineID || "").toLowerCase().includes(keyword) ||
+        return String(machine.MachineCode || "").toLowerCase().includes(keyword) ||
+          String(machine.MachineID || "").toLowerCase().includes(keyword) ||
           String(machine.MachineCategory || "").toLowerCase().includes(keyword) ||
           String(machine.MachineName || "").toLowerCase().includes(keyword) ||
           statusText.toLowerCase().includes(keyword);
@@ -1730,12 +1731,13 @@
 
       filteredMachines.forEach(machine => {
         const machineId = machine.MachineID || "";
+        const machineCode = machine.MachineCode || machine.MachineID || "";
         const active = normalizeStatus(machine.Status || "Active") === "Active";
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td class="id-cell">${escapeHtml(machineId)}</td>
+          <td class="id-cell">${escapeHtml(machineCode)}</td>
           <td>${escapeHtml(machine.MachineCategory || "")}</td>
           <td>${escapeHtml(machine.MachineName || "")}</td>
           <td>
