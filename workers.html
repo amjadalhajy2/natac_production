@@ -1150,7 +1150,7 @@
         logout: "تسجيل الخروج",
         loadingWorkers: "جاري تحميل العمال...",
         addWorker: "إضافة عامل",
-        workerId: "رقم العامل",
+        workerId: "كود العامل",
         workerName: "اسم العامل",
         status: "الحالة",
         allStatuses: "كل الحالات",
@@ -1202,7 +1202,7 @@
         logout: "Logout",
         loadingWorkers: "Loading workers...",
         addWorker: "Add Worker",
-        workerId: "Worker ID",
+        workerId: "Worker Code",
         workerName: "Worker Name",
         status: "Status",
         allStatuses: "All Statuses",
@@ -1554,6 +1554,7 @@
 
       filteredWorkers.forEach(worker => {
         const workerId = worker.WorkerID || "";
+        const workerCode = worker.WorkerCode || worker.WorkerID || "";
         const workerName = worker.WorkerName || "";
         const status = normalizeStatus(worker.Status || "Active");
         const active = status === "Active";
@@ -1561,7 +1562,7 @@
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td class="id-cell">${escapeHtml(workerId)}</td>
+          <td class="id-cell">${escapeHtml(workerCode)}</td>
           <td>${escapeHtml(workerName)}</td>
           <td>
             <span class="status-pill ${active ? "status-active" : "status-inactive"}">
