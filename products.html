@@ -1233,7 +1233,7 @@
         existingCategories: "الأصناف الموجودة",
         newCategoryName: "اسم الصنف الجديد",
         saveCategory: "حفظ الصنف",
-        productId: "رقم المنتج",
+        productId: "كود المنتج",
         productCategory: "صنف المنتج",
         productName: "اسم المنتج",
         machineName: "المكينة المصنعة",
@@ -1300,7 +1300,7 @@
         existingCategories: "Existing Categories",
         newCategoryName: "New Category Name",
         saveCategory: "Save Category",
-        productId: "Product ID",
+        productId: "Product Code",
         productCategory: "Product Category",
         productName: "Product Name",
         machineName: "Machine",
@@ -1611,8 +1611,21 @@
         }
 
         products = productsResult.products || [];
-        machines = machinesResult && machinesResult.success ? machinesResult.machines || [] : [];
-        categories = categoriesResult && categoriesResult.success ? categoriesResult.categories || [] : [];
+
+        /*
+         * مهم: دالة get_products في Supabase تعيد المنتجات + الأصناف + المكائن اللازمة
+         * لصفحة المنتجات. لذلك نعتمد عليها أولًا حتى تظهر القوائم حتى لو لم يملك المستخدم
+         * صلاحية فتح صفحة المكائن أو صفحة الأصناف بشكل مستقل.
+         */
+        machines = productsResult.machines || [];
+        if ((!machines || !machines.length) && machinesResult && machinesResult.success) {
+          machines = machinesResult.machines || [];
+        }
+
+        categories = productsResult.categories || [];
+        if ((!categories || !categories.length) && categoriesResult && categoriesResult.success) {
+          categories = categoriesResult.categories || [];
+        }
 
         setLocalCache_(PRODUCTS_CACHE_KEY, {
           products,
@@ -1729,7 +1742,7 @@
       const selectedCategory = categories.find(category => String(category.CategoryID || "") === String(categoryId));
       const selectedCategoryName = selectedCategory ? selectedCategory.CategoryName : "";
 
-      const filteredMachines = machines.filter(machine => {
+      let filteredMachines = machines.filter(machine => {
         if (normalizeStatus(machine.Status || "Active") !== "Active") return false;
 
         const sameById = String(machine.MachineCategoryID || "") === String(categoryId);
@@ -1737,6 +1750,14 @@
 
         return sameById || sameByName;
       });
+
+      /*
+       * احتياط: إذا لم تكن المكائن مرتبطة بتصنيف مكينة أو كانت البيانات القديمة
+       * لا تحتوي على MachineCategoryID، نعرض كل المكائن النشطة بدل أن تبقى القائمة فارغة.
+       */
+      if (!filteredMachines.length) {
+        filteredMachines = machines.filter(machine => normalizeStatus(machine.Status || "Active") === "Active");
+      }
 
       filteredMachines.forEach(machine => {
         const option = document.createElement("option");
@@ -1818,7 +1839,8 @@
 
         const machineName = getMachineName(product.MachineID);
 
-        return String(product.ProductID || "").toLowerCase().includes(keyword) ||
+        return String(product.ProductCode || "").toLowerCase().includes(keyword) ||
+          String(product.ProductID || "").toLowerCase().includes(keyword) ||
           String(product.ProductCategory || "").toLowerCase().includes(keyword) ||
           String(product.ProductName || "").toLowerCase().includes(keyword) ||
           String(product.MachineID || "").toLowerCase().includes(keyword) ||
@@ -1845,12 +1867,13 @@
 
       filteredProducts.forEach(product => {
         const productId = product.ProductID || "";
+        const productCode = product.ProductCode || product.ProductID || "";
         const active = normalizeStatus(product.Status || "Active") === "Active";
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td class="id-cell">${escapeHtml(productId)}</td>
+          <td class="id-cell">${escapeHtml(productCode)}</td>
           <td>${escapeHtml(product.ProductCategory || "")}</td>
           <td>${escapeHtml(product.ProductName || "")}</td>
           <td>${escapeHtml(getMachineName(product.MachineID || ""))}</td>
