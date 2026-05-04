@@ -1275,6 +1275,9 @@
     const SUPABASE_URL = "https://zwycwrewpuqlfysmqivg.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_4Mqa7nNhB7Y0Xh9X0ubdNQ_Gt6Ck0zZ";
 
+    const STORAGE_BUCKET = "defect-images";
+    const STORAGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/factory-storage";
+
     const supabaseClient = window.supabase
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
@@ -1985,7 +1988,7 @@
               <td rowspan="${rowSpan}">
                 ${
                   group.ImageURL
-                    ? `<a class="image-link" href="${escapeAttribute(group.ImageURL)}" target="_blank" rel="noopener">${t("openImage")}</a>`
+                    ? `<a class="image-link" href="#" data-image-path="${escapeAttribute(group.ImageURL)}">${t("openImage")}</a>`
                     : escapeHtml(t("noImage"))
                 }
               </td>
@@ -2041,7 +2044,7 @@
     function renderCurrentImage(imageUrl) {
       if (imageUrl) {
         currentImageBox.innerHTML = `
-          <a class="image-link" href="${escapeAttribute(imageUrl)}" target="_blank" rel="noopener">${t("openImage")}</a>
+          <a class="image-link" href="#" data-image-path="${escapeAttribute(imageUrl)}">${t("openImage")}</a>
           ${
             isAdmin()
               ? `<button class="btn btn-danger btn-small" type="button" id="removeImageBtn">${t("removeImage")}</button>`
@@ -2305,10 +2308,27 @@
       });
 
       historyTableBody.addEventListener("click", event => {
+        const imageLink = event.target.closest(".image-link[data-image-path]");
+
+        if (imageLink) {
+          event.preventDefault();
+          openImagePath_(imageLink.dataset.imagePath || "");
+          return;
+        }
+
         const detailsBtn = event.target.closest(".details-btn");
 
         if (detailsBtn) {
           openDetails(Number(detailsBtn.dataset.index));
+        }
+      });
+
+      currentImageBox.addEventListener("click", event => {
+        const imageLink = event.target.closest(".image-link[data-image-path]");
+
+        if (imageLink) {
+          event.preventDefault();
+          openImagePath_(imageLink.dataset.imagePath || "");
         }
       });
 
@@ -2369,15 +2389,6 @@
       const token = payload.token || (typeof currentUser !== "undefined" && currentUser ? currentUser.token : "");
 
       try {
-        if (action === "login") {
-          const result = await rpcSafe_("custom_login", {
-            p_username: payload.username || payload.Username || "",
-            p_password: payload.password || payload.Password || ""
-          });
-          if (result && result.user) result.user = normalizeUser_(result.user);
-          return result;
-        }
-
         if (action === "checkSession") {
           return await rpcSafe_("get_session_user", { p_token: token });
         }
@@ -2565,6 +2576,11 @@
             quantity: Number(item.quantity ?? item.Quantity ?? 0)
           }));
 
+          const imageAction = production.imageAction || "keep";
+          const imagePath = imageAction === "replace"
+            ? await uploadImageIfNeeded_(production.image || production.Image, token)
+            : getImagePathForDb_(production.image || production.Image);
+
           return await rpcSafe_("update_production", {
             p_token: token,
             p_production_id: production.productionId || production.ProductionID || null,
@@ -2573,8 +2589,8 @@
             p_worker_id: production.workerId || production.WorkerID || null,
             p_raw_waste_kg: Number(production.rawWasteKg ?? production.RawWasteKg ?? 0),
             p_notes: production.notes || production.Notes || "",
-            p_image_action: production.imageAction || "keep",
-            p_image_path: getImagePathForDb_(production.image || production.Image),
+            p_image_action: imageAction,
+            p_image_path: imagePath,
             p_items: items
           });
         }
@@ -2920,10 +2936,113 @@
       return value === "admin" || value === "مدير" || value === "مدير النظام" ? "Admin" : "Supervisor";
     }
 
+
+    function dataUrlToBase64_(dataUrl) {
+      const value = String(dataUrl || "");
+      const commaIndex = value.indexOf(",");
+      return commaIndex === -1 ? value : value.slice(commaIndex + 1);
+    }
+
+    function looksLikeStoragePath_(value) {
+      return typeof value === "string" && value && !value.startsWith("data:") && !/^https?:\/\//i.test(value);
+    }
+
+    async function invokeFactoryStorage_(payload) {
+      const response = await fetch(STORAGE_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify(payload || {})
+      });
+
+      const text = await response.text();
+      let result = null;
+
+      try {
+        result = text ? JSON.parse(text) : null;
+      } catch (error) {
+        result = { success: false, message: text || "Storage error" };
+      }
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error((result && result.message) || "تعذر التعامل مع صورة الإنتاج");
+      }
+
+      return result;
+    }
+
+    async function uploadImageIfNeeded_(image, token) {
+      if (!image) return "";
+
+      if (typeof image === "string") {
+        return image.startsWith("data:") ? "" : image;
+      }
+
+      const existingPath = image.path || image.imagePath || image.url || image.publicUrl || "";
+      if (looksLikeStoragePath_(existingPath)) return existingPath;
+
+      const dataUrl = image.dataUrl || image.dataURL || "";
+      if (!dataUrl) return existingPath || "";
+
+      const uploadResult = await invokeFactoryStorage_({
+        action: "upload",
+        token: token,
+        bucket: STORAGE_BUCKET,
+        image: {
+          fileName: image.fileName || "production-image.jpg",
+          mimeType: image.mimeType || "image/jpeg",
+          base64: dataUrlToBase64_(dataUrl)
+        }
+      });
+
+      return uploadResult.path || "";
+    }
+
+    async function getSignedImageUrl_(imagePath) {
+      if (!imagePath) return "";
+      if (/^https?:\/\//i.test(imagePath) || String(imagePath).startsWith("data:")) {
+        return imagePath;
+      }
+
+      const session = getSession();
+      const token = (currentUser && currentUser.token) || (session && session.token) || "";
+
+      if (!token) {
+        throw new Error(t("tokenMissing"));
+      }
+
+      const result = await invokeFactoryStorage_({
+        action: "signedUrl",
+        token: token,
+        bucket: STORAGE_BUCKET,
+        path: imagePath,
+        expiresIn: 600
+      });
+
+      return result.signedUrl || "";
+    }
+
+    async function openImagePath_(imagePath) {
+      try {
+        const signedUrl = await getSignedImageUrl_(imagePath);
+        if (!signedUrl) {
+          showMessage(t("noImage"), "warning");
+          return;
+        }
+        window.open(signedUrl, "_blank", "noopener");
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || t("serverError"), "error");
+      }
+    }
+
     function getImagePathForDb_(image) {
       if (!image) return "";
-      if (typeof image === "string") return image;
-      return image.dataUrl || image.url || image.path || "";
+      if (typeof image === "string") return image.startsWith("data:") ? "" : image;
+      return image.path || image.imagePath || image.url || "";
     }
 
     function getSession() {
