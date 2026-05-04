@@ -1699,12 +1699,17 @@
 
       productCategoryInput.innerHTML = `<option value="">${t("chooseCategory")}</option>`;
 
-      getCategoryNames(true).forEach(categoryName => {
-        const option = document.createElement("option");
-        option.value = categoryName;
-        option.textContent = categoryName;
-        productCategoryInput.appendChild(option);
-      });
+      categories
+        .filter(category => {
+          return normalizeStatus(category.Status || "Active") === "Active" &&
+            String(category.CategoryType || "Product") === "Product";
+        })
+        .forEach(category => {
+          const option = document.createElement("option");
+          option.value = category.CategoryID;
+          option.textContent = category.CategoryName;
+          productCategoryInput.appendChild(option);
+        });
 
       if ([...productCategoryInput.options].some(option => option.value === currentValue)) {
         productCategoryInput.value = currentValue;
@@ -1713,17 +1718,24 @@
 
     function renderMachinesForSelectedCategory() {
       const currentValue = machineIdInput.value || "";
-      const category = productCategoryInput.value || "";
+      const categoryId = productCategoryInput.value || "";
 
       machineIdInput.innerHTML = `<option value="">${t("chooseMachine")}</option>`;
 
-      if (!category) {
+      if (!categoryId) {
         return;
       }
 
+      const selectedCategory = categories.find(category => String(category.CategoryID || "") === String(categoryId));
+      const selectedCategoryName = selectedCategory ? selectedCategory.CategoryName : "";
+
       const filteredMachines = machines.filter(machine => {
-        return normalizeStatus(machine.Status || "Active") === "Active" &&
-          String(machine.MachineCategory || "") === String(category);
+        if (normalizeStatus(machine.Status || "Active") !== "Active") return false;
+
+        const sameById = String(machine.MachineCategoryID || "") === String(categoryId);
+        const sameByName = selectedCategoryName && String(machine.MachineCategory || "") === String(selectedCategoryName);
+
+        return sameById || sameByName;
       });
 
       filteredMachines.forEach(machine => {
@@ -1889,7 +1901,7 @@
 
       editingProductId = product.ProductID || "";
       productIdInput.value = product.ProductID || "";
-      productCategoryInput.value = product.ProductCategory || "";
+      productCategoryInput.value = product.ProductCategoryID || findCategoryIdByName_(product.ProductCategory || "", "Product") || "";
 
       renderMachinesForSelectedCategory();
 
@@ -1924,14 +1936,16 @@
       event.preventDefault();
       clearMessage();
 
-      const productCategory = productCategoryInput.value.trim();
+      const productCategoryId = productCategoryInput.value.trim();
+      const selectedCategory = categories.find(category => String(category.CategoryID || "") === String(productCategoryId));
+      const productCategory = selectedCategory ? selectedCategory.CategoryName : "";
       const productName = productNameInput.value.trim();
       const machineId = machineIdInput.value.trim();
       const timePerUnit = Number(timePerUnitInput.value || 0);
       const wasteKgPerUnit = Number(wasteKgPerUnitInput.value || 0);
       const status = productStatusInput.value || "Active";
 
-      if (!productCategory) {
+      if (!productCategoryId) {
         showMessage(t("categoryRequired"), "error");
         return;
       }
@@ -1952,6 +1966,7 @@
       }
 
       const payloadProduct = {
+        productCategoryId,
         productCategory,
         productName,
         machineId,
@@ -1992,9 +2007,8 @@
       }
     }
 
-    function productExists(productName, productCategory, machineId, excludeProductId = "") {
+    function productExists(productName, productCategoryId, machineId, excludeProductId = "") {
       const cleanName = normalizeText(productName);
-      const cleanCategory = normalizeText(productCategory);
 
       return products.some(product => {
         const sameId = String(product.ProductID || "") === String(excludeProductId || "");
@@ -2002,7 +2016,7 @@
         if (sameId) return false;
 
         return normalizeText(product.ProductName) === cleanName &&
-          normalizeText(product.ProductCategory) === cleanCategory &&
+          String(product.ProductCategoryID || "") === String(productCategoryId || "") &&
           String(product.MachineID || "") === String(machineId || "");
       });
     }
@@ -2270,7 +2284,8 @@
 
         if (action === "addProduct") {
           const product = payload.product || {};
-          const categoryId = product.productCategoryId || product.ProductCategoryID || findCategoryIdByName_(product.productCategory || product.ProductCategory, "Product");
+          const rawCategory = product.productCategoryId || product.ProductCategoryID || product.categoryId || product.CategoryID || product.productCategory || product.ProductCategory || "";
+          const categoryId = isUuid_(rawCategory) ? rawCategory : findCategoryIdByName_(rawCategory, "Product");
 
           return await rpcSafe_("add_product", {
             p_token: token,
@@ -2285,7 +2300,8 @@
 
         if (action === "updateProduct") {
           const product = payload.product || {};
-          const categoryId = product.productCategoryId || product.ProductCategoryID || findCategoryIdByName_(product.productCategory || product.ProductCategory, "Product");
+          const rawCategory = product.productCategoryId || product.ProductCategoryID || product.categoryId || product.CategoryID || product.productCategory || product.ProductCategory || "";
+          const categoryId = isUuid_(rawCategory) ? rawCategory : findCategoryIdByName_(rawCategory, "Product");
 
           return await rpcSafe_("update_product", {
             p_token: token,
@@ -2645,6 +2661,10 @@
       summary.averageEvaluation = evalCount ? evalSum / evalCount : 0;
       summary.wasteIndex = summary.expectedWaste > 0 ? summary.actualWaste / summary.expectedWaste : 0;
       return summary;
+    }
+
+    function isUuid_(value) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
     }
 
     function findCategoryIdByName_(name, type) {
