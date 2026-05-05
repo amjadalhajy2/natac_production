@@ -916,6 +916,11 @@
         <span data-i18n="machines">المكائن</span>
         <span class="nav-icon">⚙️</span>
       </a>
+
+      <a href="spare-parts.html" data-permission="inventoryView">
+        <span data-i18n="spareParts">قطع الغيار</span>
+        <span class="nav-icon">🧰</span>
+      </a>
     </nav>
   </aside>
 
@@ -1603,15 +1608,6 @@
       const token = payload.token || (typeof currentUser !== "undefined" && currentUser ? currentUser.token : "");
 
       try {
-        if (action === "login") {
-          const result = await rpcSafe_("custom_login", {
-            p_username: payload.username || payload.Username || "",
-            p_password: payload.password || payload.Password || ""
-          });
-          if (result && result.user) result.user = normalizeUser_(result.user);
-          return result;
-        }
-
         if (action === "checkSession") {
           return await rpcSafe_("get_session_user", { p_token: token });
         }
