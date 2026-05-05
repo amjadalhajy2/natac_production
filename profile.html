@@ -1036,7 +1036,7 @@
     </div>
 
     <nav class="nav">
-      <a href="dashboard.html">
+      <a href="dashboard.html" data-permission="dashboardPage">
         <span data-i18n="dashboard">لوحة التحكم</span>
         <span class="nav-icon">📊</span>
       </a>
@@ -1233,6 +1233,7 @@
     const PROFILE_CACHE_KEY = "profile_cache_v1";
 
     const PERMISSION_KEYS = [
+      "dashboardPage",
       "productionEntry",
       "supervisorEvaluation",
       "productionHistory",
@@ -1318,6 +1319,7 @@
         profileUpdated: "تم تحديث الملف الشخصي بنجاح.",
         passwordUpdated: "تم تغيير كلمة المرور بنجاح.",
         noPermissions: "لا توجد صلاحيات مفعلة.",
+        perm_dashboardPage: "لوحة التحكم",
         perm_productionEntry: "إدخال الإنتاج",
         perm_supervisorEvaluation: "تقييم المشرف",
         perm_productionHistory: "سجل الإنتاج",
@@ -1401,6 +1403,7 @@
         profileUpdated: "Profile updated successfully.",
         passwordUpdated: "Password changed successfully.",
         noPermissions: "No active permissions.",
+        perm_dashboardPage: "Dashboard",
         perm_productionEntry: "Production Entry",
         perm_supervisorEvaluation: "Supervisor Evaluation",
         perm_productionHistory: "Production History",
