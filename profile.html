@@ -63,11 +63,11 @@
       left: 0;
       min-height: var(--topbar-height);
       z-index: 100;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border-bottom: 1px solid rgba(16, 24, 39, 0.10);
-      box-shadow: 0 12px 32px rgba(16, 24, 39, 0.10);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 45px rgba(50, 70, 110, 0.10);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -231,11 +231,11 @@
       z-index: 500;
       padding: 10px;
       border-radius: 18px;
-      background: rgba(255,255,255,0.96);
-      border: 1px solid rgba(16,24,39,0.10);
-      box-shadow: 0 18px 48px rgba(16,24,39,0.18);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow: 0 18px 48px rgba(50,70,110,0.18);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
     }
 
     .user-dropdown.show {
@@ -298,9 +298,9 @@
       overflow-y: auto;
       transform: translateX(105%);
       transition: transform 0.26s cubic-bezier(.2,.8,.2,1);
-      background: rgba(255,255,255,0.94);
-      border-left: 1px solid rgba(16,24,39,0.10);
-      box-shadow: -28px 0 70px rgba(16, 24, 39, 0.18);
+      background: rgba(255,255,255,0.72);
+      border-left: 1px solid rgba(255,255,255,0.78);
+      box-shadow: -28px 0 70px rgba(50, 70, 110, 0.18);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
     }
@@ -310,8 +310,8 @@
       left: 0;
       transform: translateX(-105%);
       border-left: 0;
-      border-right: 1px solid rgba(16,24,39,0.10);
-      box-shadow: 28px 0 70px rgba(16, 24, 39, 0.18);
+      border-right: 1px solid rgba(255,255,255,0.78);
+      box-shadow: 28px 0 70px rgba(50, 70, 110, 0.18);
     }
 
     .sidebar.open,
@@ -554,7 +554,7 @@
 
     .profile-grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
       align-items: start;
     }
@@ -772,6 +772,94 @@
       border: 1px dashed rgba(16,24,39,0.16);
     }
 
+
+
+    .page-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(16, 24, 39, 0.34);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.show {
+      display: block;
+    }
+
+    .modal-window {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1300;
+      width: min(560px, calc(100vw - 28px));
+      max-height: calc(100vh - 36px);
+      overflow-y: auto;
+      padding: 18px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(16, 24, 39, 0.10);
+      box-shadow: 0 28px 80px rgba(16, 24, 39, 0.26);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      text-align: start;
+    }
+
+    .modal-window.show {
+      display: block;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(16, 24, 39, 0.10);
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .modal-close {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 15px;
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--red);
+      font-size: 24px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
     @keyframes spin {
       to {
         transform: rotate(360deg);
@@ -845,9 +933,12 @@
         gap: 5px;
       }
 
-      .actions {
+      .actions,
+      .page-actions,
+      .modal-actions {
         display: grid;
         grid-template-columns: 1fr;
+        width: 100%;
       }
 
       .btn {
@@ -984,6 +1075,11 @@
         <span data-i18n="machines">المكائن</span>
         <span class="nav-icon">⚙️</span>
       </a>
+
+      <a href="spare-parts.html" data-permission="inventoryView">
+        <span data-i18n="spareParts">قطع الغيار</span>
+        <span class="nav-icon">🧰</span>
+      </a>
     </nav>
   </aside>
 
@@ -999,6 +1095,17 @@
       <div class="page-title">
         <div>
           <h1 data-i18n="profile">الملف الشخصي</h1>
+        </div>
+
+        <div class="page-actions">
+          <button class="btn btn-secondary" type="button" id="openEditProfileBtn">
+            <span>✏️</span>
+            <span data-i18n="editProfile">تعديل البيانات</span>
+          </button>
+          <button class="btn btn-primary" type="button" id="openPasswordModalBtn">
+            <span>🔒</span>
+            <span data-i18n="changePassword">تغيير كلمة المرور</span>
+          </button>
         </div>
       </div>
 
@@ -1043,59 +1150,70 @@
         </div>
 
         <div class="card">
-          <h3 data-i18n="editProfile">تعديل البيانات</h3>
-
-          <form id="profileForm" class="form" novalidate>
-            <div class="field">
-              <label for="fullNameInput" data-i18n="fullName">الاسم الكامل</label>
-              <input type="text" id="fullNameInput" autocomplete="off">
-            </div>
-
-            <div class="field">
-              <label for="usernameInput" data-i18n="username">اسم المستخدم</label>
-              <input type="text" id="usernameInput" disabled>
-              <div class="hint" data-i18n="usernameLockedHint">لا يمكن تغيير اسم المستخدم.</div>
-            </div>
-
-            <div class="actions">
-              <button class="btn btn-primary" type="submit" id="saveProfileBtn" data-i18n="saveChanges">حفظ التعديلات</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h3 data-i18n="changePassword">تغيير كلمة المرور</h3>
-
-          <form id="passwordForm" class="form" novalidate>
-            <div class="field">
-              <label for="currentPasswordInput" data-i18n="currentPassword">كلمة المرور الحالية</label>
-              <input type="password" id="currentPasswordInput" autocomplete="current-password">
-            </div>
-
-            <div class="field">
-              <label for="newPasswordInput" data-i18n="newPassword">كلمة المرور الجديدة</label>
-              <input type="password" id="newPasswordInput" autocomplete="new-password">
-              <div class="hint" data-i18n="passwordHint">يجب ألا تقل كلمة المرور الجديدة عن 4 أحرف.</div>
-            </div>
-
-            <div class="field">
-              <label for="confirmPasswordInput" data-i18n="confirmPassword">تأكيد كلمة المرور الجديدة</label>
-              <input type="password" id="confirmPasswordInput" autocomplete="new-password">
-            </div>
-
-            <div class="actions">
-              <button class="btn btn-primary" type="submit" id="changePasswordBtn" data-i18n="savePassword">حفظ كلمة المرور</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
           <h3 data-i18n="myPermissions">صلاحياتي</h3>
           <div id="permissionsList" class="permissions-list"></div>
         </div>
       </div>
     </section>
   </main>
+
+  <div class="modal-backdrop" id="profileModalBackdrop"></div>
+
+  <section class="modal-window" id="editProfileModal" aria-modal="true" role="dialog">
+    <div class="modal-head">
+      <h3 data-i18n="editProfile">تعديل البيانات</h3>
+      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
+    </div>
+
+    <form id="profileForm" class="form" novalidate>
+      <div class="field">
+        <label for="fullNameInput" data-i18n="fullName">الاسم الكامل</label>
+        <input type="text" id="fullNameInput" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="usernameInput" data-i18n="username">اسم المستخدم</label>
+        <input type="text" id="usernameInput" disabled>
+        <div class="hint" data-i18n="usernameLockedHint">لا يمكن تغيير اسم المستخدم.</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="submit" id="saveProfileBtn" data-i18n="saveChanges">حفظ التعديلات</button>
+        <button class="btn btn-secondary" type="button" data-close-modal data-i18n="cancel">إلغاء</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="modal-window" id="passwordModal" aria-modal="true" role="dialog">
+    <div class="modal-head">
+      <h3 data-i18n="changePassword">تغيير كلمة المرور</h3>
+      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
+    </div>
+
+    <form id="passwordForm" class="form" novalidate>
+      <div class="field">
+        <label for="currentPasswordInput" data-i18n="currentPassword">كلمة المرور الحالية</label>
+        <input type="password" id="currentPasswordInput" autocomplete="current-password">
+      </div>
+
+      <div class="field">
+        <label for="newPasswordInput" data-i18n="newPassword">كلمة المرور الجديدة</label>
+        <input type="password" id="newPasswordInput" autocomplete="new-password">
+        <div class="hint" data-i18n="passwordHint">يجب ألا تقل كلمة المرور الجديدة عن 4 أحرف.</div>
+      </div>
+
+      <div class="field">
+        <label for="confirmPasswordInput" data-i18n="confirmPassword">تأكيد كلمة المرور الجديدة</label>
+        <input type="password" id="confirmPasswordInput" autocomplete="new-password">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="submit" id="changePasswordBtn" data-i18n="savePassword">حفظ كلمة المرور</button>
+        <button class="btn btn-secondary" type="button" data-close-modal data-i18n="cancel">إلغاء</button>
+      </div>
+    </form>
+  </section>
+
 
   <script>
     /********************************************************
@@ -1131,7 +1249,16 @@
       "addMachine",
       "editMachine",
       "workerPerformance",
-      "usersPage"
+      "usersPage",
+      "inventoryView",
+      "inventoryAddPart",
+      "inventoryEditPart",
+      "inventoryDeletePart",
+      "inventoryReceive",
+      "inventoryIssue",
+      "inventoryDirectMovement",
+      "inventoryAddCategory",
+      "inventoryMovementHistory"
     ];
 
     const i18n = {
@@ -1152,6 +1279,7 @@
         workers: "العمال",
         products: "المنتجات",
         machines: "المكائن",
+        spareParts: "قطع الغيار",
         usersManagement: "إدارة المستخدمين",
         profile: "الملف الشخصي",
         logout: "تسجيل الخروج",
@@ -1176,6 +1304,7 @@
         confirmPassword: "تأكيد كلمة المرور الجديدة",
         passwordHint: "يجب ألا تقل كلمة المرور الجديدة عن 4 أحرف.",
         savePassword: "حفظ كلمة المرور",
+        cancel: "إلغاء",
         tokenMissing: "لم يتم العثور على رمز الجلسة token.",
         sessionExpired: "انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى.",
         serverError: "تعذر الاتصال بالخادم. تحقق من رابط Apps Script أو اتصال الإنترنت.",
@@ -1205,7 +1334,16 @@
         perm_addMachine: "إضافة مكينة",
         perm_editMachine: "تعديل مكينة",
         perm_workerPerformance: "متابعة أداء العمال",
-        perm_usersPage: "إدارة المستخدمين"
+        perm_usersPage: "إدارة المستخدمين",
+        perm_inventoryView: "عرض مخزون قطع الغيار",
+        perm_inventoryAddPart: "إضافة قطعة غيار",
+        perm_inventoryEditPart: "تعديل قطعة غيار",
+        perm_inventoryDeletePart: "حذف قطعة غيار",
+        perm_inventoryReceive: "إدخال للمخزن",
+        perm_inventoryIssue: "صرف من المخزن",
+        perm_inventoryDirectMovement: "استلام/صرف مباشر",
+        perm_inventoryAddCategory: "إضافة تصنيف قطع غيار",
+        perm_inventoryMovementHistory: "عرض سجل حركة قطع الغيار"
       },
       en: {
         htmlLang: "en",
@@ -1224,6 +1362,7 @@
         workers: "Workers",
         products: "Products",
         machines: "Machines",
+        spareParts: "Spare Parts",
         usersManagement: "Users Management",
         profile: "Profile",
         logout: "Logout",
@@ -1248,6 +1387,7 @@
         confirmPassword: "Confirm New Password",
         passwordHint: "New password must be at least 4 characters.",
         savePassword: "Save Password",
+        cancel: "Cancel",
         tokenMissing: "Session token not found.",
         sessionExpired: "Session expired. Please login again.",
         serverError: "Unable to connect to the server.",
@@ -1277,7 +1417,16 @@
         perm_addMachine: "Add Machine",
         perm_editMachine: "Edit Machine",
         perm_workerPerformance: "Worker Performance",
-        perm_usersPage: "Users Management"
+        perm_usersPage: "Users Management",
+        perm_inventoryView: "View Spare Parts Inventory",
+        perm_inventoryAddPart: "Add Spare Part",
+        perm_inventoryEditPart: "Edit Spare Part",
+        perm_inventoryDeletePart: "Delete Spare Part",
+        perm_inventoryReceive: "Receive to Inventory",
+        perm_inventoryIssue: "Issue from Inventory",
+        perm_inventoryDirectMovement: "Direct Receive/Issue",
+        perm_inventoryAddCategory: "Add Spare Part Category",
+        perm_inventoryMovementHistory: "View Spare Part Movement History"
       }
     };
 
@@ -1303,6 +1452,12 @@
     const topUserMenuBtn = document.getElementById("topUserMenuBtn");
     const userDropdown = document.getElementById("userDropdown");
     const logoutDropdownBtn = document.getElementById("logoutDropdownBtn");
+
+    const openEditProfileBtn = document.getElementById("openEditProfileBtn");
+    const openPasswordModalBtn = document.getElementById("openPasswordModalBtn");
+    const profileModalBackdrop = document.getElementById("profileModalBackdrop");
+    const editProfileModal = document.getElementById("editProfileModal");
+    const passwordModal = document.getElementById("passwordModal");
 
     const profileAvatar = document.getElementById("profileAvatar");
     const profileTitleName = document.getElementById("profileTitleName");
@@ -1651,6 +1806,45 @@
     function bindEvents() {
       profileForm.addEventListener("submit", handleUpdateProfile);
       passwordForm.addEventListener("submit", handleChangePassword);
+
+      openEditProfileBtn.addEventListener("click", openEditProfileModal);
+      openPasswordModalBtn.addEventListener("click", openPasswordModal);
+      profileModalBackdrop.addEventListener("click", closeProfileModals);
+
+      document.querySelectorAll("[data-close-modal]").forEach(button => {
+        button.addEventListener("click", closeProfileModals);
+      });
+    }
+
+    function openEditProfileModal() {
+      clearMessage();
+      renderProfile(currentUser || {});
+      openProfileModal(editProfileModal);
+      setTimeout(() => fullNameInput.focus(), 80);
+    }
+
+    function openPasswordModal() {
+      clearMessage();
+      passwordForm.reset();
+      openProfileModal(passwordModal);
+      setTimeout(() => currentPasswordInput.focus(), 80);
+    }
+
+    function openProfileModal(modal) {
+      closeUserDropdown();
+      closeSidebar();
+      profileModalBackdrop.classList.add("show");
+      editProfileModal.classList.remove("show");
+      passwordModal.classList.remove("show");
+      modal.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeProfileModals() {
+      profileModalBackdrop.classList.remove("show");
+      editProfileModal.classList.remove("show");
+      passwordModal.classList.remove("show");
+      document.body.style.overflow = "";
     }
 
     async function handleUpdateProfile(event) {
@@ -1705,6 +1899,7 @@
 
         renderUser(currentUser);
         renderProfile(currentUser);
+        closeProfileModals();
         showMessage(result.message || t("profileUpdated"), "success");
 
       } catch (error) {
@@ -1762,6 +1957,7 @@
         }
 
         passwordForm.reset();
+        closeProfileModals();
         setLocalCache_(PROFILE_CACHE_KEY, {
           success: true,
           user: currentUser,
@@ -2417,6 +2613,7 @@
         if (event.key === "Escape") {
           closeSidebar();
           closeUserDropdown();
+          closeProfileModals();
         }
       });
 
