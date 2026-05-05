@@ -1881,11 +1881,22 @@
       machines.forEach(machine => {
         const option = document.createElement("option");
         option.value = machine.MachineID || "";
-        option.textContent = machine.MachineName || machine.MachineID || "";
+        option.textContent = formatMachineOptionLabel(machine);
         machineFilterInput.appendChild(option);
       });
 
       machineFilterInput.value = currentValue;
+    }
+
+    function formatMachineOptionLabel(machine) {
+      const machineName = machine.MachineName || machine.machineName || machine.machine_name || machine.MachineID || machine.id || "";
+      const machineCategory = machine.MachineCategory || machine.machineCategory || machine.machineCategoryName || machine.machine_category_name || "";
+
+      if (machineCategory && machineName) {
+        return machineCategory + " | " + machineName;
+      }
+
+      return machineName || machineCategory || "---";
     }
 
     function getProductById(productId) {
