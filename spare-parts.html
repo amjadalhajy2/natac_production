@@ -656,26 +656,6 @@
       </div>
     </section>
 
-    <section class="cards-grid">
-      <div class="stat-card clickable-stat" id="mostUsedCard">
-        <div class="stat-label" data-i18n="mostUsed">أكثر قطع الغيار استخدامًا</div>
-        <div class="stat-value" id="mostUsedName">-</div>
-        <div class="stat-meta" id="mostUsedMeta" data-i18n="top10Hint">اضغط لعرض أعلى 10 قطع</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label" data-i18n="totalStockQty">إجمالي الكميات بالمخزون</div>
-        <div class="stat-value" id="totalQuantityCard">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label" data-i18n="lowStockCount">عدد القطع منخفضة المخزون</div>
-        <div class="stat-value" id="lowStockCard">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label" data-i18n="outStockCount">عدد القطع النافدة</div>
-        <div class="stat-value" id="outStockCard">0</div>
-      </div>
-    </section>
-
     <section class="panel" id="inventoryPanel">
       <div class="panel-head">
         <h2 class="panel-title" data-i18n="inventoryTable">جدول مخزون قطع الغيار</h2>
@@ -952,7 +932,8 @@
       $("backToInventoryBtn").addEventListener("click", showInventoryView);
       $("editSelectedPartBtn").addEventListener("click", () => selectedPart && openEditPartModal(selectedPart));
       $("deleteSelectedPartBtn").addEventListener("click", deleteSelectedPart);
-      $("mostUsedCard").addEventListener("click", showTopUsedModal);
+      const mostUsedCard = $("mostUsedCard");
+      if (mostUsedCard) mostUsedCard.addEventListener("click", showTopUsedModal);
       $("receiveQuantityInput").addEventListener("input", updateReceiveUnitPrice);
       $("receiveTotalPriceInput").addEventListener("input", updateReceiveUnitPrice);
       $("directQuantityInput").addEventListener("input", updateDirectUnitPrice);
@@ -1067,12 +1048,7 @@
     }
 
     function renderStats() {
-      $("totalQuantityCard").textContent = qty(stats.totalQuantity || 0);
-      $("lowStockCard").textContent = qty(stats.lowStockCount || 0);
-      $("outStockCard").textContent = qty(stats.outOfStockCount || 0);
-      const most = stats.mostUsed || {};
-      $("mostUsedName").textContent = most.partName || "-";
-      $("mostUsedMeta").textContent = t("top10Hint");
+      // تم حذف بطاقات المؤشرات من أعلى صفحة المخزون حسب الطلب.
     }
 
     function renderCategories() {
