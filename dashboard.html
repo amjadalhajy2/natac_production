@@ -978,7 +978,7 @@
     </div>
 
     <nav class="nav">
-      <a href="dashboard.html" class="active">
+      <a href="dashboard.html" data-permission="dashboardPage" class="active">
         <span data-i18n="dashboard">لوحة التحكم</span>
         <span class="nav-icon">📊</span>
       </a>
@@ -1398,6 +1398,11 @@ const SUPABASE_ANON_KEY = "sb_publishable_4Mqa7nNhB7Y0Xh9X0ubdNQ_Gt6Ck0zZ";
           user: currentUser
         }));
 
+        if (!hasClientPermission("dashboardPage")) {
+          redirectToFirstAllowedPage();
+          return;
+        }
+
         renderUser(currentUser);
         applyPermissionsUI();
         await loadDashboard();
@@ -1698,6 +1703,24 @@ const SUPABASE_ANON_KEY = "sb_publishable_4Mqa7nNhB7Y0Xh9X0ubdNQ_Gt6Ck0zZ";
       } catch (error) {
         console.warn("Local cache failed:", error);
       }
+    }
+
+
+    function redirectToFirstAllowedPage() {
+      const routes = [
+        ["productionEntry", "production.html"],
+        ["supervisorEvaluation", "evaluation.html"],
+        ["productionHistory", "history.html"],
+        ["workerPerformance", "performance.html"],
+        ["workersPage", "workers.html"],
+        ["productsPage", "products.html"],
+        ["machinesPage", "machines.html"],
+        ["inventoryView", "spare-parts.html"],
+        ["usersPage", "users.html"]
+      ];
+
+      const route = routes.find(item => hasClientPermission(item[0]));
+      window.location.href = route ? route[1] : "profile.html";
     }
 
     function redirectToLogin() {
