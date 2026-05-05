@@ -461,6 +461,17 @@
     .qty-badge { display: inline-flex; min-width: 56px; justify-content: center; padding: 6px 10px; border-radius: 999px; font-weight: 900; background: rgba(22,163,74,.12); color: #166534; }
     .qty-badge.low, .qty-badge.out { background: rgba(220,38,38,.12); color: #991b1b; }
     .thumb { width: 52px; height: 52px; border-radius: 15px; object-fit: cover; display: block; background: rgba(16,24,39,.06); border: 1px solid rgba(16,24,39,.10); }
+    .action-menu-wrapper { position: relative; display: inline-flex; }
+    .action-menu { display: none; position: absolute; top: calc(100% + 8px); inset-inline-end: 0; min-width: 230px; padding: 8px; border-radius: 18px; background: rgba(255,255,255,.96); border: 1px solid rgba(16,24,39,.10); box-shadow: 0 18px 48px rgba(16,24,39,.16); z-index: 30; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .action-menu.show { display: grid; gap: 6px; }
+    .action-menu button { width: 100%; min-height: 42px; border: 0; border-radius: 14px; background: transparent; color: var(--text); font-family: inherit; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: flex-start; padding: 0 10px; text-align: start; }
+    .action-menu button:hover { background: rgba(0,102,255,.08); color: var(--blue-dark); }
+    .detail-title-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .detail-title-image { width: 58px; height: 58px; border-radius: 18px; object-fit: cover; background: rgba(16,24,39,.06); border: 1px solid rgba(16,24,39,.10); cursor: pointer; flex-shrink: 0; display: none; }
+    .detail-title-image.show { display: block; }
+    .image-preview { width: min(920px, 92vw); max-height: 82vh; object-fit: contain; border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(16,24,39,.28); }
+    .image-preview-close { position: fixed; top: 18px; inset-inline-end: 18px; z-index: 760; width: 46px; height: 46px; border: 0; border-radius: 16px; background: rgba(255,255,255,.92); color: var(--red); font-size: 26px; cursor: pointer; box-shadow: 0 12px 36px rgba(16,24,39,.18); }
+
     .empty { padding: 30px; text-align: center; color: var(--muted); font-weight: 900; }
 
     .detail-view { display: none; margin-top: 16px; }
@@ -623,11 +634,6 @@
         <span data-i18n="navSpareParts">قطع الغيار</span>
         <span class="nav-icon">🧰</span>
       </a>
-
-      <a href="users.html" data-permission="usersPage">
-        <span data-i18n="navUsers">المستخدمون</span>
-        <span class="nav-icon">👥</span>
-      </a>
     </nav>
   </aside>
 
@@ -637,10 +643,22 @@
         <h1 class="page-title" data-i18n="pageTitle">مخزون قطع الغيار</h1>
       </div>
       <div class="actions-row">
-        <button class="btn btn-green" id="openReceiveBtn" type="button">➕ <span data-i18n="receivePart">استلام قطعة غيار</span></button>
-        <button class="btn btn-orange" id="openIssueBtn" type="button">➖ <span data-i18n="issuePart">صرف قطعة غيار</span></button>
-        <button class="btn btn-primary" id="openPartBtn" type="button">🧰 <span data-i18n="addPart">إضافة قطعة غيار جديدة</span></button>
-        <button class="btn btn-soft" id="openCategoryBtn" type="button">🏷 <span data-i18n="addCategory">إضافة تصنيف جديد</span></button>
+        <div class="action-menu-wrapper" id="directMenuWrapper">
+          <button class="btn btn-soft" id="directMovementBtn" type="button">⚡ <span data-i18n="directMovement">استلام/صرف مباشر</span></button>
+          <div class="action-menu" id="directMovementMenu">
+            <button type="button" id="directReceiveBtn">➕ <span data-i18n="directReceive">استلام مباشر</span></button>
+            <button type="button" id="directIssueBtn">➖ <span data-i18n="directIssue">صرف مباشر</span></button>
+          </div>
+        </div>
+        <button class="btn btn-green" id="openReceiveBtn" type="button">➕ <span data-i18n="receivePart">إدخال للمخزن</span></button>
+        <button class="btn btn-orange" id="openIssueBtn" type="button">➖ <span data-i18n="issuePart">صرف من المخزن</span></button>
+        <div class="action-menu-wrapper" id="addMenuWrapper">
+          <button class="btn btn-primary" id="addMenuBtn" type="button">＋ <span data-i18n="addMenu">إضافة</span></button>
+          <div class="action-menu" id="addMenu">
+            <button type="button" id="openCategoryBtn">🏷 <span data-i18n="addCategory">إضافة تصنيف جديد</span></button>
+            <button type="button" id="openPartBtn">🧰 <span data-i18n="addPart">إضافة قطعة غيار جديدة</span></button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -653,17 +671,14 @@
       <div class="stat-card">
         <div class="stat-label" data-i18n="totalStockQty">إجمالي الكميات بالمخزون</div>
         <div class="stat-value" id="totalQuantityCard">0</div>
-        <div class="stat-meta" data-i18n="totalStockQtyMeta">مجموع العدد المتوفر لكل القطع</div>
       </div>
       <div class="stat-card">
         <div class="stat-label" data-i18n="lowStockCount">عدد القطع منخفضة المخزون</div>
         <div class="stat-value" id="lowStockCard">0</div>
-        <div class="stat-meta" data-i18n="lowStockMeta">أعلى من صفر وأقل من الحد الأدنى</div>
       </div>
       <div class="stat-card">
         <div class="stat-label" data-i18n="outStockCount">عدد القطع النافدة</div>
         <div class="stat-value" id="outStockCard">0</div>
-        <div class="stat-meta" data-i18n="outStockMeta">الكمية المتوفرة تساوي صفر</div>
       </div>
     </section>
 
@@ -693,7 +708,6 @@
               <th data-i18n="availableQty">العدد المتوفر</th>
               <th data-i18n="lastPurchasePrice">آخر سعر شراء</th>
               <th data-i18n="partLocation">موقع القطعة</th>
-              <th data-i18n="partImage">صورة القطعة</th>
               <th data-i18n="minimumStock">الحد الأدنى</th>
             </tr>
           </thead>
@@ -705,7 +719,10 @@
 
     <section class="panel detail-view" id="detailView">
       <div class="panel-head">
-        <h2 class="panel-title" id="detailTitle">سجل حركة قطعة الغيار</h2>
+        <div class="detail-title-wrap">
+          <img id="detailPartImage" class="detail-title-image" alt="صورة القطعة">
+          <h2 class="panel-title" id="detailTitle">سجل حركة قطعة الغيار</h2>
+        </div>
         <div class="actions-row">
           <button class="btn btn-soft" id="backToInventoryBtn" type="button">← <span data-i18n="backToInventory">رجوع للمخزون</span></button>
           <button class="btn btn-primary" id="editSelectedPartBtn" type="button">✏ <span data-i18n="editPartData">تعديل بيانات القطعة</span></button>
@@ -802,6 +819,11 @@
 
   <datalist id="partsDatalist"></datalist>
 
+  <div class="modal-overlay" id="imagePreviewOverlay">
+    <button class="image-preview-close" type="button" data-close-modal="imagePreviewOverlay">×</button>
+    <img id="imagePreviewLarge" class="image-preview" alt="صورة قطعة الغيار">
+  </div>
+
   <script>
     /********************************************************
      * Supabase Settings
@@ -820,8 +842,8 @@
         htmlLang: "ar", dir: "rtl", pageTitleDoc: "مخزون قطع الغيار | NATAC", languageButton: "EN",
         factoryName: "ناتاك", systemName: "نظام إدارة الإنتاج", mainMenu: "القائمة الرئيسية", usersManagement: "إدارة المستخدمين", profile: "الملف الشخصي", logout: "تسجيل الخروج",
         navDashboard: "لوحة التحكم", navProduction: "إدخال الإنتاج", navEvaluation: "تقييم المشرف", navHistory: "سجل الإنتاج", navPerformance: "أداء العمال", navWorkers: "العمال", navProducts: "المنتجات", navMachines: "المكائن", navSpareParts: "قطع الغيار", navUsers: "المستخدمون",
-        pageTitle: "مخزون قطع الغيار", receivePart: "استلام قطعة غيار", issuePart: "صرف قطعة غيار", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
-        mostUsed: "أكثر قطع الغيار استخدامًا", top10Hint: "اضغط لعرض أعلى 10 قطع", usedQty: "كمية مستخدمة", totalStockQty: "إجمالي الكميات بالمخزون", totalStockQtyMeta: "مجموع العدد المتوفر لكل القطع", lowStockCount: "عدد القطع منخفضة المخزون", lowStockMeta: "أعلى من صفر وأقل من الحد الأدنى", outStockCount: "عدد القطع النافدة", outStockMeta: "الكمية المتوفرة تساوي صفر",
+        pageTitle: "مخزون قطع الغيار", directMovement: "استلام/صرف مباشر", directReceive: "استلام مباشر", directIssue: "صرف مباشر", receivePart: "إدخال للمخزن", issuePart: "صرف من المخزن", addMenu: "إضافة", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
+        mostUsed: "أكثر قطع الغيار استخدامًا", top10Hint: "اضغط لعرض أعلى 10 قطع", usedQty: "كمية مستخدمة", totalStockQty: "إجمالي الكميات بالمخزون", lowStockCount: "عدد القطع منخفضة المخزون", outStockCount: "عدد القطع النافدة",
         inventoryTable: "جدول مخزون قطع الغيار", refresh: "تحديث", refreshing: "جاري التحديث...", searchPlaceholder: "بحث حسب الكود، الاسم، التصنيف، أو الوصف", allCategories: "كل التصنيفات", chooseCategory: "اختر التصنيف", allStockStatuses: "كل حالات المخزون", available: "متوفر", belowMinimum: "أقل من الحد الأدنى", outOfStock: "نفدت", noMatchingParts: "لا توجد قطع غيار مطابقة للبحث.",
         partCode: "كود القطعة", partCategory: "تصنيف القطعة", partName: "اسم قطعة الغيار", partDescription: "وصف القطعة", availableQty: "العدد المتوفر", lastPurchasePrice: "آخر سعر شراء", partLocation: "موقع القطعة", partImage: "صورة القطعة", minimumStock: "الحد الأدنى", partStatus: "حالة القطعة", partImageOptional: "صورة القطعة، اختياري", initialQty: "العدد الابتدائي", purchasePriceOptional: "سعر الشراء، اختياري",
         movementHistory: "سجل حركة", movementHistoryFallback: "سجل حركة قطعة الغيار", movementDate: "تاريخ الحركة", movementType: "نوع الحركة", movementQty: "كمية الحركة", qtyBefore: "الكمية قبل الحركة", qtyAfter: "الكمية بعد الحركة", unitPrice: "سعر الوحدة", totalPrice: "إجمالي السعر", noMovements: "لا توجد حركات مسجلة لهذه القطعة.",
@@ -834,8 +856,8 @@
         htmlLang: "en", dir: "ltr", pageTitleDoc: "Spare Parts Inventory | NATAC", languageButton: "عربي",
         factoryName: "NATAC", systemName: "Production Management System", mainMenu: "Main Menu", usersManagement: "Users Management", profile: "Profile", logout: "Logout",
         navDashboard: "Dashboard", navProduction: "Production Entry", navEvaluation: "Supervisor Evaluation", navHistory: "Production History", navPerformance: "Worker Performance", navWorkers: "Workers", navProducts: "Products", navMachines: "Machines", navSpareParts: "Spare Parts", navUsers: "Users",
-        pageTitle: "Spare Parts Inventory", receivePart: "Receive Spare Part", issuePart: "Issue Spare Part", addPart: "Add New Spare Part", addCategory: "Add New Category",
-        mostUsed: "Most Used Spare Part", top10Hint: "Click to view top 10 parts", usedQty: "Used quantity", totalStockQty: "Total Inventory Quantity", totalStockQtyMeta: "Total available quantity for all parts", lowStockCount: "Low Stock Parts", lowStockMeta: "Above zero and below minimum stock", outStockCount: "Out-of-Stock Parts", outStockMeta: "Available quantity equals zero",
+        pageTitle: "Spare Parts Inventory", directMovement: "Direct Receive/Issue", directReceive: "Direct Receive", directIssue: "Direct Issue", receivePart: "Receive to Stock", issuePart: "Issue from Stock", addMenu: "Add", addPart: "Add New Spare Part", addCategory: "Add New Category",
+        mostUsed: "Most Used Spare Part", top10Hint: "Click to view top 10 parts", usedQty: "Used quantity", totalStockQty: "Total Inventory Quantity", lowStockCount: "Low Stock Parts", outStockCount: "Out-of-Stock Parts",
         inventoryTable: "Spare Parts Inventory Table", refresh: "Refresh", refreshing: "Refreshing...", searchPlaceholder: "Search by code, name, category, or description", allCategories: "All Categories", chooseCategory: "Choose category", allStockStatuses: "All Stock Statuses", available: "Available", belowMinimum: "Below Minimum", outOfStock: "Out of Stock", noMatchingParts: "No spare parts match your search.",
         partCode: "Part Code", partCategory: "Part Category", partName: "Spare Part Name", partDescription: "Part Description", availableQty: "Available Quantity", lastPurchasePrice: "Last Purchase Price", partLocation: "Part Location", partImage: "Part Image", minimumStock: "Minimum Stock", partStatus: "Part Status", partImageOptional: "Part Image, optional", initialQty: "Initial Quantity", purchasePriceOptional: "Purchase Price, optional",
         movementHistory: "Movement History", movementHistoryFallback: "Spare Part Movement History", movementDate: "Movement Date", movementType: "Movement Type", movementQty: "Movement Quantity", qtyBefore: "Quantity Before", qtyAfter: "Quantity After", unitPrice: "Unit Price", totalPrice: "Total Price", noMovements: "No movements are recorded for this part.",
@@ -903,10 +925,16 @@
       $("searchInput").addEventListener("input", renderPartsTable);
       $("categoryFilter").addEventListener("change", renderPartsTable);
       $("stockFilter").addEventListener("change", renderPartsTable);
-      $("openCategoryBtn").addEventListener("click", () => openModal("categoryModalOverlay"));
-      $("openPartBtn").addEventListener("click", openAddPartModal);
+      $("addMenuBtn").addEventListener("click", (event) => { event.stopPropagation(); closeDirectMenu(); $("addMenu").classList.toggle("show"); });
+      $("directMovementBtn").addEventListener("click", (event) => { event.stopPropagation(); closeAddMenu(); $("directMovementMenu").classList.toggle("show"); });
+      $("openCategoryBtn").addEventListener("click", () => { closeAddMenu(); openModal("categoryModalOverlay"); });
+      $("openPartBtn").addEventListener("click", () => { closeAddMenu(); openAddPartModal(); });
       $("openReceiveBtn").addEventListener("click", openReceiveModal);
       $("openIssueBtn").addEventListener("click", openIssueModal);
+      $("directReceiveBtn").addEventListener("click", () => { closeDirectMenu(); openReceiveModal(); });
+      $("directIssueBtn").addEventListener("click", () => { closeDirectMenu(); openIssueModal(); });
+      document.addEventListener("click", (e) => { if (!e.target.closest("#addMenuWrapper")) closeAddMenu(); if (!e.target.closest("#directMenuWrapper")) closeDirectMenu(); });
+      $("detailPartImage").addEventListener("click", openDetailImagePreview);
       $("categoryForm").addEventListener("submit", saveCategory);
       $("partForm").addEventListener("submit", savePart);
       $("receiveForm").addEventListener("submit", saveReceive);
@@ -924,6 +952,8 @@
     function closeSidebar() { $("sidebar").classList.remove("open"); $("overlay").classList.remove("show"); document.body.style.overflow = ""; }
     function openModal(id) { $(id).classList.add("show"); }
     function closeModal(id) { $(id).classList.remove("show"); }
+    function closeAddMenu() { const menu = $("addMenu"); if (menu) menu.classList.remove("show"); }
+    function closeDirectMenu() { const menu = $("directMovementMenu"); if (menu) menu.classList.remove("show"); }
 
     function applyLanguage(lang) {
       currentLang = lang;
@@ -982,10 +1012,13 @@
           element.style.display = hasPermission(permission) ? "" : "none";
         }
       });
+      toggleByPermission("directMenuWrapper", "inventoryDirectMovement", "inline-flex");
       toggleByPermission("openReceiveBtn", "inventoryReceive", "inline-flex");
       toggleByPermission("openIssueBtn", "inventoryIssue", "inline-flex");
-      toggleByPermission("openPartBtn", "inventoryAddPart", "inline-flex");
-      toggleByPermission("openCategoryBtn", "inventoryAddCategory", "inline-flex");
+      toggleByPermission("openPartBtn", "inventoryAddPart", "flex");
+      toggleByPermission("openCategoryBtn", "inventoryAddCategory", "flex");
+      const addVisible = hasPermission("inventoryAddPart") || hasPermission("inventoryAddCategory");
+      const addWrapper = $("addMenuWrapper"); if (addWrapper) addWrapper.style.display = addVisible ? "inline-flex" : "none";
       toggleByPermission("editSelectedPartBtn", "inventoryEditPart", "inline-flex");
       toggleByPermission("deleteSelectedPartBtn", "inventoryDeletePart", "inline-flex");
     }
@@ -1026,7 +1059,7 @@
       $("outStockCard").textContent = qty(stats.outOfStockCount || 0);
       const most = stats.mostUsed || {};
       $("mostUsedName").textContent = most.partName || "-";
-      $("mostUsedMeta").textContent = most.usedQuantity ? `${most.partCode || ""} • ${t("usedQty")} ${qty(most.usedQuantity)}` : t("top10Hint");
+      $("mostUsedMeta").textContent = t("top10Hint");
     }
 
     function renderCategories() {
@@ -1081,12 +1114,11 @@
           <td><span class="qty-badge ${qtyClass}">${qty(available)}</span></td>
           <td>${money(p.lastPurchasePrice)}</td>
           <td>${escapeHtml(p.location || "-")}</td>
-          <td>${p.imagePath ? `<img class="thumb" data-image-path="${escapeHtml(p.imagePath)}" alt="صورة القطعة">` : "-"}</td>
           <td>${qty(minStock)}</td>
         </tr>`;
       }).join("");
       $("partsTableBody").querySelectorAll("tr").forEach(row => row.addEventListener("click", () => openPartDetails(row.dataset.partId)));
-      loadVisibleImages();
+      /* لا يتم عرض الصور داخل جدول المخزون؛ تظهر في سجل الحركة عند فتح القطعة. */
     }
 
     async function loadVisibleImages() {
@@ -1105,7 +1137,7 @@
       selectedPart = result.part;
       const movements = result.movements || [];
       if (!selectedPart) { showMessage(t("partNotFound"), "error"); return; }
-      renderDetail(selectedPart, movements);
+      await renderDetail(selectedPart, movements);
       $("inventoryPanel").style.display = "none";
       $("detailView").classList.add("show");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1113,6 +1145,7 @@
 
     async function renderDetail(part, movements) {
       $("detailTitle").textContent = `${t("movementHistory")} ${part.partName || t("movementHistoryFallback")}`;
+      await renderDetailImage(part);
       $("movementsTableBody").innerHTML = movements.length ? movements.map(m => {
         const isNeg = num(m.quantityChange) < 0;
         return `<tr>
@@ -1125,6 +1158,32 @@
           <td>${money(m.totalPrice)}</td>
         </tr>`;
       }).join("") : `<tr><td colspan="7" class="empty">${escapeHtml(t("noMovements"))}</td></tr>`;
+    }
+
+    async function renderDetailImage(part) {
+      const img = $("detailPartImage");
+      img.classList.remove("show");
+      img.removeAttribute("src");
+      img.dataset.largeUrl = "";
+      const path = part && part.imagePath;
+      if (!path) return;
+      try {
+        const url = await getSignedUrl(path);
+        if (url) {
+          img.src = url;
+          img.dataset.largeUrl = url;
+          img.classList.add("show");
+        }
+      } catch (error) {
+        console.warn("detail image failed", error);
+      }
+    }
+
+    function openDetailImagePreview() {
+      const url = $("detailPartImage").dataset.largeUrl;
+      if (!url) return;
+      $("imagePreviewLarge").src = url;
+      openModal("imagePreviewOverlay");
     }
 
     function showInventoryView() {
