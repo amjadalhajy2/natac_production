@@ -1017,7 +1017,7 @@
     </div>
 
     <nav class="nav">
-      <a href="dashboard.html">
+      <a href="dashboard.html" data-permission="dashboardPage">
         <span data-i18n="dashboard">لوحة التحكم</span>
         <span class="nav-icon">📊</span>
       </a>
@@ -1178,6 +1178,13 @@
 
         <div class="permissions-box">
           <h3 data-i18n="permissions">الصلاحيات</h3>
+
+          <div class="permissions-section">
+            <label class="perm-label">
+              <input type="checkbox" data-perm="dashboardPage">
+              <span data-i18n="permDashboardPage">صلاحية دخول صفحة لوحة التحكم</span>
+            </label>
+          </div>
 
           <div class="permissions-section">
             <label class="perm-label">
@@ -1365,6 +1372,7 @@
     const USERS_CACHE_MAX_AGE_MS = 300000;
 
     const ALL_PERMISSION_KEYS = [
+      "dashboardPage",
       "productionEntry",
       "supervisorEvaluation",
       "productionHistory",
@@ -1451,6 +1459,7 @@
         addSuccess: "تمت إضافة المستخدم بنجاح.",
         updateSuccess: "تم تحديث بيانات المستخدم بنجاح.",
         saving: "جاري الحفظ...",
+        permDashboardPage: "صلاحية دخول صفحة لوحة التحكم",
         permProductionEntry: "صلاحية دخول صفحة إدخال الإنتاج",
         permSupervisorEvaluation: "صلاحية دخول صفحة تقييم المشرف",
         permProductionHistory: "صلاحية دخول سجل الإنتاج",
@@ -1535,6 +1544,7 @@
         addSuccess: "User added successfully.",
         updateSuccess: "User updated successfully.",
         saving: "Saving...",
+        permDashboardPage: "Access Dashboard page",
         permProductionEntry: "Access Production Entry page",
         permSupervisorEvaluation: "Access Supervisor Evaluation page",
         permProductionHistory: "Access Production History",
