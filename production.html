@@ -1271,7 +1271,7 @@
         deleteEntry: "حذف",
         roleAdmin: "مدير النظام",
         roleSupervisor: "مشرف",
-        supervisorDateHint: "المشرف يمكنه إدخال إنتاج اليوم فقط.",
+        supervisorDateHint: "",
         futureDateNotAllowed: "لا يمكن إدخال إنتاج بتاريخ مستقبلي.",
         duplicateWorkerEntry: "تمت إضافة إنتاج هذا العامل مسبقًا في الجدول.",
         apiMissing: "تعذر تهيئة الاتصال بقاعدة بيانات Supabase. تحقق من الرابط والمفتاح العام.",
@@ -1294,7 +1294,7 @@
         chooseDate: "يرجى اختيار التاريخ.",
         chooseShiftMsg: "يرجى اختيار الشفت.",
         chooseWorkerMsg: "يرجى اختيار العامل.",
-        supervisorTodayOnly: "المشرف يمكنه إدخال إنتاج اليوم فقط.",
+        supervisorTodayOnly: "",
         needOneItem: "يرجى إدخال منتج واحد على الأقل مع الكمية.",
         completeRow: row => "يرجى إكمال بيانات المنتج رقم " + row + " أو حذف البطاقة.",
         addEntrySuccess: "تمت إضافة المدخلات إلى الجدول.",
@@ -1365,7 +1365,7 @@
         deleteEntry: "Delete",
         roleAdmin: "System Admin",
         roleSupervisor: "Supervisor",
-        supervisorDateHint: "Supervisor can enter today’s production only.",
+        supervisorDateHint: "",
         futureDateNotAllowed: "Future production dates are not allowed.",
         duplicateWorkerEntry: "This worker already has an entry in the table.",
         apiMissing: "Supabase connection is not configured. Check the URL and publishable key.",
@@ -1388,7 +1388,7 @@
         chooseDate: "Please choose the date.",
         chooseShiftMsg: "Please choose the shift.",
         chooseWorkerMsg: "Please choose the worker.",
-        supervisorTodayOnly: "Supervisor can enter today’s production only.",
+        supervisorTodayOnly: "",
         needOneItem: "Please enter at least one product with quantity.",
         completeRow: row => "Please complete product " + row + " or remove the card.",
         addEntrySuccess: "Entry added to the table.",
@@ -1647,29 +1647,13 @@
 
     function updateDateLockState() {
       const today = getTodayISO();
-      const role = String(currentUser?.Role || currentUser?.role || "").toLowerCase();
 
-      productionDate.max = today;
+      productionDate.removeAttribute("min");
+      productionDate.removeAttribute("max");
 
       if (!productionDate.value) {
         productionDate.value = today;
       }
-
-      if (productionDate.value > today) {
-        productionDate.value = today;
-        showMessage(t("futureDateNotAllowed"), "error");
-      }
-
-      if (role === "supervisor") {
-        productionDate.value = today;
-        productionDate.min = today;
-        productionDate.max = today;
-        productionDate.disabled = true;
-        dateHint.textContent = t("supervisorDateHint");
-        return;
-      }
-
-      productionDate.removeAttribute("min");
 
       if (productionEntries.length > 0) {
         productionDate.disabled = true;
@@ -2231,11 +2215,6 @@
         return null;
       }
 
-      if (isFutureDate(dateValue)) {
-        showMessage(t("futureDateNotAllowed"), "error");
-        productionDate.value = getTodayISO();
-        return null;
-      }
 
       if (!shiftValue) {
         showMessage(t("chooseShiftMsg"), "error");
@@ -2635,18 +2614,7 @@
         return null;
       }
 
-      if (isFutureDate(dateValue)) {
-        showMessage(t("futureDateNotAllowed"), "error");
-        productionDate.value = getTodayISO();
-        return null;
-      }
 
-      const role = String(currentUser?.Role || currentUser?.role || "").toLowerCase();
-
-      if (role === "supervisor" && dateValue !== getTodayISO()) {
-        showMessage(t("supervisorTodayOnly"), "error");
-        return null;
-      }
 
       if (!productionEntries.length) {
         showMessage(t("noEntriesToSave"), "error");
