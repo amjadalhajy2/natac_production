@@ -643,13 +643,7 @@
         <h1 class="page-title" data-i18n="pageTitle">مخزون قطع الغيار</h1>
       </div>
       <div class="actions-row">
-        <div class="action-menu-wrapper" id="directMenuWrapper">
-          <button class="btn btn-soft" id="directMovementBtn" type="button">⚡ <span data-i18n="directMovement">استلام/صرف مباشر</span></button>
-          <div class="action-menu" id="directMovementMenu">
-            <button type="button" id="directReceiveBtn">➕ <span data-i18n="directReceive">استلام مباشر</span></button>
-            <button type="button" id="directIssueBtn">➖ <span data-i18n="directIssue">صرف مباشر</span></button>
-          </div>
-        </div>
+        <button class="btn btn-soft" id="directMovementBtn" type="button">⚡ <span data-i18n="directMovement">استلام/صرف مباشر</span></button>
         <button class="btn btn-green" id="openReceiveBtn" type="button">➕ <span data-i18n="receivePart">إدخال للمخزن</span></button>
         <button class="btn btn-orange" id="openIssueBtn" type="button">➖ <span data-i18n="issuePart">صرف من المخزن</span></button>
         <div class="action-menu-wrapper" id="addMenuWrapper">
@@ -794,6 +788,23 @@
     </form>
   </div>
 
+  <div class="modal-overlay" id="directModalOverlay">
+    <form class="modal" id="directForm">
+      <div class="modal-head"><h3 class="modal-title" data-i18n="directMovement">استلام/صرف مباشر</h3><button class="close-sidebar" type="button" data-close-modal="directModalOverlay">×</button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full"><label data-i18n="selectPart">اختيار القطعة</label><input id="directPartSearch" list="partsDatalist" placeholder="ابحث بالكود أو الاسم أو التصنيف أو الوصف" data-i18n-placeholder="searchPartPlaceholder" required><input id="directPartId" type="hidden"></div>
+          <div class="field"><label data-i18n="receivedQty">عدد القطع الموردة</label><input id="directQuantityInput" type="number" min="1" step="1" required></div>
+          <div class="field"><label data-i18n="receivedTotalPrice">إجمالي سعر القطع الموردة</label><input id="directTotalPriceInput" type="number" min="0" step="0.001"></div>
+          <div class="field"><label data-i18n="unitPrice">سعر الوحدة</label><input id="directUnitPriceInput" type="number" readonly></div>
+          <div class="field"><label data-i18n="receiveDate">تاريخ الاستلام</label><input id="directDateInput" type="date" required></div>
+          <div class="field full"><label data-i18n="notesOptional">ملاحظات، اختياري</label><textarea id="directNotesInput"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-soft" type="button" data-close-modal="directModalOverlay" data-i18n="cancel">إلغاء</button><button class="btn btn-primary" id="saveDirectBtn" type="submit" data-i18n="saveDirect">حفظ الاستلام/الصرف</button></div>
+    </form>
+  </div>
+
   <div class="modal-overlay" id="issueModalOverlay">
     <form class="modal" id="issueForm">
       <div class="modal-head"><h3 class="modal-title" data-i18n="issuePart">صرف قطعة غيار</h3><button class="close-sidebar" type="button" data-close-modal="issueModalOverlay">×</button></div>
@@ -842,7 +853,7 @@
         htmlLang: "ar", dir: "rtl", pageTitleDoc: "مخزون قطع الغيار | NATAC", languageButton: "EN",
         factoryName: "ناتاك", systemName: "نظام إدارة الإنتاج", mainMenu: "القائمة الرئيسية", usersManagement: "إدارة المستخدمين", profile: "الملف الشخصي", logout: "تسجيل الخروج",
         navDashboard: "لوحة التحكم", navProduction: "إدخال الإنتاج", navEvaluation: "تقييم المشرف", navHistory: "سجل الإنتاج", navPerformance: "أداء العمال", navWorkers: "العمال", navProducts: "المنتجات", navMachines: "المكائن", navSpareParts: "قطع الغيار", navUsers: "المستخدمون",
-        pageTitle: "مخزون قطع الغيار", directMovement: "استلام/صرف مباشر", directReceive: "استلام مباشر", directIssue: "صرف مباشر", receivePart: "إدخال للمخزن", issuePart: "صرف من المخزن", addMenu: "إضافة", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
+        pageTitle: "مخزون قطع الغيار", directMovement: "استلام/صرف مباشر", saveDirect: "حفظ الاستلام/الصرف", receivePart: "إدخال للمخزن", issuePart: "صرف من المخزن", addMenu: "إضافة", addPart: "إضافة قطعة غيار جديدة", addCategory: "إضافة تصنيف جديد",
         mostUsed: "أكثر قطع الغيار استخدامًا", top10Hint: "اضغط لعرض أعلى 10 قطع", usedQty: "كمية مستخدمة", totalStockQty: "إجمالي الكميات بالمخزون", lowStockCount: "عدد القطع منخفضة المخزون", outStockCount: "عدد القطع النافدة",
         inventoryTable: "جدول مخزون قطع الغيار", refresh: "تحديث", refreshing: "جاري التحديث...", searchPlaceholder: "بحث حسب الكود، الاسم، التصنيف، أو الوصف", allCategories: "كل التصنيفات", chooseCategory: "اختر التصنيف", allStockStatuses: "كل حالات المخزون", available: "متوفر", belowMinimum: "أقل من الحد الأدنى", outOfStock: "نفدت", noMatchingParts: "لا توجد قطع غيار مطابقة للبحث.",
         partCode: "كود القطعة", partCategory: "تصنيف القطعة", partName: "اسم قطعة الغيار", partDescription: "وصف القطعة", availableQty: "العدد المتوفر", lastPurchasePrice: "آخر سعر شراء", partLocation: "موقع القطعة", partImage: "صورة القطعة", minimumStock: "الحد الأدنى", partStatus: "حالة القطعة", partImageOptional: "صورة القطعة، اختياري", initialQty: "العدد الابتدائي", purchasePriceOptional: "سعر الشراء، اختياري",
@@ -850,13 +861,13 @@
         backToInventory: "رجوع للمخزون", editPartData: "تعديل بيانات القطعة", deletePart: "حذف القطعة", addPartTitle: "إضافة قطعة غيار جديدة", editPartTitle: "تعديل بيانات", addCategoryTitle: "إضافة تصنيف جديد", categoryName: "اسم التصنيف", selectPart: "اختيار القطعة", searchPartPlaceholder: "ابحث بالكود أو الاسم أو التصنيف أو الوصف", receivedQty: "عدد القطع الموردة", receivedTotalPrice: "إجمالي سعر القطع الموردة", receiveDate: "تاريخ الاستلام", issuedQty: "العدد المصروف", issueDate: "تاريخ الصرف", notesOptional: "ملاحظات، اختياري", save: "حفظ", cancel: "إلغاء", close: "إغلاق", saveCategory: "حفظ التصنيف", saveReceive: "حفظ الاستلام", saveIssue: "حفظ الصرف", saving: "جاري الحفظ...", loading: "جاري...",
         top10Title: "أعلى 10 قطع غيار حركة", movedQty: "الكمية المتحركة صرفًا", issueCount: "عدد الحركات", noIssueMovements: "لا توجد حركات صرف حتى الآن.",
         movementOpening: "إضافة افتتاحية", movementReceive: "استلام", movementIssue: "صرف",
-        dbLoadError: "تعذر تحميل المخزون", movementLoadError: "تعذر تحميل سجل الحركة", partNotFound: "لم يتم العثور على قطعة الغيار", validPartRequired: "يرجى اختيار قطعة صحيحة من القائمة", savePartError: "تعذر حفظ قطعة الغيار", saveCategoryError: "تعذر حفظ التصنيف", saveReceiveError: "تعذر حفظ الاستلام", saveIssueError: "تعذر حفظ الصرف", deleteConfirm: "هل أنت متأكد من حذف قطعة الغيار؟ سيتم إخفاؤها من المخزون مع بقاء سجل الحركة محفوظًا.", deleteError: "تعذر حذف القطعة", uploadError: "تعذر رفع الصورة", signedUrlError: "تعذر إنشاء رابط الصورة", imageReadError: "تعذر قراءة الصورة", fileReadError: "تعذر قراءة الملف", imageFileOnly: "الملف يجب أن يكون صورة", dbError: "حدث خطأ في قاعدة البيانات", noDbResponse: "لا توجد استجابة من قاعدة البيانات", userFallback: "مستخدم"
+        dbLoadError: "تعذر تحميل المخزون", movementLoadError: "تعذر تحميل سجل الحركة", partNotFound: "لم يتم العثور على قطعة الغيار", validPartRequired: "يرجى اختيار قطعة صحيحة من القائمة", savePartError: "تعذر حفظ قطعة الغيار", saveCategoryError: "تعذر حفظ التصنيف", saveReceiveError: "تعذر حفظ الاستلام", saveIssueError: "تعذر حفظ الصرف", saveDirectError: "تعذر حفظ الاستلام/الصرف المباشر", deleteConfirm: "هل أنت متأكد من حذف قطعة الغيار؟ سيتم إخفاؤها من المخزون مع بقاء سجل الحركة محفوظًا.", deleteError: "تعذر حذف القطعة", uploadError: "تعذر رفع الصورة", signedUrlError: "تعذر إنشاء رابط الصورة", imageReadError: "تعذر قراءة الصورة", fileReadError: "تعذر قراءة الملف", imageFileOnly: "الملف يجب أن يكون صورة", dbError: "حدث خطأ في قاعدة البيانات", noDbResponse: "لا توجد استجابة من قاعدة البيانات", userFallback: "مستخدم"
       },
       en: {
         htmlLang: "en", dir: "ltr", pageTitleDoc: "Spare Parts Inventory | NATAC", languageButton: "عربي",
         factoryName: "NATAC", systemName: "Production Management System", mainMenu: "Main Menu", usersManagement: "Users Management", profile: "Profile", logout: "Logout",
         navDashboard: "Dashboard", navProduction: "Production Entry", navEvaluation: "Supervisor Evaluation", navHistory: "Production History", navPerformance: "Worker Performance", navWorkers: "Workers", navProducts: "Products", navMachines: "Machines", navSpareParts: "Spare Parts", navUsers: "Users",
-        pageTitle: "Spare Parts Inventory", directMovement: "Direct Receive/Issue", directReceive: "Direct Receive", directIssue: "Direct Issue", receivePart: "Receive to Stock", issuePart: "Issue from Stock", addMenu: "Add", addPart: "Add New Spare Part", addCategory: "Add New Category",
+        pageTitle: "Spare Parts Inventory", directMovement: "Direct Receive/Issue", saveDirect: "Save Direct Receive/Issue", receivePart: "Receive to Stock", issuePart: "Issue from Stock", addMenu: "Add", addPart: "Add New Spare Part", addCategory: "Add New Category",
         mostUsed: "Most Used Spare Part", top10Hint: "Click to view top 10 parts", usedQty: "Used quantity", totalStockQty: "Total Inventory Quantity", lowStockCount: "Low Stock Parts", outStockCount: "Out-of-Stock Parts",
         inventoryTable: "Spare Parts Inventory Table", refresh: "Refresh", refreshing: "Refreshing...", searchPlaceholder: "Search by code, name, category, or description", allCategories: "All Categories", chooseCategory: "Choose category", allStockStatuses: "All Stock Statuses", available: "Available", belowMinimum: "Below Minimum", outOfStock: "Out of Stock", noMatchingParts: "No spare parts match your search.",
         partCode: "Part Code", partCategory: "Part Category", partName: "Spare Part Name", partDescription: "Part Description", availableQty: "Available Quantity", lastPurchasePrice: "Last Purchase Price", partLocation: "Part Location", partImage: "Part Image", minimumStock: "Minimum Stock", partStatus: "Part Status", partImageOptional: "Part Image, optional", initialQty: "Initial Quantity", purchasePriceOptional: "Purchase Price, optional",
@@ -864,7 +875,7 @@
         backToInventory: "Back to Inventory", editPartData: "Edit Part Data", deletePart: "Delete Part", addPartTitle: "Add New Spare Part", editPartTitle: "Edit Data", addCategoryTitle: "Add New Category", categoryName: "Category Name", selectPart: "Select Part", searchPartPlaceholder: "Search by code, name, category, or description", receivedQty: "Received Quantity", receivedTotalPrice: "Total Received Price", receiveDate: "Receive Date", issuedQty: "Issued Quantity", issueDate: "Issue Date", notesOptional: "Notes, optional", save: "Save", cancel: "Cancel", close: "Close", saveCategory: "Save Category", saveReceive: "Save Receive", saveIssue: "Save Issue", saving: "Saving...", loading: "Loading...",
         top10Title: "Top 10 Moving Spare Parts", movedQty: "Issued moving quantity", issueCount: "Movements", noIssueMovements: "No issue movements yet.",
         movementOpening: "Opening Balance", movementReceive: "Receive", movementIssue: "Issue",
-        dbLoadError: "Unable to load inventory", movementLoadError: "Unable to load movement history", partNotFound: "Spare part was not found", validPartRequired: "Please choose a valid part from the list", savePartError: "Unable to save spare part", saveCategoryError: "Unable to save category", saveReceiveError: "Unable to save receive transaction", saveIssueError: "Unable to save issue transaction", deleteConfirm: "Are you sure you want to delete this spare part? It will be hidden from inventory while its movement history remains saved.", deleteError: "Unable to delete part", uploadError: "Unable to upload image", signedUrlError: "Unable to create image link", imageReadError: "Unable to read image", fileReadError: "Unable to read file", imageFileOnly: "The file must be an image", dbError: "A database error occurred", noDbResponse: "No response from database", userFallback: "User"
+        dbLoadError: "Unable to load inventory", movementLoadError: "Unable to load movement history", partNotFound: "Spare part was not found", validPartRequired: "Please choose a valid part from the list", savePartError: "Unable to save spare part", saveCategoryError: "Unable to save category", saveReceiveError: "Unable to save receive transaction", saveIssueError: "Unable to save issue transaction", saveDirectError: "Unable to save direct receive/issue transaction", deleteConfirm: "Are you sure you want to delete this spare part? It will be hidden from inventory while its movement history remains saved.", deleteError: "Unable to delete part", uploadError: "Unable to upload image", signedUrlError: "Unable to create image link", imageReadError: "Unable to read image", fileReadError: "Unable to read file", imageFileOnly: "The file must be an image", dbError: "A database error occurred", noDbResponse: "No response from database", userFallback: "User"
       }
     };
 
@@ -925,19 +936,18 @@
       $("searchInput").addEventListener("input", renderPartsTable);
       $("categoryFilter").addEventListener("change", renderPartsTable);
       $("stockFilter").addEventListener("change", renderPartsTable);
-      $("addMenuBtn").addEventListener("click", (event) => { event.stopPropagation(); closeDirectMenu(); $("addMenu").classList.toggle("show"); });
-      $("directMovementBtn").addEventListener("click", (event) => { event.stopPropagation(); closeAddMenu(); $("directMovementMenu").classList.toggle("show"); });
+      $("addMenuBtn").addEventListener("click", (event) => { event.stopPropagation(); $("addMenu").classList.toggle("show"); });
+      $("directMovementBtn").addEventListener("click", openDirectModal);
       $("openCategoryBtn").addEventListener("click", () => { closeAddMenu(); openModal("categoryModalOverlay"); });
       $("openPartBtn").addEventListener("click", () => { closeAddMenu(); openAddPartModal(); });
       $("openReceiveBtn").addEventListener("click", openReceiveModal);
       $("openIssueBtn").addEventListener("click", openIssueModal);
-      $("directReceiveBtn").addEventListener("click", () => { closeDirectMenu(); openReceiveModal(); });
-      $("directIssueBtn").addEventListener("click", () => { closeDirectMenu(); openIssueModal(); });
-      document.addEventListener("click", (e) => { if (!e.target.closest("#addMenuWrapper")) closeAddMenu(); if (!e.target.closest("#directMenuWrapper")) closeDirectMenu(); });
+      document.addEventListener("click", (e) => { if (!e.target.closest("#addMenuWrapper")) closeAddMenu(); });
       $("detailPartImage").addEventListener("click", openDetailImagePreview);
       $("categoryForm").addEventListener("submit", saveCategory);
       $("partForm").addEventListener("submit", savePart);
       $("receiveForm").addEventListener("submit", saveReceive);
+      $("directForm").addEventListener("submit", saveDirect);
       $("issueForm").addEventListener("submit", saveIssue);
       $("backToInventoryBtn").addEventListener("click", showInventoryView);
       $("editSelectedPartBtn").addEventListener("click", () => selectedPart && openEditPartModal(selectedPart));
@@ -945,7 +955,10 @@
       $("mostUsedCard").addEventListener("click", showTopUsedModal);
       $("receiveQuantityInput").addEventListener("input", updateReceiveUnitPrice);
       $("receiveTotalPriceInput").addEventListener("input", updateReceiveUnitPrice);
+      $("directQuantityInput").addEventListener("input", updateDirectUnitPrice);
+      $("directTotalPriceInput").addEventListener("input", updateDirectUnitPrice);
       $("receivePartSearch").addEventListener("change", () => syncPartSearch("receive"));
+      $("directPartSearch").addEventListener("change", () => syncPartSearch("direct"));
       $("issuePartSearch").addEventListener("change", () => syncPartSearch("issue"));
     }
 
@@ -953,7 +966,7 @@
     function openModal(id) { $(id).classList.add("show"); }
     function closeModal(id) { $(id).classList.remove("show"); }
     function closeAddMenu() { const menu = $("addMenu"); if (menu) menu.classList.remove("show"); }
-    function closeDirectMenu() { const menu = $("directMovementMenu"); if (menu) menu.classList.remove("show"); }
+    function closeDirectMenu() {}
 
     function applyLanguage(lang) {
       currentLang = lang;
@@ -1012,7 +1025,7 @@
           element.style.display = hasPermission(permission) ? "" : "none";
         }
       });
-      toggleByPermission("directMenuWrapper", "inventoryDirectMovement", "inline-flex");
+      toggleByPermission("directMovementBtn", "inventoryDirectMovement", "inline-flex");
       toggleByPermission("openReceiveBtn", "inventoryReceive", "inline-flex");
       toggleByPermission("openIssueBtn", "inventoryIssue", "inline-flex");
       toggleByPermission("openPartBtn", "inventoryAddPart", "flex");
@@ -1281,6 +1294,12 @@
       $("receiveUnitPriceInput").value = "";
       openModal("receiveModalOverlay");
     }
+    function openDirectModal() {
+      $("directForm").reset();
+      $("directDateInput").value = today();
+      $("directUnitPriceInput").value = "";
+      openModal("directModalOverlay");
+    }
     function openIssueModal() {
       $("issueForm").reset();
       $("issueDateInput").value = today();
@@ -1290,6 +1309,11 @@
       const q = Number($("receiveQuantityInput").value || 0);
       const t = Number($("receiveTotalPriceInput").value || 0);
       $("receiveUnitPriceInput").value = q > 0 && t >= 0 ? (t / q).toFixed(3) : "";
+    }
+    function updateDirectUnitPrice() {
+      const q = Number($("directQuantityInput").value || 0);
+      const t = Number($("directTotalPriceInput").value || 0);
+      $("directUnitPriceInput").value = q > 0 && t >= 0 ? (t / q).toFixed(3) : "";
     }
     async function saveReceive(e) {
       e.preventDefault();
@@ -1311,6 +1335,27 @@
       showMessage(result.message, "success");
       await loadInventory();
     }
+    async function saveDirect(e) {
+      e.preventDefault();
+      syncPartSearch("direct");
+      const partId = $("directPartId").value;
+      if (!partId) { showMessage(t("validPartRequired"), "error"); return; }
+      setButtonLoading("saveDirectBtn", true, t("saving"));
+      const result = await rpcSafe("direct_receive_issue_spare_part", {
+        p_token: currentToken,
+        p_part_id: partId,
+        p_quantity: Number($("directQuantityInput").value || 0),
+        p_total_price: $("directTotalPriceInput").value === "" ? null : Number($("directTotalPriceInput").value),
+        p_movement_date: $("directDateInput").value,
+        p_notes: $("directNotesInput").value.trim() || null
+      });
+      setButtonLoading("saveDirectBtn", false, t("saveDirect"));
+      if (!result.success) { showMessage(result.message || t("saveDirectError"), "error"); return; }
+      closeModal("directModalOverlay");
+      showMessage(result.message, "success");
+      await loadInventory();
+    }
+
     async function saveIssue(e) {
       e.preventDefault();
       syncPartSearch("issue");
