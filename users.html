@@ -1278,6 +1278,55 @@
 
           <div class="permissions-section">
             <label class="perm-label">
+              <input type="checkbox" data-perm="inventoryView">
+              <span data-i18n="permInventoryView">صلاحية دخول صفحة مخزون قطع الغيار</span>
+            </label>
+
+            <div class="sub-permissions">
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryDirectMovement">
+                <span data-i18n="permInventoryDirectMovement">صلاحية استلام/صرف مباشر من المخزون</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryReceive">
+                <span data-i18n="permInventoryReceive">صلاحية إدخال للمخزن</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryIssue">
+                <span data-i18n="permInventoryIssue">صلاحية صرف من المخزن</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryAddPart">
+                <span data-i18n="permInventoryAddPart">صلاحية إضافة قطعة غيار</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryEditPart">
+                <span data-i18n="permInventoryEditPart">صلاحية تعديل قطعة غيار</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryDeletePart">
+                <span data-i18n="permInventoryDeletePart">صلاحية حذف قطعة غيار</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryAddCategory">
+                <span data-i18n="permInventoryAddCategory">صلاحية إضافة تصنيف قطع غيار</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="inventoryMovementHistory">
+                <span data-i18n="permInventoryMovementHistory">صلاحية عرض سجل حركات المخزون</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="permissions-section">
+            <label class="perm-label">
               <input type="checkbox" data-perm="usersPage">
               <span data-i18n="permUsersPage">صلاحية دخول صفحة المستخدمين</span>
             </label>
@@ -1327,6 +1376,15 @@
       "addMachine",
       "editMachine",
       "workerPerformance",
+      "inventoryView",
+      "inventoryDirectMovement",
+      "inventoryReceive",
+      "inventoryIssue",
+      "inventoryAddPart",
+      "inventoryEditPart",
+      "inventoryDeletePart",
+      "inventoryAddCategory",
+      "inventoryMovementHistory",
       "usersPage"
     ];
 
@@ -1403,6 +1461,15 @@
         permAddMachine: "صلاحية إضافة مكينة جديدة",
         permEditMachine: "صلاحية تعديل بيانات المكينة",
         permWorkerPerformance: "صلاحية دخول صفحة متابعة أداء العمال",
+        permInventoryView: "صلاحية دخول صفحة مخزون قطع الغيار",
+        permInventoryDirectMovement: "صلاحية استلام/صرف مباشر من المخزون",
+        permInventoryReceive: "صلاحية إدخال للمخزن",
+        permInventoryIssue: "صلاحية صرف من المخزن",
+        permInventoryAddPart: "صلاحية إضافة قطعة غيار",
+        permInventoryEditPart: "صلاحية تعديل قطعة غيار",
+        permInventoryDeletePart: "صلاحية حذف قطعة غيار",
+        permInventoryAddCategory: "صلاحية إضافة تصنيف قطع غيار",
+        permInventoryMovementHistory: "صلاحية عرض سجل حركات المخزون",
         permUsersPage: "صلاحية دخول صفحة المستخدمين"
       },
       en: {
@@ -1477,6 +1544,15 @@
         permAddMachine: "Add new machine",
         permEditMachine: "Edit machine data",
         permWorkerPerformance: "Access Worker Performance page",
+        permInventoryView: "Access Spare Parts Inventory page",
+        permInventoryDirectMovement: "Direct receive/issue from inventory",
+        permInventoryReceive: "Receive to stock",
+        permInventoryIssue: "Issue from stock",
+        permInventoryAddPart: "Add spare part",
+        permInventoryEditPart: "Edit spare part",
+        permInventoryDeletePart: "Delete spare part",
+        permInventoryAddCategory: "Add spare part category",
+        permInventoryMovementHistory: "View inventory movement history",
         permUsersPage: "Access Users page"
       }
     };
