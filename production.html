@@ -551,12 +551,13 @@
       position: relative;
     }
 
-    .search-select-trigger {
+    .search-select-input {
       width: 100%;
       min-height: 52px;
       border: 1px solid rgba(16,24,39,0.18);
       border-radius: 16px;
       padding: 0 14px;
+      padding-inline-end: 42px;
       font-family: inherit;
       font-size: 15px;
       font-weight: 800;
@@ -565,42 +566,33 @@
       outline: none;
       box-shadow: 0 2px 0 rgba(16,24,39,0.03);
       transition: 0.18s ease;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      text-align: start;
     }
 
-    .search-select-trigger:hover,
-    .search-select.open .search-select-trigger,
-    .search-select-trigger:focus {
+    .search-select-input::placeholder {
+      color: #98a2b3;
+      font-weight: 700;
+    }
+
+    .search-select.open .search-select-input,
+    .search-select-input:focus {
       border-color: rgba(0, 102, 255, 0.65);
       box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.13);
       background: #fff;
     }
 
-    .search-select-value {
-      min-width: 0;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .search-select-placeholder {
-      color: #98a2b3;
-    }
-
     .search-select-arrow {
+      position: absolute;
+      top: 50%;
+      inset-inline-end: 14px;
+      transform: translateY(-50%);
       color: var(--muted);
       font-size: 12px;
-      flex-shrink: 0;
+      pointer-events: none;
       transition: transform 0.18s ease;
     }
 
     .search-select.open .search-select-arrow {
-      transform: rotate(180deg);
+      transform: translateY(-50%) rotate(180deg);
     }
 
     .search-select-panel {
@@ -620,16 +612,8 @@
       display: block;
     }
 
-    .search-select-search {
-      min-height: 42px;
-      border-radius: 13px;
-      padding: 0 12px;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
     .search-select-options {
-      max-height: 235px;
+      max-height: 250px;
       overflow-y: auto;
       display: grid;
       gap: 4px;
@@ -657,9 +641,11 @@
     }
 
     .search-select-option:hover,
-    .search-select-option.selected {
+    .search-select-option.selected,
+    .search-select-option:focus {
       background: rgba(0,102,255,0.10);
       color: var(--blue-dark);
+      outline: none;
     }
 
     .search-select-empty {
@@ -2185,6 +2171,11 @@
 
       initSearchableSelectGlobalEvents();
 
+      if (select._searchChangeHandler) {
+        select.removeEventListener("change", select._searchChangeHandler);
+        select._searchChangeHandler = null;
+      }
+
       if (select._searchWrapper) {
         select._searchWrapper.remove();
         select._searchWrapper = null;
@@ -2201,22 +2192,19 @@
       wrapper.className = "search-select";
       wrapper.dataset.kind = kind || "default";
 
-      const trigger = document.createElement("button");
-      trigger.type = "button";
-      trigger.className = "search-select-trigger";
-      trigger.setAttribute("aria-haspopup", "listbox");
-      trigger.setAttribute("aria-expanded", "false");
-
-      const valueSpan = document.createElement("span");
-      valueSpan.className = "search-select-value";
+      const searchInput = document.createElement("input");
+      searchInput.type = "search";
+      searchInput.className = "search-select-input";
+      searchInput.autocomplete = "off";
+      searchInput.setAttribute("aria-haspopup", "listbox");
+      searchInput.setAttribute("aria-expanded", "false");
 
       const arrow = document.createElement("span");
       arrow.className = "search-select-arrow";
       arrow.textContent = "▾";
 
-      trigger.appendChild(valueSpan);
-      trigger.appendChild(arrow);
-      wrapper.appendChild(trigger);
+      wrapper.appendChild(searchInput);
+      wrapper.appendChild(arrow);
       select.insertAdjacentElement("afterend", wrapper);
 
       const panel = document.createElement("div");
@@ -2224,17 +2212,10 @@
       panel.dataset.kind = kind || "default";
       panel.dir = document.documentElement.dir || "rtl";
 
-      const searchInput = document.createElement("input");
-      searchInput.type = "search";
-      searchInput.className = "search-select-search";
-      searchInput.placeholder = t("searchInList") || "Search...";
-      searchInput.autocomplete = "off";
-
       const optionsBox = document.createElement("div");
       optionsBox.className = "search-select-options";
       optionsBox.setAttribute("role", "listbox");
 
-      panel.appendChild(searchInput);
       panel.appendChild(optionsBox);
       document.body.appendChild(panel);
 
@@ -2249,8 +2230,8 @@
         const selectedOption = select.options[select.selectedIndex];
         const selectedText = selectedOption ? selectedOption.textContent : "";
 
-        valueSpan.textContent = select.value ? selectedText : placeholder;
-        valueSpan.classList.toggle("search-select-placeholder", !select.value);
+        searchInput.value = select.value ? selectedText : "";
+        searchInput.placeholder = placeholder;
       };
 
       const renderOptions = () => {
@@ -2303,9 +2284,9 @@
         closeAllSearchSelects(wrapper);
         wrapper.classList.add("open");
         panel.classList.add("show");
-        trigger.setAttribute("aria-expanded", "true");
+        searchInput.setAttribute("aria-expanded", "true");
         panel.dir = document.documentElement.dir || "rtl";
-        searchInput.placeholder = t("searchInList") || "Search...";
+        searchInput.placeholder = t("searchInList") || placeholder;
         searchInput.value = "";
         renderOptions();
         positionSearchSelectPanel(wrapper, panel);
@@ -2314,36 +2295,86 @@
           panel,
           kind: kind || "default"
         };
-        setTimeout(() => searchInput.focus(), 0);
       };
 
       const closePanel = () => {
         wrapper.classList.remove("open");
         panel.classList.remove("show");
-        trigger.setAttribute("aria-expanded", "false");
+        searchInput.setAttribute("aria-expanded", "false");
+        refreshLabel();
       };
 
       wrapper._closeSearchSelect = closePanel;
 
-      trigger.addEventListener("click", event => {
-        event.stopPropagation();
+      searchInput.addEventListener("focus", () => {
+        openPanel();
+      });
 
-        if (panel.classList.contains("show")) {
-          closeAllSearchSelects();
-        } else {
+      searchInput.addEventListener("click", event => {
+        event.stopPropagation();
+        if (!panel.classList.contains("show")) {
           openPanel();
+        }
+      });
+
+      searchInput.addEventListener("input", () => {
+        if (!panel.classList.contains("show")) {
+          wrapper.classList.add("open");
+          panel.classList.add("show");
+          searchInput.setAttribute("aria-expanded", "true");
+          activeSearchSelect = { wrapper, panel, kind: kind || "default" };
+        }
+        renderOptions();
+        positionSearchSelectPanel(wrapper, panel);
+      });
+
+      searchInput.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeAllSearchSelects();
+          searchInput.blur();
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const firstOption = panel.querySelector(".search-select-option");
+          if (firstOption) firstOption.focus();
+        }
+      });
+
+      panel.addEventListener("keydown", event => {
+        const currentOption = document.activeElement.closest(".search-select-option");
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeAllSearchSelects();
+          searchInput.focus();
+          return;
+        }
+
+        if (!currentOption) return;
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const next = currentOption.nextElementSibling;
+          if (next && next.classList.contains("search-select-option")) next.focus();
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          const previous = currentOption.previousElementSibling;
+          if (previous && previous.classList.contains("search-select-option")) {
+            previous.focus();
+          } else {
+            searchInput.focus();
+          }
         }
       });
 
       panel.addEventListener("click", event => {
         event.stopPropagation();
       });
-
-      searchInput.addEventListener("input", renderOptions);
-
-      if (select._searchChangeHandler) {
-        select.removeEventListener("change", select._searchChangeHandler);
-      }
 
       select._searchChangeHandler = refreshLabel;
       select.addEventListener("change", select._searchChangeHandler);
