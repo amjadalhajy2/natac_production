@@ -612,6 +612,15 @@
       padding: 0;
       display: block;
       background: var(--input);
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      cursor: default;
+    }
+
+    .searchable-select-menu {
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
 
     .searchable-select-option,
@@ -630,6 +639,8 @@
       display: flex;
       align-items: center;
       cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .searchable-select-option:last-child,
@@ -2157,7 +2168,13 @@
       });
 
       window.addEventListener("resize", closeAllSearchableSelects);
-      window.addEventListener("scroll", () => {
+      window.addEventListener("scroll", event => {
+        const scrollTarget = event.target;
+
+        if (scrollTarget && scrollTarget.closest && scrollTarget.closest(".searchable-select-options")) {
+          return;
+        }
+
         if (activeSearchableSelect) {
           positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
         }
@@ -2227,6 +2244,12 @@
       menu._sourceSelect = select;
       menu._searchableWrapper = wrapper;
 
+      let isMenuPointerDown = false;
+      let isMenuPointerDragging = false;
+      let suppressOptionClick = false;
+      let dragStartY = 0;
+      let dragStartScrollTop = 0;
+
       function getSelectedText() {
         const selectedOption = select.options[select.selectedIndex];
         return selectedOption && select.value ? selectedOption.textContent : "";
@@ -2265,7 +2288,13 @@
             button.setAttribute("aria-selected", "true");
           }
 
-          button.addEventListener("click", () => {
+          button.addEventListener("click", event => {
+            if (isMenuPointerDragging || suppressOptionClick) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
             select.value = option.value;
             select.dispatchEvent(new Event("change", { bubbles: true }));
             refreshInputText();
@@ -2348,9 +2377,80 @@
         }
       });
 
+      optionsBox.addEventListener("wheel", event => {
+        event.stopPropagation();
+      }, { passive: true });
+
+      optionsBox.addEventListener("touchmove", event => {
+        event.stopPropagation();
+      }, { passive: true });
+
+      optionsBox.addEventListener("pointerdown", event => {
+        if (event.button !== undefined && event.button !== 0) return;
+
+        isMenuPointerDown = true;
+        isMenuPointerDragging = false;
+        suppressOptionClick = false;
+        dragStartY = event.clientY;
+        dragStartScrollTop = optionsBox.scrollTop;
+
+        if (optionsBox.setPointerCapture && event.pointerId !== undefined) {
+          try {
+            optionsBox.setPointerCapture(event.pointerId);
+          } catch (error) {}
+        }
+      });
+
+      optionsBox.addEventListener("pointermove", event => {
+        if (!isMenuPointerDown) return;
+
+        const deltaY = event.clientY - dragStartY;
+
+        if (Math.abs(deltaY) > 5) {
+          isMenuPointerDragging = true;
+          suppressOptionClick = true;
+
+          if (event.pointerType === "mouse" || event.pointerType === "pen") {
+            optionsBox.scrollTop = dragStartScrollTop - deltaY;
+            event.preventDefault();
+          }
+        }
+      });
+
+      function endMenuDrag(event) {
+        if (isMenuPointerDown && optionsBox.releasePointerCapture && event && event.pointerId !== undefined) {
+          try {
+            optionsBox.releasePointerCapture(event.pointerId);
+          } catch (error) {}
+        }
+
+        isMenuPointerDown = false;
+
+        if (isMenuPointerDragging) {
+          setTimeout(() => {
+            isMenuPointerDragging = false;
+            suppressOptionClick = false;
+          }, 120);
+        } else {
+          suppressOptionClick = false;
+        }
+      }
+
+      optionsBox.addEventListener("pointerup", endMenuDrag);
+      optionsBox.addEventListener("pointercancel", endMenuDrag);
+      optionsBox.addEventListener("lostpointercapture", endMenuDrag);
+
       menu.addEventListener("click", event => {
         event.stopPropagation();
       });
+
+      menu.addEventListener("mousedown", event => {
+        event.stopPropagation();
+      });
+
+      menu.addEventListener("touchstart", event => {
+        event.stopPropagation();
+      }, { passive: true });
 
       menu.addEventListener("keydown", event => {
         const currentOption = document.activeElement.closest(".searchable-select-option");
