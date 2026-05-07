@@ -533,6 +533,141 @@
       background: #f2f4f7;
     }
 
+
+    .searchable-native-select {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      min-height: 1px !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+    }
+
+    .search-select {
+      width: 100%;
+      position: relative;
+    }
+
+    .search-select-trigger {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid rgba(16,24,39,0.18);
+      border-radius: 16px;
+      padding: 0 14px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 2px 0 rgba(16,24,39,0.03);
+      transition: 0.18s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: start;
+    }
+
+    .search-select-trigger:hover,
+    .search-select.open .search-select-trigger,
+    .search-select-trigger:focus {
+      border-color: rgba(0, 102, 255, 0.65);
+      box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.13);
+      background: #fff;
+    }
+
+    .search-select-value {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .search-select-placeholder {
+      color: #98a2b3;
+    }
+
+    .search-select-arrow {
+      color: var(--muted);
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: transform 0.18s ease;
+    }
+
+    .search-select.open .search-select-arrow {
+      transform: rotate(180deg);
+    }
+
+    .search-select-panel {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      padding: 8px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.98);
+      border: 1px solid rgba(16,24,39,0.12);
+      box-shadow: 0 18px 48px rgba(16,24,39,0.18);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .search-select-panel.show {
+      display: block;
+    }
+
+    .search-select-search {
+      min-height: 42px;
+      border-radius: 13px;
+      padding: 0 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .search-select-options {
+      max-height: 235px;
+      overflow-y: auto;
+      display: grid;
+      gap: 4px;
+      padding-inline-end: 2px;
+    }
+
+    .search-select-option,
+    .search-select-empty {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      text-align: start;
+      padding: 0 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: 0.15s ease;
+    }
+
+    .search-select-option:hover,
+    .search-select-option.selected {
+      background: rgba(0,102,255,0.10);
+      color: var(--blue-dark);
+    }
+
+    .search-select-empty {
+      cursor: default;
+      color: var(--muted);
+      justify-content: center;
+    }
+
     .date-hint {
       color: var(--muted);
       font-size: 13px;
@@ -1262,6 +1397,8 @@
         chooseCategory: "اختر الصنف",
         chooseProduct: "اختر المنتج",
         chooseMachine: "اختر المكينة",
+        searchInList: "اكتب للبحث...",
+        noSearchResults: "لا توجد نتائج مطابقة",
         quantityPlaceholder: "الكمية",
         workersProductionTable: "جدول إنتاج العمال",
         enteredProductsCount: "عدد المنتجات المدخلة",
@@ -1356,6 +1493,8 @@
         chooseCategory: "Choose category",
         chooseProduct: "Choose product",
         chooseMachine: "Choose machine",
+        searchInList: "Type to search...",
+        noSearchResults: "No matching results",
         quantityPlaceholder: "Quantity",
         workersProductionTable: "Workers Production Table",
         enteredProductsCount: "Entered Products Count",
@@ -1422,6 +1561,8 @@
     let productionEntries = [];
     let editingEntryIndex = null;
     let messageTimer = null;
+    let activeSearchSelect = null;
+    let searchableSelectEventsReady = false;
 
     const loadingBox = document.getElementById("loadingBox");
     const messageBox = document.getElementById("messageBox");
@@ -1470,6 +1611,7 @@
       initSidebar();
       initLanguage();
       initUserDropdown();
+      initSearchableSelectGlobalEvents();
       initDateRules();
       renderProductRows();
       renderEntriesTable();
@@ -1825,9 +1967,12 @@
       if (preserveValue && current) {
         workerId.value = current;
       }
+
+      enhanceSearchableSelect(workerId, t("chooseWorker"), "worker");
     }
 
     function renderProductRows() {
+      cleanupSearchSelectPanels("product");
       itemsBody.innerHTML = "";
 
       currentItems.forEach((item, index) => {
@@ -1895,6 +2040,7 @@
 
         fillProductsForCategoryAndMachine(productSelect, item.category || "", item.machineId || "");
         productSelect.value = item.productId || "";
+        enhanceSearchableSelect(productSelect, t("chooseProduct"), "product");
 
         quantityInput.value = item.quantity || "";
       });
@@ -1981,6 +2127,7 @@
 
       if (!category || !machineId) {
         if (current) select.value = "";
+        enhanceSearchableSelect(select, t("chooseProduct"), "product");
         return;
       }
 
@@ -2000,7 +2147,269 @@
       if (current && [...select.options].some(option => option.value === current)) {
         select.value = current;
       }
+
+      enhanceSearchableSelect(select, t("chooseProduct"), "product");
     }
+
+
+    function initSearchableSelectGlobalEvents() {
+      if (searchableSelectEventsReady) return;
+
+      document.addEventListener("click", event => {
+        if (
+          !event.target.closest(".search-select") &&
+          !event.target.closest(".search-select-panel")
+        ) {
+          closeAllSearchSelects();
+        }
+      });
+
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          closeAllSearchSelects();
+        }
+      });
+
+      window.addEventListener("resize", closeAllSearchSelects);
+      window.addEventListener("scroll", () => {
+        if (activeSearchSelect) {
+          positionSearchSelectPanel(activeSearchSelect.wrapper, activeSearchSelect.panel);
+        }
+      }, true);
+
+      searchableSelectEventsReady = true;
+    }
+
+    function enhanceSearchableSelect(select, placeholder, kind) {
+      if (!select) return;
+
+      initSearchableSelectGlobalEvents();
+
+      if (select._searchWrapper) {
+        select._searchWrapper.remove();
+        select._searchWrapper = null;
+      }
+
+      if (select._searchPanel) {
+        select._searchPanel.remove();
+        select._searchPanel = null;
+      }
+
+      select.classList.add("searchable-native-select");
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "search-select";
+      wrapper.dataset.kind = kind || "default";
+
+      const trigger = document.createElement("button");
+      trigger.type = "button";
+      trigger.className = "search-select-trigger";
+      trigger.setAttribute("aria-haspopup", "listbox");
+      trigger.setAttribute("aria-expanded", "false");
+
+      const valueSpan = document.createElement("span");
+      valueSpan.className = "search-select-value";
+
+      const arrow = document.createElement("span");
+      arrow.className = "search-select-arrow";
+      arrow.textContent = "▾";
+
+      trigger.appendChild(valueSpan);
+      trigger.appendChild(arrow);
+      wrapper.appendChild(trigger);
+      select.insertAdjacentElement("afterend", wrapper);
+
+      const panel = document.createElement("div");
+      panel.className = "search-select-panel";
+      panel.dataset.kind = kind || "default";
+      panel.dir = document.documentElement.dir || "rtl";
+
+      const searchInput = document.createElement("input");
+      searchInput.type = "search";
+      searchInput.className = "search-select-search";
+      searchInput.placeholder = t("searchInList") || "Search...";
+      searchInput.autocomplete = "off";
+
+      const optionsBox = document.createElement("div");
+      optionsBox.className = "search-select-options";
+      optionsBox.setAttribute("role", "listbox");
+
+      panel.appendChild(searchInput);
+      panel.appendChild(optionsBox);
+      document.body.appendChild(panel);
+
+      select._searchWrapper = wrapper;
+      select._searchPanel = panel;
+      wrapper._sourceSelect = select;
+      wrapper._searchPanel = panel;
+      panel._sourceSelect = select;
+      panel._searchWrapper = wrapper;
+
+      const refreshLabel = () => {
+        const selectedOption = select.options[select.selectedIndex];
+        const selectedText = selectedOption ? selectedOption.textContent : "";
+
+        valueSpan.textContent = select.value ? selectedText : placeholder;
+        valueSpan.classList.toggle("search-select-placeholder", !select.value);
+      };
+
+      const renderOptions = () => {
+        const query = normalizeSearchText(searchInput.value);
+        optionsBox.innerHTML = "";
+
+        let matches = 0;
+
+        [...select.options].forEach(option => {
+          const optionText = option.textContent || "";
+          const normalized = normalizeSearchText(optionText);
+
+          if (query && !normalized.includes(query)) {
+            return;
+          }
+
+          matches++;
+
+          const optionButton = document.createElement("button");
+          optionButton.type = "button";
+          optionButton.className = "search-select-option";
+          optionButton.textContent = optionText;
+          optionButton.dataset.value = option.value;
+          optionButton.setAttribute("role", "option");
+
+          if (String(option.value) === String(select.value)) {
+            optionButton.classList.add("selected");
+            optionButton.setAttribute("aria-selected", "true");
+          }
+
+          optionButton.addEventListener("click", () => {
+            select.value = option.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            refreshLabel();
+            closeAllSearchSelects();
+          });
+
+          optionsBox.appendChild(optionButton);
+        });
+
+        if (!matches) {
+          const empty = document.createElement("div");
+          empty.className = "search-select-empty";
+          empty.textContent = t("noSearchResults") || "No results";
+          optionsBox.appendChild(empty);
+        }
+      };
+
+      const openPanel = () => {
+        closeAllSearchSelects(wrapper);
+        wrapper.classList.add("open");
+        panel.classList.add("show");
+        trigger.setAttribute("aria-expanded", "true");
+        panel.dir = document.documentElement.dir || "rtl";
+        searchInput.placeholder = t("searchInList") || "Search...";
+        searchInput.value = "";
+        renderOptions();
+        positionSearchSelectPanel(wrapper, panel);
+        activeSearchSelect = {
+          wrapper,
+          panel,
+          kind: kind || "default"
+        };
+        setTimeout(() => searchInput.focus(), 0);
+      };
+
+      const closePanel = () => {
+        wrapper.classList.remove("open");
+        panel.classList.remove("show");
+        trigger.setAttribute("aria-expanded", "false");
+      };
+
+      wrapper._closeSearchSelect = closePanel;
+
+      trigger.addEventListener("click", event => {
+        event.stopPropagation();
+
+        if (panel.classList.contains("show")) {
+          closeAllSearchSelects();
+        } else {
+          openPanel();
+        }
+      });
+
+      panel.addEventListener("click", event => {
+        event.stopPropagation();
+      });
+
+      searchInput.addEventListener("input", renderOptions);
+
+      if (select._searchChangeHandler) {
+        select.removeEventListener("change", select._searchChangeHandler);
+      }
+
+      select._searchChangeHandler = refreshLabel;
+      select.addEventListener("change", select._searchChangeHandler);
+      refreshLabel();
+    }
+
+    function positionSearchSelectPanel(wrapper, panel) {
+      const rect = wrapper.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+      const gap = 6;
+      const estimatedHeight = Math.min(312, Math.max(180, viewportHeight - rect.bottom - 18));
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const openUp = spaceBelow < 260 && spaceAbove > spaceBelow;
+      const panelHeight = openUp ? Math.min(312, Math.max(180, spaceAbove - 18)) : estimatedHeight;
+
+      panel.style.width = Math.max(rect.width, 220) + "px";
+      panel.style.maxHeight = panelHeight + "px";
+      panel.style.left = Math.min(Math.max(rect.left, 8), viewportWidth - rect.width - 8) + "px";
+      panel.style.top = openUp
+        ? Math.max(8, rect.top - panelHeight - gap) + "px"
+        : Math.min(rect.bottom + gap, viewportHeight - panelHeight - 8) + "px";
+    }
+
+    function closeAllSearchSelects(exceptWrapper) {
+      document.querySelectorAll(".search-select.open").forEach(wrapper => {
+        if (exceptWrapper && wrapper === exceptWrapper) return;
+
+        if (typeof wrapper._closeSearchSelect === "function") {
+          wrapper._closeSearchSelect();
+        } else {
+          wrapper.classList.remove("open");
+        }
+      });
+
+      document.querySelectorAll(".search-select-panel.show").forEach(panel => {
+        if (exceptWrapper && panel._searchWrapper === exceptWrapper) return;
+        panel.classList.remove("show");
+      });
+
+      if (!exceptWrapper) {
+        activeSearchSelect = null;
+      }
+    }
+
+    function cleanupSearchSelectPanels(kind) {
+      document.querySelectorAll(`.search-select-panel[data-kind="${kind}"]`).forEach(panel => {
+        panel.remove();
+      });
+
+      if (activeSearchSelect && activeSearchSelect.kind === kind) {
+        activeSearchSelect = null;
+      }
+    }
+
+    function normalizeSearchText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[أإآ]/g, "ا")
+        .replace(/ى/g, "ي")
+        .replace(/ة/g, "ه")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
 
     function bindEvents() {
       productionDate.addEventListener("change", () => {
