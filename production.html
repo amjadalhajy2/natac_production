@@ -2388,19 +2388,61 @@
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
       const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
       const gap = 4;
-      const maxHeight = Math.min(250, Math.max(150, viewportHeight - rect.bottom - 12));
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const openUp = spaceBelow < 190 && spaceAbove > spaceBelow;
-      const menuHeight = openUp ? Math.min(250, Math.max(150, spaceAbove - 12)) : maxHeight;
-      const left = Math.min(Math.max(rect.left, 8), viewportWidth - rect.width - 8);
+      const edgeGap = 8;
+      const maxAllowedHeight = 250;
+      const minUsableHeight = 80;
+      const menuWidth = Math.min(Math.max(rect.width, 220), viewportWidth - (edgeGap * 2));
+      const left = Math.min(
+        Math.max(rect.left, edgeGap),
+        viewportWidth - menuWidth - edgeGap
+      );
 
-      menu.style.width = Math.max(rect.width, 220) + "px";
-      menu.style.maxHeight = menuHeight + "px";
+      const optionsBox = menu.querySelector(".searchable-select-options");
+
+      menu.style.width = menuWidth + "px";
       menu.style.left = left + "px";
-      menu.style.top = openUp
-        ? Math.max(8, rect.top - menuHeight - gap) + "px"
-        : Math.min(rect.bottom + gap, viewportHeight - menuHeight - 8) + "px";
+      menu.style.maxHeight = "none";
+
+      if (optionsBox) {
+        optionsBox.style.maxHeight = "none";
+      }
+
+      const spaceBelow = Math.max(0, viewportHeight - rect.bottom - gap - edgeGap);
+      const spaceAbove = Math.max(0, rect.top - gap - edgeGap);
+      const naturalHeight = Math.min(
+        maxAllowedHeight,
+        Math.max(42, menu.scrollHeight || 42)
+      );
+
+      let openUp = false;
+
+      if (spaceBelow >= naturalHeight) {
+        openUp = false;
+      } else if (spaceAbove >= naturalHeight) {
+        openUp = true;
+      } else {
+        openUp = spaceAbove > spaceBelow;
+      }
+
+      const availableSpace = openUp ? spaceAbove : spaceBelow;
+      const menuHeight = Math.min(
+        naturalHeight,
+        Math.max(minUsableHeight, availableSpace)
+      );
+      const unclampedTop = openUp
+        ? rect.top - menuHeight - gap
+        : rect.bottom + gap;
+      const top = Math.min(
+        Math.max(unclampedTop, edgeGap),
+        viewportHeight - menuHeight - edgeGap
+      );
+
+      menu.style.maxHeight = menuHeight + "px";
+      menu.style.top = top + "px";
+
+      if (optionsBox) {
+        optionsBox.style.maxHeight = menuHeight + "px";
+      }
     }
 
     function closeAllSearchableSelects(exceptWrapper) {
