@@ -527,7 +527,7 @@
     }
 
 
-    /* Searchable select: keeps the same original field shape and adds search inside the same cell */
+    /* Searchable select: نفس شكل select الأصلي مع البحث داخل نفس الخانة */
     select.searchable-select-source {
       position: absolute !important;
       width: 1px !important;
@@ -559,6 +559,9 @@
       outline: none;
       box-shadow: 0 2px 0 rgba(16,24,39,0.03);
       transition: 0.18s ease;
+      cursor: text;
+      appearance: none;
+      -webkit-appearance: none;
     }
 
     .searchable-select-input::placeholder {
@@ -595,7 +598,7 @@
       border-radius: 16px;
       background: var(--input);
       color: var(--text);
-      box-shadow: 0 14px 32px rgba(16,24,39,0.14);
+      box-shadow: 0 8px 20px rgba(16,24,39,0.06);
       overflow: hidden;
     }
 
@@ -606,19 +609,20 @@
     .searchable-select-options {
       max-height: 238px;
       overflow-y: auto;
-      padding: 6px;
-      display: grid;
-      gap: 2px;
+      padding: 0;
+      display: block;
+      background: var(--input);
     }
 
     .searchable-select-option,
     .searchable-select-empty {
       width: 100%;
-      min-height: 40px;
+      min-height: 42px;
       border: 0;
-      border-radius: 12px;
-      padding: 0 10px;
-      background: transparent;
+      border-bottom: 1px solid rgba(16,24,39,0.08);
+      border-radius: 0;
+      padding: 0 14px;
+      background: var(--input);
       color: var(--text);
       font-family: inherit;
       font-size: 15px;
@@ -628,10 +632,15 @@
       cursor: pointer;
     }
 
+    .searchable-select-option:last-child,
+    .searchable-select-empty:last-child {
+      border-bottom: 0;
+    }
+
     .searchable-select-option:hover,
     .searchable-select-option:focus,
     .searchable-select-option.selected {
-      background: rgba(0, 102, 255, 0.10);
+      background: #eef4ff;
       color: var(--blue-dark);
       outline: none;
     }
@@ -640,6 +649,7 @@
       justify-content: center;
       color: var(--muted);
       cursor: default;
+      background: var(--input);
     }
 
     input[readonly],
