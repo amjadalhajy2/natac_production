@@ -493,6 +493,8 @@
     select,
     textarea {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       min-height: 52px;
       border: 1px solid rgba(16,24,39,0.18);
       border-radius: 16px;
@@ -504,6 +506,22 @@
       outline: none;
       box-shadow: 0 2px 0 rgba(16,24,39,0.03);
       transition: 0.18s ease;
+    }
+
+    input[type="date"] {
+      display: block;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value {
+      min-height: 1.2em;
+      text-align: start;
+    }
+
+    html[dir="rtl"] input[type="date"]::-webkit-date-and-time-value {
+      text-align: right;
     }
 
     textarea {
@@ -543,10 +561,14 @@
     .searchable-select-cell {
       position: relative;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
     }
 
     .searchable-select-input {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       min-height: 52px;
       border: 1px solid rgba(16,24,39,0.18);
       border-radius: 16px;
@@ -990,6 +1012,23 @@
       }
     }
 
+    /* حماية عامة لمنع خروج الخلايا عن حدود الشاشة */
+    .main,
+    .panel,
+    .panel-content,
+    .form-grid,
+    .product-grid,
+    .field,
+    .product-card,
+    .searchable-select-cell {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .searchable-select-menu {
+      max-width: calc(100vw - 16px);
+    }
+
     @media (max-width: 1100px) {
       .form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1029,13 +1068,26 @@
         font-size: 14px;
       }
 
+      html,
+      body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
       .main {
-        padding: 94px 14px 24px;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        padding: 94px 10px 24px;
       }
 
       .panel {
-        padding: 16px;
-        border-radius: 24px;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+        padding: 14px;
+        border-radius: 22px;
       }
 
       .page-title h1 {
@@ -1044,7 +1096,39 @@
 
       .form-grid,
       .product-grid {
-        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .field,
+      .product-card,
+      .searchable-select-cell {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      input,
+      select,
+      textarea,
+      .searchable-select-input {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      input[type="date"] {
+        box-sizing: border-box;
+        padding-inline-start: 12px;
+        padding-inline-end: 12px;
+        font-size: 14px;
+      }
+
+      .searchable-select-menu {
+        max-width: calc(100vw - 20px);
       }
 
       .actions,
@@ -1077,6 +1161,29 @@
 
       .page-title h1 {
         font-size: 24px;
+      }
+
+      .main {
+        padding-inline: 8px;
+      }
+
+      .panel {
+        padding: 12px;
+        border-radius: 20px;
+      }
+
+      input,
+      select,
+      textarea,
+      .searchable-select-input {
+        min-height: 50px;
+        border-radius: 15px;
+        font-size: 14px;
+      }
+
+      input[type="date"] {
+        padding-inline-start: 10px;
+        padding-inline-end: 10px;
       }
     }
   </style>
@@ -2168,6 +2275,18 @@
       });
 
       window.addEventListener("resize", closeAllSearchableSelects);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", () => {
+          if (activeSearchableSelect) {
+            positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
+          }
+        });
+        window.visualViewport.addEventListener("scroll", () => {
+          if (activeSearchableSelect) {
+            positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
+          }
+        });
+      }
       window.addEventListener("scroll", event => {
         const scrollTarget = event.target;
 
@@ -2485,16 +2604,20 @@
 
     function positionSearchableSelectMenu(wrapper, menu) {
       const rect = wrapper.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+      const visualViewport = window.visualViewport || null;
+      const viewportHeight = visualViewport ? visualViewport.height : (window.innerHeight || document.documentElement.clientHeight);
+      const viewportWidth = visualViewport ? visualViewport.width : (window.innerWidth || document.documentElement.clientWidth);
+      const viewportOffsetTop = visualViewport ? visualViewport.offsetTop : 0;
+      const viewportOffsetLeft = visualViewport ? visualViewport.offsetLeft : 0;
       const gap = 4;
       const edgeGap = 8;
       const maxAllowedHeight = 250;
       const minUsableHeight = 80;
-      const menuWidth = Math.min(Math.max(rect.width, 220), viewportWidth - (edgeGap * 2));
+      const minimumMenuWidth = viewportWidth <= 430 ? rect.width : 220;
+      const menuWidth = Math.min(Math.max(rect.width, minimumMenuWidth), viewportWidth - (edgeGap * 2));
       const left = Math.min(
-        Math.max(rect.left, edgeGap),
-        viewportWidth - menuWidth - edgeGap
+        Math.max(rect.left + viewportOffsetLeft, edgeGap + viewportOffsetLeft),
+        viewportOffsetLeft + viewportWidth - menuWidth - edgeGap
       );
 
       const optionsBox = menu.querySelector(".searchable-select-options");
@@ -2507,8 +2630,10 @@
         optionsBox.style.maxHeight = "none";
       }
 
-      const spaceBelow = Math.max(0, viewportHeight - rect.bottom - gap - edgeGap);
-      const spaceAbove = Math.max(0, rect.top - gap - edgeGap);
+      const viewportTop = viewportOffsetTop;
+      const viewportBottom = viewportOffsetTop + viewportHeight;
+      const spaceBelow = Math.max(0, viewportBottom - rect.bottom - gap - edgeGap);
+      const spaceAbove = Math.max(0, rect.top - viewportTop - gap - edgeGap);
       const naturalHeight = Math.min(
         maxAllowedHeight,
         Math.max(42, menu.scrollHeight || 42)
@@ -2533,8 +2658,8 @@
         ? rect.top - menuHeight - gap
         : rect.bottom + gap;
       const top = Math.min(
-        Math.max(unclampedTop, edgeGap),
-        viewportHeight - menuHeight - edgeGap
+        Math.max(unclampedTop, viewportTop + edgeGap),
+        viewportBottom - menuHeight - edgeGap
       );
 
       menu.style.maxHeight = menuHeight + "px";
