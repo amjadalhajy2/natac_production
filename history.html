@@ -510,7 +510,7 @@
 
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+      grid-template-columns: 220px 220px repeat(3, minmax(0, 1fr)) auto;
       gap: 12px;
       margin-bottom: 16px;
       align-items: end;
@@ -669,6 +669,7 @@
       border-bottom: 1px solid rgba(16,24,39,0.08);
       border-radius: 0;
       padding: 0 14px;
+
 
     .summary-grid {
       display: grid;
@@ -1217,8 +1218,8 @@
 
         <div class="filters-grid">
           <div class="field">
-            <label for="dateInput" data-i18n="fromDate">من تاريخ</label>
-            <input type="date" id="dateInput">
+            <label for="fromDateInput" data-i18n="fromDate">من تاريخ</label>
+            <input type="date" id="fromDateInput">
           </div>
 
           <div class="field">
@@ -1488,7 +1489,8 @@
         avgWorkHoursExplain: "يمثل متوسط ساعات العمل النظرية لكل عامل، ويتم حسابه من خلال إجمالي الوقت النظري لإنتاج الكميات المدخلة مقسومًا على عدد العمال الذين لديهم إنتاج في التاريخ المحدد.",
         rawWasteIndexExplain: "يوضح مستوى هدر المواد الخام، ويتم حسابه بقسمة الهدر الفعلي على الهدر المتوقع حسب بيانات المنتجات. إذا كان المؤشر أكبر من 1 فهذا يعني أن الهدر الفعلي أعلى من المتوقع.",
         wastedHoursExplain: "يمثل الفرق بين ساعات العمل القياسية المتوقعة للعمال وساعات الإنتاج النظرية الفعلية. يتم حسابه بناءً على 600 دقيقة كمعيار يومي لكل عامل.",
-        totalProductionExplain: "يمثل مجموع الكميات المنتجة لجميع العمال في التاريخ المحدد وبعد تطبيق الفلاتر."
+        totalProductionExplain: "يمثل مجموع الكميات المنتجة لجميع العمال في التاريخ المحدد وبعد تطبيق الفلاتر.",
+        dateRangeInvalid: "تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية."
       },
       en: {
         htmlLang: "en",
@@ -1569,7 +1571,8 @@
         avgWorkHoursExplain: "Average theoretical work hours per worker. It is calculated by dividing total theoretical production time by the number of workers who have production on the selected date.",
         rawWasteIndexExplain: "Shows the raw material waste level. It is actual waste divided by expected waste based on product data. If the index is above 1, actual waste is higher than expected.",
         wastedHoursExplain: "Represents the difference between standard expected working hours and actual theoretical production hours, based on 600 minutes per worker per day.",
-        totalProductionExplain: "Represents the total produced quantity for the selected date after applying filters."
+        totalProductionExplain: "Represents the total produced quantity for the selected date after applying filters.",
+        dateRangeInvalid: "From date must be before or equal to To date."
       }
     };
 
@@ -1605,7 +1608,7 @@
     const overlay = document.getElementById("overlay");
     const languageToggleBtn = document.getElementById("languageToggleBtn");
 
-    const dateInput = document.getElementById("dateInput");
+    const fromDateInput = document.getElementById("fromDateInput");
     const toDateInput = document.getElementById("toDateInput");
     const workerFilterInput = document.getElementById("workerFilterInput");
     const productFilterInput = document.getElementById("productFilterInput");
@@ -1647,7 +1650,6 @@
       initSidebar();
       initLanguage();
       initUserDropdown();
-      initSearchableSelectEvents();
       bindEvents();
       setTodayDate();
       protectPageAndLoadData();
@@ -1827,7 +1829,7 @@
 
     function setTodayDate() {
       const today = toISODate(new Date());
-      dateInput.value = today;
+      fromDateInput.value = today;
       toDateInput.value = today;
     }
 
@@ -1895,13 +1897,13 @@
     async function loadHistory(forceFresh = false) {
       clearMessage();
 
-      let selectedFromDate = dateInput.value || toISODate(new Date());
-      let selectedToDate = toDateInput.value || selectedFromDate;
+      const today = toISODate(new Date());
+      const selectedFromDate = fromDateInput.value || today;
+      const selectedToDate = toDateInput.value || selectedFromDate;
 
       if (selectedFromDate > selectedToDate) {
-        const tempDate = selectedFromDate;
-        selectedFromDate = selectedToDate;
-        selectedToDate = tempDate;
+        showMessage(t("dateRangeInvalid"), "error");
+        return;
       }
 
       const filters = {
@@ -2181,7 +2183,7 @@
       replacementImage = null;
 
       editProductionId.value = group.ProductionID || "";
-      editDateInput.value = group.Date || dateInput.value || "";
+      editDateInput.value = group.Date || fromDateInput.value || "";
       editShiftInput.value = group.Shift || "صباحي";
       editWorkerInput.value = group.WorkerID || "";
       editWasteInput.value = group.RawWasteKg || 0;
@@ -2383,7 +2385,7 @@
         token: currentUser.token,
         production: {
           productionId: productionId,
-          date: editDateInput.value || dateInput.value,
+          date: editDateInput.value || fromDateInput.value,
           shift: editShiftInput.value || "",
           workerId: editWorkerInput.value || "",
           rawWasteKg: Number(editWasteInput.value || 0),
@@ -2931,7 +2933,7 @@
     function bindEvents() {
       refreshBtn.addEventListener("click", loadHistory);
 
-      dateInput.addEventListener("change", loadHistory);
+      fromDateInput.addEventListener("change", loadHistory);
       toDateInput.addEventListener("change", loadHistory);
       workerFilterInput.addEventListener("change", loadHistory);
       productFilterInput.addEventListener("change", loadHistory);
