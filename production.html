@@ -2366,6 +2366,7 @@
       let isMenuPointerDown = false;
       let isMenuPointerDragging = false;
       let suppressOptionClick = false;
+      let pointerDownOptionButton = null;
       let dragStartY = 0;
       let dragStartScrollTop = 0;
 
@@ -2377,6 +2378,13 @@
       function refreshInputText() {
         input.value = getSelectedText();
         input.placeholder = placeholder;
+      }
+
+      function chooseSearchableOption(value) {
+        select.value = value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        refreshInputText();
+        closeAllSearchableSelects();
       }
 
       function renderOptions(searchValue = input.value) {
@@ -2408,16 +2416,14 @@
           }
 
           button.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+
             if (isMenuPointerDragging || suppressOptionClick) {
-              event.preventDefault();
-              event.stopPropagation();
               return;
             }
 
-            select.value = option.value;
-            select.dispatchEvent(new Event("change", { bubbles: true }));
-            refreshInputText();
-            closeAllSearchableSelects();
+            chooseSearchableOption(button.dataset.value);
           });
 
           optionsBox.appendChild(button);
@@ -2510,6 +2516,9 @@
         isMenuPointerDown = true;
         isMenuPointerDragging = false;
         suppressOptionClick = false;
+        pointerDownOptionButton = event.target && event.target.closest
+          ? event.target.closest(".searchable-select-option")
+          : null;
         dragStartY = event.clientY;
         dragStartScrollTop = optionsBox.scrollTop;
 
@@ -2544,6 +2553,21 @@
         }
 
         isMenuPointerDown = false;
+
+        if (!isMenuPointerDragging && event && event.type === "pointerup" && pointerDownOptionButton && optionsBox.contains(pointerDownOptionButton)) {
+          const value = pointerDownOptionButton.dataset.value;
+          pointerDownOptionButton = null;
+          suppressOptionClick = true;
+          chooseSearchableOption(value);
+
+          setTimeout(() => {
+            suppressOptionClick = false;
+          }, 0);
+
+          return;
+        }
+
+        pointerDownOptionButton = null;
 
         if (isMenuPointerDragging) {
           setTimeout(() => {
