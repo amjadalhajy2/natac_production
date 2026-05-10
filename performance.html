@@ -1178,7 +1178,7 @@
     const SESSION_KEY = "factoryUserSession";
     const LANGUAGE_KEY = "factoryLanguage";
     const INITIAL_CACHE_KEY = "performance_initial_data_v2";
-    const PERFORMANCE_CACHE_PREFIX = "performance_result_cache_v2_";
+    const PERFORMANCE_CACHE_PREFIX = "performance_result_cache_v3_";
     const STANDARD_WORK_MINUTES = 600;
 
     const i18n = {
@@ -2187,6 +2187,9 @@
           return;
         }
 
+        const productionCountsByWorker = await getProductionCountsByWorker(fromDate, toDate);
+        result.records = applyProductionCountsByWorker(result.records || [], productionCountsByWorker);
+
         setLocalCache_(cacheKey, result);
         renderAllTable(result.records || []);
 
@@ -2239,21 +2242,39 @@
       const candidates = [
         row.productionCount,
         row.production_count,
+        row.ProductionCount,
         row.productionTimes,
         row.production_times,
+        row.ProductionTimes,
         row.productionEntries,
         row.production_entries,
+        row.ProductionEntries,
         row.productionRecords,
         row.production_records,
+        row.ProductionRecords,
+        row.productionSessions,
+        row.production_sessions,
+        row.ProductionSessions,
+        row.productionSessionsCount,
+        row.production_sessions_count,
+        row.ProductionSessionsCount,
+        row.productionDaysCount,
+        row.production_days_count,
+        row.ProductionDaysCount,
         row.entriesCount,
         row.entries_count,
+        row.EntriesCount,
         row.recordsCount,
         row.records_count,
+        row.RecordsCount,
         row.daysCount,
         row.days_count,
+        row.DaysCount,
         row.productionDays,
         row.production_days,
-        row.count
+        row.ProductionDays,
+        row.count,
+        row.Count
       ];
 
       const found = candidates.find(value => value !== undefined && value !== null && value !== "" && !Number.isNaN(Number(value)));
@@ -2262,11 +2283,131 @@
       return count > 0 ? count : 1;
     }
 
+    function normalizeWorkerKey_(value) {
+      return String(value || "").trim();
+    }
+
+    function getWorkerPossibleKeys_(row) {
+      row = row || {};
+
+      return [
+        row.workerId,
+        row.worker_id,
+        row.WorkerID,
+        row.workerName,
+        row.worker_name,
+        row.WorkerName
+      ]
+        .map(normalizeWorkerKey_)
+        .filter(Boolean);
+    }
+
+    function getProductionIdFromHistoryRow_(row) {
+      row = row || {};
+
+      return normalizeWorkerKey_(
+        row.ProductionID ||
+        row.productionId ||
+        row.production_id ||
+        row.ProductionCode ||
+        row.productionCode ||
+        row.production_code ||
+        row.id ||
+        row.ID ||
+        ""
+      );
+    }
+
+    async function getProductionCountsByWorker(fromDate, toDate) {
+      try {
+        const result = await apiPost({
+          action: "getProductionHistory",
+          token: currentUser.token,
+          filters: {
+            fromDate: fromDate,
+            toDate: toDate,
+            workerId: "",
+            productId: "",
+            machineId: ""
+          }
+        });
+
+        if (!result || !result.success) {
+          return {};
+        }
+
+        const setsByWorker = {};
+        const displayNamesByWorker = {};
+
+        (result.records || []).forEach(row => {
+          const workerId = normalizeWorkerKey_(row.WorkerID || row.workerId || row.worker_id || "");
+          const workerName = normalizeWorkerKey_(row.WorkerName || row.workerName || row.worker_name || "");
+          const primaryKey = workerId || workerName;
+
+          if (!primaryKey) return;
+
+          const productionId = getProductionIdFromHistoryRow_(row) || [
+            primaryKey,
+            row.Date || row.date || "",
+            row.Shift || row.shift || "",
+            row.RawWasteKg || row.rawWasteKg || row.raw_waste_kg || ""
+          ].join("|");
+
+          if (!setsByWorker[primaryKey]) {
+            setsByWorker[primaryKey] = new Set();
+          }
+
+          setsByWorker[primaryKey].add(productionId);
+
+          if (workerId && workerName) {
+            displayNamesByWorker[workerId] = workerName;
+          }
+        });
+
+        const counts = {};
+
+        Object.keys(setsByWorker).forEach(workerKey => {
+          const count = setsByWorker[workerKey].size;
+          counts[workerKey] = count;
+
+          const workerName = displayNamesByWorker[workerKey];
+          if (workerName) {
+            counts[workerName] = count;
+          }
+        });
+
+        return counts;
+
+      } catch (error) {
+        console.error("Production count calculation failed:", error);
+        return {};
+      }
+    }
+
+    function applyProductionCountsByWorker(records, countsByWorker) {
+      countsByWorker = countsByWorker || {};
+
+      return (records || []).map(row => {
+        const keys = getWorkerPossibleKeys_(row);
+        const matchedKey = keys.find(key => countsByWorker[key] !== undefined && countsByWorker[key] !== null);
+        const productionCount = matchedKey ? Number(countsByWorker[matchedKey] || 1) : getProductionTimes(row);
+
+        return {
+          ...row,
+          productionCount: productionCount > 0 ? productionCount : 1
+        };
+      });
+    }
+
     function getWastedMinutes(row, mode) {
       const theoreticalMinutes = getTheoreticalMinutes(row);
-      const productionTimes = mode === "all" ? getProductionTimes(row) : 1;
 
-      return (STANDARD_WORK_MINUTES * productionTimes) - theoreticalMinutes;
+      if (mode === "all") {
+        const productionTimes = getProductionTimes(row);
+        return (STANDARD_WORK_MINUTES * productionTimes) - theoreticalMinutes;
+      }
+
+      return STANDARD_WORK_MINUTES - theoreticalMinutes;
     }
 
     function renderDangerNumber(value, isDanger) {
@@ -2980,19 +3121,21 @@
           ? Number(explicitMinutes || 0)
           : theoreticalHours * 60;
 
+        const productionCount = getProductionTimes(row);
+
         return {
           date: row.date || row.production_date || "",
-          workerId: row.workerId || row.worker_id || "",
-          workerName: row.workerName || row.worker_name || "",
-          totalQuantity: Number(row.totalQuantity ?? row.total_quantity ?? 0),
-          actualWaste: Number(row.actualWaste ?? row.actual_waste ?? row.total_raw_waste ?? 0),
-          expectedWaste: Number(row.expectedWaste ?? row.expected_waste ?? 0),
-          wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? 0),
+          workerId: row.workerId || row.worker_id || row.WorkerID || "",
+          workerName: row.workerName || row.worker_name || row.WorkerName || "",
+          totalQuantity: Number(row.totalQuantity ?? row.total_quantity ?? row.TotalQuantity ?? 0),
+          actualWaste: Number(row.actualWaste ?? row.actual_waste ?? row.ActualWaste ?? row.total_raw_waste ?? 0),
+          expectedWaste: Number(row.expectedWaste ?? row.expected_waste ?? row.ExpectedWaste ?? 0),
+          wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? row.WasteIndex ?? 0),
           theoreticalHours: theoreticalHours,
           theoreticalMinutes: theoreticalMinutes,
-          productionCount: Number(row.productionCount ?? row.production_count ?? row.productionTimes ?? row.production_times ?? row.productionEntries ?? row.production_entries ?? row.productionRecords ?? row.production_records ?? row.entriesCount ?? row.entries_count ?? row.recordsCount ?? row.records_count ?? row.daysCount ?? row.days_count ?? row.productionDays ?? row.production_days ?? row.count ?? 1),
-          wastedMinutes: (STANDARD_WORK_MINUTES * Number(row.productionCount ?? row.production_count ?? row.productionTimes ?? row.production_times ?? row.productionEntries ?? row.production_entries ?? row.productionRecords ?? row.production_records ?? row.entriesCount ?? row.entries_count ?? row.recordsCount ?? row.records_count ?? row.daysCount ?? row.days_count ?? row.productionDays ?? row.production_days ?? row.count ?? 1)) - theoreticalMinutes,
-          averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? 0)
+          productionCount: productionCount,
+          wastedMinutes: (STANDARD_WORK_MINUTES * productionCount) - theoreticalMinutes,
+          averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? row.AverageEvaluation ?? 0)
         };
       });
 
