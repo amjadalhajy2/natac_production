@@ -1243,7 +1243,7 @@
         <span class="nav-icon">🧰</span>
       </a>
 
-      <a href="permits.html" class="active" data-permission="permitsTracking">
+      <a href="permits.html" class="active" data-permission="permitsPage">
         <span data-i18n="permitsTracking">متابعة التصاريح</span>
         <span class="nav-icon">🧾</span>
       </a>
@@ -1266,9 +1266,9 @@
           </div>
 
           <div class="actions">
-            <button class="btn btn-primary" type="button" id="addPermitBtn" data-i18n="addPermit">إضافة معاملة جديدة</button>
-            <button class="btn btn-secondary" type="button" id="addActivityBtn" data-i18n="addActivity">إضافة نشاط جديد</button>
-            <button class="btn btn-secondary" type="button" id="addLocationBtn" data-i18n="addLocation">إضافة موقع جديد</button>
+            <button class="btn btn-primary" type="button" id="addPermitBtn" data-permission="permitAddTransaction" data-i18n="addPermit">إضافة معاملة جديدة</button>
+            <button class="btn btn-secondary" type="button" id="addActivityBtn" data-permission="permitAddActivity" data-i18n="addActivity">إضافة نشاط جديد</button>
+            <button class="btn btn-secondary" type="button" id="addLocationBtn" data-permission="permitAddLocation" data-i18n="addLocation">إضافة موقع جديد</button>
           </div>
         </div>
 
@@ -1893,7 +1893,7 @@
         renderUser(currentUser);
         applyPermissionsUI();
 
-        if (!hasClientPermission("permitsTracking")) {
+        if (!hasClientPermission("permitsPage")) {
           hideLoading();
           showMessage(t("notAllowed"), "error");
           setTimeout(() => {
@@ -2137,11 +2137,13 @@
           <td>${imagePath ? `<a class="image-link" href="#" data-image-path="${escapeAttribute(imagePath)}">${t("openImage")}</a>` : escapeHtml(t("noImage"))}</td>
           <td><span class="status-pill valid-${validity.key}">${validity.label}</span></td>
           <td><span class="status-pill ${status.key === "active" ? "status-active" : "status-inactive"}">${status.label}</span></td>
-          <td><button class="btn btn-secondary btn-small update-permit-btn" type="button" data-id="${escapeAttribute(permit.PermitID || permit.permitId || permit.id || "")}">${t("update")}</button></td>
+          <td><button class="btn btn-secondary btn-small update-permit-btn" type="button" data-permission="permitUpdateTransaction" data-id="${escapeAttribute(permit.PermitID || permit.permitId || permit.id || "")}">${t("update")}</button></td>
         `;
 
         permitsTableBody.appendChild(tr);
       });
+
+      applyPermissionsUI();
     }
 
     function showOpeningAlerts() {
