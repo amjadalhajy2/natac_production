@@ -1303,6 +1303,15 @@
           </div>
 
           <div class="field">
+            <label for="statusFilterInput" data-i18n="transactionStatus">حالة المعاملة</label>
+            <select id="statusFilterInput">
+              <option value="" data-i18n="allTransactionStatuses">كل الحالات</option>
+              <option value="Active" data-i18n="active">نشطة</option>
+              <option value="Inactive" data-i18n="inactive">غير نشطة</option>
+            </select>
+          </div>
+
+          <div class="field">
             <label>&nbsp;</label>
             <button class="btn btn-secondary" type="button" id="refreshBtn" data-i18n="refresh">تحديث</button>
           </div>
@@ -1335,8 +1344,8 @@
                 <th data-i18n="expiryDate">تاريخ الانتهاء</th>
                 <th data-i18n="validityDuration">مدة الصلاحية</th>
                 <th data-i18n="transactionImage">صورة المعاملة</th>
-                <th data-i18n="transactionStatus">حالة المعاملة</th>
                 <th data-i18n="validityStatus">سريان المعاملة</th>
+                <th data-i18n="transactionStatus">حالة المعاملة</th>
                 <th data-i18n="update">تحديث</th>
               </tr>
             </thead>
@@ -1482,6 +1491,13 @@
               <input type="text" id="updateDurationInput" autocomplete="off">
             </div>
             <div class="field">
+              <label for="updateStatusInput" data-i18n="transactionStatus">حالة المعاملة</label>
+              <select id="updateStatusInput">
+                <option value="Active" data-i18n="active">نشطة</option>
+                <option value="Inactive" data-i18n="inactive">غير نشطة</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="updateImageInput" data-i18n="transactionImage">صورة المعاملة</label>
               <input class="image-input" type="file" id="updateImageInput" accept="image/*">
               <div class="hint-text" id="updateImageName"></div>
@@ -1576,6 +1592,7 @@
         allLocations: "كل المواقع",
         validityStatus: "سريان المعاملة",
         allValidity: "كل الحالات",
+        allTransactionStatuses: "كل الحالات",
         valid: "ساري",
         expiresSoon: "ينتهي قريبا",
         expired: "منتهية",
@@ -1654,6 +1671,7 @@
         allLocations: "All Locations",
         validityStatus: "Validity Status",
         allValidity: "All Statuses",
+        allTransactionStatuses: "All Statuses",
         valid: "Valid",
         expiresSoon: "Expires Soon",
         expired: "Expired",
@@ -1737,6 +1755,7 @@
     const activityFilterInput = document.getElementById("activityFilterInput");
     const locationFilterInput = document.getElementById("locationFilterInput");
     const validityFilterInput = document.getElementById("validityFilterInput");
+    const statusFilterInput = document.getElementById("statusFilterInput");
 
     const totalPermitsValue = document.getElementById("totalPermitsValue");
     const expiresSoonValue = document.getElementById("expiresSoonValue");
@@ -1774,6 +1793,7 @@
     const updateIssueDateInput = document.getElementById("updateIssueDateInput");
     const updateExpiryDateInput = document.getElementById("updateExpiryDateInput");
     const updateDurationInput = document.getElementById("updateDurationInput");
+    const updateStatusInput = document.getElementById("updateStatusInput");
     const updateImageInput = document.getElementById("updateImageInput");
     const updateImageName = document.getElementById("updateImageName");
     const saveUpdateBtn = document.getElementById("saveUpdateBtn");
@@ -2067,12 +2087,14 @@
       const activityId = String(activityFilterInput.value || "");
       const locationId = String(locationFilterInput.value || "");
       const validity = String(validityFilterInput.value || "");
+      const transactionStatus = String(statusFilterInput.value || "");
 
       return permits.filter(permit => {
         if (text && normalizeText(permit.TransactionName || permit.transactionName || "").indexOf(text) === -1) return false;
         if (activityId && String(permit.ActivityID || permit.activityId || "") !== activityId) return false;
         if (locationId && String(permit.LocationID || permit.locationId || "") !== locationId) return false;
         if (validity && getPermitValidity(permit).key !== validity) return false;
+        if (transactionStatus && normalizePermitStatus(permit.Status || permit.status || "Active").value !== transactionStatus) return false;
         return true;
       });
     }
@@ -2117,8 +2139,8 @@
           <td class="number-cell">${escapeHtml(permit.ExpiryDate || permit.expiryDate || "")}</td>
           <td>${escapeHtml(permit.ValidityDuration || permit.validityDuration || "")}</td>
           <td>${imagePath ? `<a class="image-link" href="#" data-image-path="${escapeAttribute(imagePath)}">${t("openImage")}</a>` : escapeHtml(t("noImage"))}</td>
-          <td><span class="status-pill ${status.key === "active" ? "status-active" : "status-inactive"}">${status.label}</span></td>
           <td><span class="status-pill valid-${validity.key}">${validity.label}</span></td>
+          <td><span class="status-pill ${status.key === "active" ? "status-active" : "status-inactive"}">${status.label}</span></td>
           <td><button class="btn btn-secondary btn-small update-permit-btn" type="button" data-id="${escapeAttribute(permit.PermitID || permit.permitId || permit.id || "")}">${t("update")}</button></td>
         `;
 
@@ -2149,6 +2171,7 @@
       updateIssueDateInput.value = permit.IssueDate || permit.issueDate || "";
       updateExpiryDateInput.value = permit.ExpiryDate || permit.expiryDate || "";
       updateDurationInput.value = permit.ValidityDuration || permit.validityDuration || "";
+      updateStatusInput.value = normalizePermitStatus(permit.Status || permit.status || "Active").value;
       renderCurrentPermitBox(permit);
       openModal(updateModal);
     }
@@ -2202,6 +2225,7 @@
       activityFilterInput.addEventListener("change", renderPermitsTable);
       locationFilterInput.addEventListener("change", renderPermitsTable);
       validityFilterInput.addEventListener("change", renderPermitsTable);
+      statusFilterInput.addEventListener("change", renderPermitsTable);
 
       document.querySelectorAll("[data-close-modal]").forEach(button => {
         button.addEventListener("click", () => {
@@ -2402,7 +2426,8 @@
             issueDate: updateIssueDateInput.value,
             expiryDate: updateExpiryDateInput.value,
             validityDuration: updateDurationInput.value.trim(),
-            imagePath: imagePath
+            imagePath: imagePath,
+            status: updateStatusInput.value || "Active"
           }
         });
 
@@ -2545,9 +2570,9 @@
     function normalizePermitStatus(status) {
       const value = String(status || "Active").toLowerCase();
       if (value === "inactive" || value === "غير نشطة") {
-        return { key: "inactive", label: t("inactive") };
+        return { key: "inactive", value: "Inactive", label: t("inactive") };
       }
-      return { key: "active", label: t("active") };
+      return { key: "active", value: "Active", label: t("active") };
     }
 
     function getActivityName(activityId) {
@@ -2631,13 +2656,15 @@
 
         if (action === "updatePermitRenewal") {
           const permit = payload.permit || {};
-          return await rpcSafe_("update_permit_renewal", {
+          return await rpcSafe_("update_permit_transaction", {
             p_token: token,
             p_permit_id: permit.permitId || null,
             p_issue_date: permit.issueDate || null,
             p_expiry_date: permit.expiryDate || null,
             p_validity_duration: permit.validityDuration || "",
-            p_image_path: permit.imagePath || ""
+            p_image_path: permit.imagePath || "",
+            p_image_action: permit.imagePath ? "replace" : "keep",
+            p_status: permit.status || "Active"
           });
         }
 
