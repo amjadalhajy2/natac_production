@@ -1221,7 +1221,7 @@
         expectedHours: "وقت الانتاج النظري",
         theoreticalProductionMinutes: "وقت الانتاج النظري (بالدقائق)",
         wastedTime: "الوقت المهدر",
-        wastedTimeFormula: "الوقت المهدر (600-وقت الانتاج النظري)",
+        wastedTimeFormula: "الوقت المهدر",
         supervisorEvaluationAvg: "متوسط تقييم المشرف",
         quality: "الجودة",
         cleanliness: "النظافة",
@@ -1286,7 +1286,7 @@
         expectedHours: "Theoretical Production Time",
         theoreticalProductionMinutes: "Theoretical Production Time (minutes)",
         wastedTime: "Wasted Time",
-        wastedTimeFormula: "Wasted Time (600 - Theoretical Production Time)",
+        wastedTimeFormula: "Wasted Time",
         supervisorEvaluationAvg: "Average Supervisor Evaluation",
         quality: "Quality",
         cleanliness: "Cleanliness",
@@ -2233,8 +2233,40 @@
       return Number(row.theoreticalHours || row.theoretical_hours || 0) * 60;
     }
 
-    function getWastedMinutes(row) {
-      return STANDARD_WORK_MINUTES - getTheoreticalMinutes(row);
+    function getProductionTimes(row) {
+      row = row || {};
+
+      const candidates = [
+        row.productionCount,
+        row.production_count,
+        row.productionTimes,
+        row.production_times,
+        row.productionEntries,
+        row.production_entries,
+        row.productionRecords,
+        row.production_records,
+        row.entriesCount,
+        row.entries_count,
+        row.recordsCount,
+        row.records_count,
+        row.daysCount,
+        row.days_count,
+        row.productionDays,
+        row.production_days,
+        row.count
+      ];
+
+      const found = candidates.find(value => value !== undefined && value !== null && value !== "" && !Number.isNaN(Number(value)));
+      const count = Number(found || 1);
+
+      return count > 0 ? count : 1;
+    }
+
+    function getWastedMinutes(row, mode) {
+      const theoreticalMinutes = getTheoreticalMinutes(row);
+      const productionTimes = mode === "all" ? getProductionTimes(row) : 1;
+
+      return (STANDARD_WORK_MINUTES * productionTimes) - theoreticalMinutes;
     }
 
     function renderDangerNumber(value, isDanger) {
@@ -2324,7 +2356,7 @@
         const level = getLevel(row.averageEvaluation, row.wasteIndex);
         const wasteIndex = Number(row.wasteIndex || 0);
         const theoreticalMinutes = getTheoreticalMinutes(row);
-        const wastedMinutes = getWastedMinutes(row);
+        const wastedMinutes = getWastedMinutes(row, "single");
 
         tr.innerHTML = `
           <td class="date-cell">${escapeHtml(row.date || "")}</td>
@@ -2369,7 +2401,7 @@
         const level = getLevel(row.averageEvaluation, row.wasteIndex);
         const wasteIndex = Number(row.wasteIndex || 0);
         const theoreticalMinutes = getTheoreticalMinutes(row);
-        const wastedMinutes = getWastedMinutes(row);
+        const wastedMinutes = getWastedMinutes(row, "all");
 
         tr.innerHTML = `
           <td>${escapeHtml(row.workerName || row.workerId || "")}</td>
@@ -2958,7 +2990,8 @@
           wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? 0),
           theoreticalHours: theoreticalHours,
           theoreticalMinutes: theoreticalMinutes,
-          wastedMinutes: STANDARD_WORK_MINUTES - theoreticalMinutes,
+          productionCount: Number(row.productionCount ?? row.production_count ?? row.productionTimes ?? row.production_times ?? row.productionEntries ?? row.production_entries ?? row.productionRecords ?? row.production_records ?? row.entriesCount ?? row.entries_count ?? row.recordsCount ?? row.records_count ?? row.daysCount ?? row.days_count ?? row.productionDays ?? row.production_days ?? row.count ?? 1),
+          wastedMinutes: (STANDARD_WORK_MINUTES * Number(row.productionCount ?? row.production_count ?? row.productionTimes ?? row.production_times ?? row.productionEntries ?? row.production_entries ?? row.productionRecords ?? row.production_records ?? row.entriesCount ?? row.entries_count ?? row.recordsCount ?? row.records_count ?? row.daysCount ?? row.days_count ?? row.productionDays ?? row.production_days ?? row.count ?? 1)) - theoreticalMinutes,
           averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? 0)
         };
       });
