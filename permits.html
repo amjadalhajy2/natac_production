@@ -2318,7 +2318,7 @@
       } catch (error) {
         console.error(error);
         setButtonLoading(savePermitBtn, false, t("save"));
-        showMessage(t("serverError"), "error");
+        showMessage(error.message || t("serverError"), "error");
       }
     }
 
@@ -2442,7 +2442,7 @@
       } catch (error) {
         console.error(error);
         setButtonLoading(saveUpdateBtn, false, t("saveChanges"));
-        showMessage(t("serverError"), "error");
+        showMessage(error.message || t("serverError"), "error");
       }
     }
 
@@ -2493,61 +2493,62 @@
     async function uploadImage_(imageData) {
       if (!imageData) return "";
 
-      let lastError = null;
-
-      try {
-        const result = await fetch(STORAGE_FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({
-            action: "upload",
-            bucket: STORAGE_BUCKET,
-            token: currentUser.token,
-            fileName: imageData.fileName,
-            mimeType: imageData.mimeType,
-            dataUrl: imageData.dataUrl
-          })
-        });
-
-        const json = await result.json().catch(() => ({}));
-        if (result.ok && json.success) {
-          const uploadedPath = json.path || json.imagePath || json.filePath || json.publicUrl || json.public_url || json.url || "";
-          if (uploadedPath) return uploadedPath;
-        }
-
-        lastError = new Error(json.message || "Upload failed");
-      } catch (error) {
-        lastError = error;
+      if (!supabaseClient || !supabaseClient.storage) {
+        throw new Error(currentLang === "ar"
+          ? "تعذر تهيئة Supabase Storage. تحقق من رابط Supabase والمفتاح العام."
+          : "Supabase Storage is not initialized. Check Supabase URL and public key.");
       }
 
       try {
-        if (!supabaseClient || !supabaseClient.storage) {
-          throw lastError || new Error("Supabase storage is not available");
-        }
-
         const blob = dataUrlToBlob_(imageData.dataUrl);
         const extension = getFileExtension_(imageData.fileName, imageData.mimeType);
-        const filePath = "permits/" + Date.now() + "-" + Math.random().toString(36).slice(2) + extension;
+        const safeName = String(imageData.fileName || "permit-image")
+          .replace(/[^a-zA-Z0-9._-]/g, "-")
+          .replace(/-+/g, "-")
+          .slice(-80);
+        const filePath = "permits/" + Date.now() + "-" + Math.random().toString(36).slice(2) + "-" + safeName.replace(/\.[a-z0-9]+$/i, "") + extension;
+
         const uploadResult = await supabaseClient.storage
           .from(STORAGE_BUCKET)
           .upload(filePath, blob, {
             contentType: imageData.mimeType || "image/jpeg",
-            upsert: true
+            upsert: false
           });
 
         if (uploadResult.error) {
           throw uploadResult.error;
         }
 
-        const publicResult = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
-        return publicResult?.data?.publicUrl || filePath;
+        return uploadResult.data?.path || filePath;
+
       } catch (error) {
         console.error("Image upload failed:", error);
-        throw new Error(error.message || t("serverError"));
+        throw new Error(getStorageErrorMessage_(error));
       }
+    }
+
+    function getStorageErrorMessage_(error) {
+      const message = String(error?.message || error || "");
+
+      if (/bucket not found/i.test(message)) {
+        return currentLang === "ar"
+          ? "Bucket الصور permit-images غير موجود في Supabase Storage. أنشئه ثم جرّب مرة أخرى."
+          : "Storage bucket permit-images was not found. Create it and try again.";
+      }
+
+      if (/row-level security|policy|permission|not authorized|unauthorized|403/i.test(message)) {
+        return currentLang === "ar"
+          ? "لا توجد صلاحية رفع للصور في bucket permit-images. أضف سياسات Storage للرفع والقراءة ثم جرّب مرة أخرى."
+          : "No upload permission for permit-images bucket. Add Storage policies for upload/read and try again.";
+      }
+
+      if (/payload|too large|413/i.test(message)) {
+        return currentLang === "ar"
+          ? "حجم الصورة كبير جدًا. اختر صورة أصغر من 8MB."
+          : "Image is too large. Choose an image under 8MB.";
+      }
+
+      return message || t("serverError");
     }
 
     function dataUrlToBlob_(dataUrl) {
