@@ -439,6 +439,125 @@
       background: #fff;
     }
 
+    /* Searchable select: نفس شكل select الأصلي مع البحث داخل نفس الخانة */
+    select.searchable-select-source {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      min-height: 1px !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+    }
+
+    .searchable-select-cell {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .searchable-select-input {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 52px;
+      border: 1px solid rgba(16,24,39,0.18);
+      border-radius: 16px;
+      padding: 0 14px;
+      padding-inline-end: 42px;
+      font-family: inherit;
+      font-size: 15px;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 2px 0 rgba(16,24,39,0.03);
+      transition: 0.18s ease;
+      cursor: text;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .searchable-select-input::placeholder {
+      color: #98a2b3;
+    }
+
+    .searchable-select-cell.open .searchable-select-input,
+    .searchable-select-input:focus {
+      border-color: rgba(0, 102, 255, 0.65);
+      box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.13);
+      background: #fff;
+    }
+
+    .searchable-select-arrow {
+      position: absolute;
+      top: 50%;
+      inset-inline-end: 15px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .searchable-select-cell.open .searchable-select-arrow {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .searchable-select-menu {
+      display: none;
+      position: fixed;
+      z-index: 450;
+      border: 1px solid rgba(16,24,39,0.18);
+      border-radius: 16px;
+      background: var(--input);
+      color: var(--text);
+      box-shadow: 0 8px 20px rgba(16,24,39,0.06);
+      overflow: hidden;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      max-width: calc(100vw - 16px);
+    }
+
+    .searchable-select-menu.show {
+      display: block;
+    }
+
+    .searchable-select-options {
+      max-height: 238px;
+      overflow-y: auto;
+      padding: 0;
+      display: block;
+      background: var(--input);
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      cursor: default;
+    }
+
+    .searchable-select-option,
+    .searchable-select-empty {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-bottom: 1px solid rgba(16,24,39,0.08);
+      border-radius: 0;
+      padding: 0 14px;
+      background: var(--input);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      text-align: start;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+
     .btn {
       min-height: 46px;
       border: 0;
@@ -477,7 +596,7 @@
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -548,6 +667,16 @@
       text-align: start;
       font-family: Arial, sans-serif;
       font-weight: 900;
+    }
+
+    .danger-number {
+      color: #991b1b;
+      font-weight: 900;
+    }
+
+    td.danger-cell {
+      color: #991b1b;
+      background: rgba(220, 38, 38, 0.08);
     }
 
     .status-pill {
@@ -947,7 +1076,7 @@
         </button>
 
         <button class="tab-btn" type="button" id="allTabBtn" data-mode="all" data-i18n="allWorkersMode">
-          متوسط جميع العمال
+          آداء جميع العمال
         </button>
       </div>
 
@@ -992,10 +1121,15 @@
         </div>
       </div>
 
-      <div class="summary-grid">
+      <div class="summary-grid" id="summaryGrid">
         <div class="summary-card">
           <span data-i18n="totalProduction">إجمالي الإنتاج</span>
           <strong id="totalProductionValue">0</strong>
+        </div>
+
+        <div class="summary-card">
+          <span data-i18n="theoreticalProductionMinutes">وقت الانتاج النظري (بالدقائق)</span>
+          <strong id="theoreticalProductionMinutesValue">0</strong>
         </div>
 
         <div class="summary-card">
@@ -1045,6 +1179,7 @@
     const LANGUAGE_KEY = "factoryLanguage";
     const INITIAL_CACHE_KEY = "performance_initial_data_v2";
     const PERFORMANCE_CACHE_PREFIX = "performance_result_cache_v2_";
+    const STANDARD_WORK_MINUTES = 600;
 
     const i18n = {
       ar: {
@@ -1070,7 +1205,7 @@
         logout: "تسجيل الخروج",
         loadingData: "جاري تحميل البيانات...",
         singleWorkerMode: "أداء عامل محدد",
-        allWorkersMode: "متوسط جميع العمال",
+        allWorkersMode: "آداء جميع العمال",
         worker: "العامل",
         chooseWorker: "اختر العامل",
         fromDate: "من تاريخ",
@@ -1083,7 +1218,10 @@
         rawWasteIndex: "مؤشر هدر المواد الخام",
         date: "التاريخ",
         productionQty: "كمية الإنتاج",
-        expectedHours: "ساعات العمل النظرية",
+        expectedHours: "وقت الانتاج النظري",
+        theoreticalProductionMinutes: "وقت الانتاج النظري (بالدقائق)",
+        wastedTime: "الوقت المهدر",
+        wastedTimeFormula: "الوقت المهدر (600-وقت الانتاج النظري)",
         supervisorEvaluationAvg: "متوسط تقييم المشرف",
         quality: "الجودة",
         cleanliness: "النظافة",
@@ -1132,7 +1270,7 @@
         logout: "Logout",
         loadingData: "Loading data...",
         singleWorkerMode: "Single Worker Performance",
-        allWorkersMode: "All Workers Average",
+        allWorkersMode: "All Workers Performance",
         worker: "Worker",
         chooseWorker: "Choose Worker",
         fromDate: "From Date",
@@ -1145,7 +1283,10 @@
         rawWasteIndex: "Raw Material Waste Index",
         date: "Date",
         productionQty: "Production Quantity",
-        expectedHours: "Theoretical Hours",
+        expectedHours: "Theoretical Production Time",
+        theoreticalProductionMinutes: "Theoretical Production Time (minutes)",
+        wastedTime: "Wasted Time",
+        wastedTimeFormula: "Wasted Time (600 - Theoretical Production Time)",
         supervisorEvaluationAvg: "Average Supervisor Evaluation",
         quality: "Quality",
         cleanliness: "Cleanliness",
@@ -1178,6 +1319,8 @@
     let workers = [];
     let currentMode = "single";
     let messageTimer = null;
+    let activeSearchableSelect = null;
+    let searchableSelectEventsReady = false;
 
     const loadingBox = document.getElementById("loadingBox");
     const messageBox = document.getElementById("messageBox");
@@ -1213,7 +1356,9 @@
     const loadSingleBtn = document.getElementById("loadSingleBtn");
     const loadAllBtn = document.getElementById("loadAllBtn");
 
+    const summaryGrid = document.getElementById("summaryGrid");
     const totalProductionValue = document.getElementById("totalProductionValue");
+    const theoreticalProductionMinutesValue = document.getElementById("theoreticalProductionMinutesValue");
     const avgEvaluationValue = document.getElementById("avgEvaluationValue");
     const actualWasteValue = document.getElementById("actualWasteValue");
     const expectedWasteValue = document.getElementById("expectedWasteValue");
@@ -1227,6 +1372,7 @@
       initSidebar();
       initLanguage();
       initUserDropdown();
+      initSearchableSelectEvents();
       bindEvents();
       setDefaultDates();
       protectPageAndLoadInitialData();
@@ -1379,6 +1525,479 @@
       });
     }
 
+    function initSearchableSelectEvents() {
+      if (searchableSelectEventsReady) return;
+
+      document.addEventListener("click", event => {
+        if (
+          !event.target.closest(".searchable-select-cell") &&
+          !event.target.closest(".searchable-select-menu")
+        ) {
+          closeAllSearchableSelects();
+        }
+      });
+
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          closeAllSearchableSelects();
+        }
+      });
+
+      window.addEventListener("resize", closeAllSearchableSelects);
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", () => {
+          if (activeSearchableSelect) {
+            positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
+          }
+        });
+
+        window.visualViewport.addEventListener("scroll", () => {
+          if (activeSearchableSelect) {
+            positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
+          }
+        });
+      }
+
+      window.addEventListener("scroll", event => {
+        const scrollTarget = event.target;
+
+        if (scrollTarget && scrollTarget.closest && scrollTarget.closest(".searchable-select-options")) {
+          return;
+        }
+
+        if (activeSearchableSelect) {
+          positionSearchableSelectMenu(activeSearchableSelect.wrapper, activeSearchableSelect.menu);
+        }
+      }, true);
+
+      searchableSelectEventsReady = true;
+    }
+
+    function enhanceSearchableSelect(select, placeholder, kind) {
+      if (!select) return;
+
+      initSearchableSelectEvents();
+
+      if (select._searchableChangeHandler) {
+        select.removeEventListener("change", select._searchableChangeHandler);
+        select._searchableChangeHandler = null;
+      }
+
+      if (select._searchableWrapper) {
+        select._searchableWrapper.remove();
+        select._searchableWrapper = null;
+      }
+
+      if (select._searchableMenu) {
+        select._searchableMenu.remove();
+        select._searchableMenu = null;
+      }
+
+      select.classList.add("searchable-select-source");
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "searchable-select-cell";
+      wrapper.dataset.kind = kind || "default";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "searchable-select-input";
+      input.autocomplete = "off";
+      input.placeholder = placeholder;
+      input.setAttribute("aria-haspopup", "listbox");
+      input.setAttribute("aria-expanded", "false");
+
+      const arrow = document.createElement("span");
+      arrow.className = "searchable-select-arrow";
+      arrow.textContent = "▾";
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(arrow);
+      select.insertAdjacentElement("afterend", wrapper);
+
+      const menu = document.createElement("div");
+      menu.className = "searchable-select-menu";
+      menu.dataset.kind = kind || "default";
+      menu.dir = document.documentElement.dir || "rtl";
+
+      const optionsBox = document.createElement("div");
+      optionsBox.className = "searchable-select-options";
+      optionsBox.setAttribute("role", "listbox");
+
+      menu.appendChild(optionsBox);
+      document.body.appendChild(menu);
+
+      select._searchableWrapper = wrapper;
+      select._searchableMenu = menu;
+      wrapper._sourceSelect = select;
+      wrapper._searchableMenu = menu;
+      menu._sourceSelect = select;
+      menu._searchableWrapper = wrapper;
+
+      let isMenuPointerDown = false;
+      let isMenuPointerDragging = false;
+      let suppressOptionClick = false;
+      let pointerDownOptionButton = null;
+      let dragStartY = 0;
+      let dragStartScrollTop = 0;
+
+      function getSelectedText() {
+        const selectedOption = select.options[select.selectedIndex];
+        return selectedOption && select.value ? selectedOption.textContent : "";
+      }
+
+      function refreshInputText() {
+        input.value = getSelectedText();
+        input.placeholder = placeholder;
+      }
+
+      function chooseSearchableOption(value) {
+        select.value = value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        refreshInputText();
+        closeAllSearchableSelects();
+      }
+
+      function renderOptions(searchValue = input.value) {
+        const query = normalizeSearchText(searchValue);
+        optionsBox.innerHTML = "";
+
+        let count = 0;
+
+        [...select.options].forEach(option => {
+          const optionText = option.textContent || "";
+          const normalizedText = normalizeSearchText(optionText);
+
+          if (query && !normalizedText.includes(query)) {
+            return;
+          }
+
+          count++;
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "searchable-select-option";
+          button.textContent = optionText;
+          button.dataset.value = option.value;
+          button.setAttribute("role", "option");
+
+          if (String(option.value) === String(select.value)) {
+            button.classList.add("selected");
+            button.setAttribute("aria-selected", "true");
+          }
+
+          button.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (isMenuPointerDragging || suppressOptionClick) {
+              return;
+            }
+
+            chooseSearchableOption(button.dataset.value);
+          });
+
+          optionsBox.appendChild(button);
+        });
+
+        if (!count) {
+          const empty = document.createElement("div");
+          empty.className = "searchable-select-empty";
+          empty.textContent = currentLang === "ar" ? "لا توجد نتائج" : "No results";
+          optionsBox.appendChild(empty);
+        }
+      }
+
+      function openMenu() {
+        closeAllSearchableSelects(wrapper);
+        wrapper.classList.add("open");
+        menu.classList.add("show");
+        menu.dir = document.documentElement.dir || "rtl";
+        input.setAttribute("aria-expanded", "true");
+        renderOptions("");
+        positionSearchableSelectMenu(wrapper, menu);
+        activeSearchableSelect = { wrapper, menu, kind: kind || "default" };
+
+        setTimeout(() => {
+          input.focus();
+          input.select();
+        }, 0);
+      }
+
+      function closeMenu() {
+        wrapper.classList.remove("open");
+        menu.classList.remove("show");
+        input.setAttribute("aria-expanded", "false");
+        refreshInputText();
+      }
+
+      wrapper._closeSearchableSelect = closeMenu;
+
+      input.addEventListener("focus", openMenu);
+
+      input.addEventListener("click", event => {
+        event.stopPropagation();
+        if (!menu.classList.contains("show")) {
+          openMenu();
+        }
+      });
+
+      input.addEventListener("input", () => {
+        if (!menu.classList.contains("show")) {
+          wrapper.classList.add("open");
+          menu.classList.add("show");
+          input.setAttribute("aria-expanded", "true");
+          activeSearchableSelect = { wrapper, menu, kind: kind || "default" };
+        }
+
+        renderOptions(input.value);
+        positionSearchableSelectMenu(wrapper, menu);
+      });
+
+      input.addEventListener("keydown", event => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          if (!menu.classList.contains("show")) {
+            openMenu();
+          }
+          const firstOption = menu.querySelector(".searchable-select-option");
+          if (firstOption) firstOption.focus();
+        }
+
+        if (event.key === "Enter") {
+          const firstOption = menu.querySelector(".searchable-select-option");
+          if (menu.classList.contains("show") && firstOption) {
+            event.preventDefault();
+            firstOption.click();
+          }
+        }
+      });
+
+      optionsBox.addEventListener("wheel", event => {
+        event.stopPropagation();
+      }, { passive: true });
+
+      optionsBox.addEventListener("touchmove", event => {
+        event.stopPropagation();
+      }, { passive: true });
+
+      optionsBox.addEventListener("pointerdown", event => {
+        if (event.button !== undefined && event.button !== 0) return;
+
+        isMenuPointerDown = true;
+        isMenuPointerDragging = false;
+        suppressOptionClick = false;
+        pointerDownOptionButton = event.target && event.target.closest
+          ? event.target.closest(".searchable-select-option")
+          : null;
+        dragStartY = event.clientY;
+        dragStartScrollTop = optionsBox.scrollTop;
+
+        if (optionsBox.setPointerCapture && event.pointerId !== undefined) {
+          try {
+            optionsBox.setPointerCapture(event.pointerId);
+          } catch (error) {}
+        }
+      });
+
+      optionsBox.addEventListener("pointermove", event => {
+        if (!isMenuPointerDown) return;
+
+        const deltaY = event.clientY - dragStartY;
+
+        if (Math.abs(deltaY) > 5) {
+          isMenuPointerDragging = true;
+          suppressOptionClick = true;
+
+          if (event.pointerType === "mouse" || event.pointerType === "pen") {
+            optionsBox.scrollTop = dragStartScrollTop - deltaY;
+            event.preventDefault();
+          }
+        }
+      });
+
+      function endMenuDrag(event) {
+        if (isMenuPointerDown && optionsBox.releasePointerCapture && event && event.pointerId !== undefined) {
+          try {
+            optionsBox.releasePointerCapture(event.pointerId);
+          } catch (error) {}
+        }
+
+        isMenuPointerDown = false;
+
+        if (!isMenuPointerDragging && event && event.type === "pointerup" && pointerDownOptionButton && optionsBox.contains(pointerDownOptionButton)) {
+          const value = pointerDownOptionButton.dataset.value;
+          pointerDownOptionButton = null;
+          suppressOptionClick = true;
+          chooseSearchableOption(value);
+
+          setTimeout(() => {
+            suppressOptionClick = false;
+          }, 0);
+
+          return;
+        }
+
+        pointerDownOptionButton = null;
+
+        if (isMenuPointerDragging) {
+          setTimeout(() => {
+            isMenuPointerDragging = false;
+            suppressOptionClick = false;
+          }, 120);
+        } else {
+          suppressOptionClick = false;
+        }
+      }
+
+      optionsBox.addEventListener("pointerup", endMenuDrag);
+      optionsBox.addEventListener("pointercancel", endMenuDrag);
+      optionsBox.addEventListener("lostpointercapture", endMenuDrag);
+
+      menu.addEventListener("click", event => {
+        event.stopPropagation();
+      });
+
+      menu.addEventListener("mousedown", event => {
+        event.stopPropagation();
+      });
+
+      menu.addEventListener("touchstart", event => {
+        event.stopPropagation();
+      }, { passive: true });
+
+      menu.addEventListener("keydown", event => {
+        const currentOption = document.activeElement.closest(".searchable-select-option");
+        if (!currentOption) return;
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const next = currentOption.nextElementSibling;
+          if (next && next.classList.contains("searchable-select-option")) next.focus();
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          const previous = currentOption.previousElementSibling;
+          if (previous && previous.classList.contains("searchable-select-option")) {
+            previous.focus();
+          } else {
+            input.focus();
+          }
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          currentOption.click();
+        }
+      });
+
+      select._searchableChangeHandler = refreshInputText;
+      select.addEventListener("change", select._searchableChangeHandler);
+      refreshInputText();
+    }
+
+    function positionSearchableSelectMenu(wrapper, menu) {
+      const rect = wrapper.getBoundingClientRect();
+      const visualViewport = window.visualViewport || null;
+      const viewportHeight = visualViewport ? visualViewport.height : (window.innerHeight || document.documentElement.clientHeight);
+      const viewportWidth = visualViewport ? visualViewport.width : (window.innerWidth || document.documentElement.clientWidth);
+      const viewportOffsetTop = visualViewport ? visualViewport.offsetTop : 0;
+      const viewportOffsetLeft = visualViewport ? visualViewport.offsetLeft : 0;
+      const gap = 4;
+      const edgeGap = 8;
+      const maxAllowedHeight = 250;
+      const minUsableHeight = 80;
+      const minimumMenuWidth = viewportWidth <= 430 ? rect.width : 220;
+      const menuWidth = Math.min(Math.max(rect.width, minimumMenuWidth), viewportWidth - (edgeGap * 2));
+      const left = Math.min(
+        Math.max(rect.left + viewportOffsetLeft, edgeGap + viewportOffsetLeft),
+        viewportOffsetLeft + viewportWidth - menuWidth - edgeGap
+      );
+
+      const optionsBox = menu.querySelector(".searchable-select-options");
+
+      menu.style.width = menuWidth + "px";
+      menu.style.left = left + "px";
+      menu.style.maxHeight = "none";
+
+      if (optionsBox) {
+        optionsBox.style.maxHeight = "none";
+      }
+
+      const viewportTop = viewportOffsetTop;
+      const viewportBottom = viewportOffsetTop + viewportHeight;
+      const spaceBelow = Math.max(0, viewportBottom - rect.bottom - gap - edgeGap);
+      const spaceAbove = Math.max(0, rect.top - viewportTop - gap - edgeGap);
+      const naturalHeight = Math.min(
+        maxAllowedHeight,
+        Math.max(42, menu.scrollHeight || 42)
+      );
+
+      let openUp = false;
+
+      if (spaceBelow >= naturalHeight) {
+        openUp = false;
+      } else if (spaceAbove >= naturalHeight) {
+        openUp = true;
+      } else {
+        openUp = spaceAbove > spaceBelow;
+      }
+
+      const availableSpace = openUp ? spaceAbove : spaceBelow;
+      const menuHeight = Math.min(
+        naturalHeight,
+        Math.max(minUsableHeight, availableSpace)
+      );
+      const unclampedTop = openUp
+        ? rect.top - menuHeight - gap
+        : rect.bottom + gap;
+      const top = Math.min(
+        Math.max(unclampedTop, viewportTop + edgeGap),
+        viewportBottom - menuHeight - edgeGap
+      );
+
+      menu.style.maxHeight = menuHeight + "px";
+      menu.style.top = top + "px";
+
+      if (optionsBox) {
+        optionsBox.style.maxHeight = menuHeight + "px";
+      }
+    }
+
+    function closeAllSearchableSelects(exceptWrapper) {
+      document.querySelectorAll(".searchable-select-cell.open").forEach(wrapper => {
+        if (exceptWrapper && wrapper === exceptWrapper) return;
+
+        if (typeof wrapper._closeSearchableSelect === "function") {
+          wrapper._closeSearchableSelect();
+        } else {
+          wrapper.classList.remove("open");
+        }
+      });
+
+      document.querySelectorAll(".searchable-select-menu.show").forEach(menu => {
+        if (exceptWrapper && menu._searchableWrapper === exceptWrapper) return;
+        menu.classList.remove("show");
+      });
+
+      if (!exceptWrapper) {
+        activeSearchableSelect = null;
+      }
+    }
+
+    function normalizeSearchText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[أإآ]/g, "ا")
+        .replace(/ى/g, "ي")
+        .replace(/ة/g, "ه")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+
     function bindEvents() {
       singleTabBtn.addEventListener("click", () => switchMode("single"));
       allTabBtn.addEventListener("click", () => switchMode("all"));
@@ -1395,6 +2014,7 @@
 
       singleFilters.style.display = mode === "single" ? "grid" : "none";
       allFilters.style.display = mode === "all" ? "grid" : "none";
+      if (summaryGrid) summaryGrid.style.display = mode === "single" ? "grid" : "none";
 
       clearSummary();
       renderEmptyTable();
@@ -1474,6 +2094,8 @@
       if ([...singleWorkerInput.options].some(option => option.value === currentValue)) {
         singleWorkerInput.value = currentValue;
       }
+
+      enhanceSearchableSelect(singleWorkerInput, t("chooseWorker"), "performance-worker");
     }
 
     async function loadSinglePerformance() {
@@ -1542,7 +2164,6 @@
       const cached = getLocalCache_(cacheKey, 60000);
 
       if (cached) {
-        renderSummary(cached.summary || {});
         renderAllTable(cached.records || []);
       }
 
@@ -1567,7 +2188,6 @@
         }
 
         setLocalCache_(cacheKey, result);
-        renderSummary(result.summary || {});
         renderAllTable(result.records || []);
 
       } catch (error) {
@@ -1591,8 +2211,41 @@
       return true;
     }
 
+    function getTheoreticalMinutes(row) {
+      row = row || {};
+
+      if (row.theoreticalMinutes !== undefined && row.theoreticalMinutes !== null && row.theoreticalMinutes !== "") {
+        return Number(row.theoreticalMinutes || 0);
+      }
+
+      if (row.theoretical_minutes !== undefined && row.theoretical_minutes !== null && row.theoretical_minutes !== "") {
+        return Number(row.theoretical_minutes || 0);
+      }
+
+      if (row.theoreticalProductionMinutes !== undefined && row.theoreticalProductionMinutes !== null && row.theoreticalProductionMinutes !== "") {
+        return Number(row.theoreticalProductionMinutes || 0);
+      }
+
+      if (row.theoretical_production_minutes !== undefined && row.theoretical_production_minutes !== null && row.theoretical_production_minutes !== "") {
+        return Number(row.theoretical_production_minutes || 0);
+      }
+
+      return Number(row.theoreticalHours || row.theoretical_hours || 0) * 60;
+    }
+
+    function getWastedMinutes(row) {
+      return STANDARD_WORK_MINUTES - getTheoreticalMinutes(row);
+    }
+
+    function renderDangerNumber(value, isDanger) {
+      const formatted = formatDecimal(value || 0);
+      return isDanger ? `<span class="danger-number">${formatted}</span>` : formatted;
+    }
+
     function renderSummary(summary) {
+      summary = summary || {};
       totalProductionValue.textContent = formatNumber(summary.totalQuantity || 0);
+      theoreticalProductionMinutesValue.textContent = formatDecimal(summary.theoreticalMinutes || 0);
       avgEvaluationValue.textContent = formatDecimal(summary.averageEvaluation || 0);
       actualWasteValue.textContent = formatDecimal(summary.actualWaste || 0);
       expectedWasteValue.textContent = formatDecimal(summary.expectedWaste || 0);
@@ -1602,6 +2255,7 @@
     function clearSummary() {
       renderSummary({
         totalQuantity: 0,
+        theoreticalMinutes: 0,
         averageEvaluation: 0,
         actualWaste: 0,
         expectedWaste: 0,
@@ -1619,11 +2273,12 @@
             <th>${t("expectedWaste")}</th>
             <th>${t("rawWasteIndex")}</th>
             <th>${t("expectedHours")}</th>
+            <th>${t("wastedTimeFormula")}</th>
             <th>${t("supervisorEvaluationAvg")}</th>
             <th>${t("performanceLevel")}</th>
           </tr>
         `;
-        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        resultTableBody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
       } else {
         resultTableHead.innerHTML = `
           <tr>
@@ -1633,11 +2288,12 @@
             <th>${t("expectedWaste")}</th>
             <th>${t("rawWasteIndex")}</th>
             <th>${t("expectedHours")}</th>
+            <th>${t("wastedTimeFormula")}</th>
             <th>${t("supervisorEvaluationAvg")}</th>
             <th>${t("performanceLevel")}</th>
           </tr>
         `;
-        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        resultTableBody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
       }
     }
 
@@ -1650,13 +2306,14 @@
           <th>${t("expectedWaste")}</th>
           <th>${t("rawWasteIndex")}</th>
           <th>${t("expectedHours")}</th>
+          <th>${t("wastedTimeFormula")}</th>
           <th>${t("supervisorEvaluationAvg")}</th>
           <th>${t("performanceLevel")}</th>
         </tr>
       `;
 
       if (!records.length) {
-        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        resultTableBody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
         return;
       }
 
@@ -1665,14 +2322,18 @@
       records.forEach(row => {
         const tr = document.createElement("tr");
         const level = getLevel(row.averageEvaluation, row.wasteIndex);
+        const wasteIndex = Number(row.wasteIndex || 0);
+        const theoreticalMinutes = getTheoreticalMinutes(row);
+        const wastedMinutes = getWastedMinutes(row);
 
         tr.innerHTML = `
           <td class="date-cell">${escapeHtml(row.date || "")}</td>
           <td class="number-cell">${formatNumber(row.totalQuantity || 0)}</td>
           <td class="number-cell">${formatDecimal(row.actualWaste || 0)}</td>
           <td class="number-cell">${formatDecimal(row.expectedWaste || 0)}</td>
-          <td class="number-cell">${formatDecimal(row.wasteIndex || 0)}</td>
-          <td class="number-cell">${formatDecimal(row.theoreticalHours || 0)}</td>
+          <td class="number-cell ${wasteIndex > 1 ? "danger-cell" : ""}">${renderDangerNumber(wasteIndex, wasteIndex > 1)}</td>
+          <td class="number-cell">${formatDecimal(theoreticalMinutes)}</td>
+          <td class="number-cell ${wastedMinutes > 0 ? "danger-cell" : ""}">${renderDangerNumber(wastedMinutes, wastedMinutes > 0)}</td>
           <td class="number-cell">${formatDecimal(row.averageEvaluation || 0)}</td>
           <td>${renderLevel(level)}</td>
         `;
@@ -1690,13 +2351,14 @@
           <th>${t("expectedWaste")}</th>
           <th>${t("rawWasteIndex")}</th>
           <th>${t("expectedHours")}</th>
+          <th>${t("wastedTimeFormula")}</th>
           <th>${t("supervisorEvaluationAvg")}</th>
           <th>${t("performanceLevel")}</th>
         </tr>
       `;
 
       if (!records.length) {
-        resultTableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
+        resultTableBody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${t("emptyData")}</div></td></tr>`;
         return;
       }
 
@@ -1705,14 +2367,18 @@
       records.forEach(row => {
         const tr = document.createElement("tr");
         const level = getLevel(row.averageEvaluation, row.wasteIndex);
+        const wasteIndex = Number(row.wasteIndex || 0);
+        const theoreticalMinutes = getTheoreticalMinutes(row);
+        const wastedMinutes = getWastedMinutes(row);
 
         tr.innerHTML = `
           <td>${escapeHtml(row.workerName || row.workerId || "")}</td>
           <td class="number-cell">${formatNumber(row.totalQuantity || 0)}</td>
           <td class="number-cell">${formatDecimal(row.actualWaste || 0)}</td>
           <td class="number-cell">${formatDecimal(row.expectedWaste || 0)}</td>
-          <td class="number-cell">${formatDecimal(row.wasteIndex || 0)}</td>
-          <td class="number-cell">${formatDecimal(row.theoreticalHours || 0)}</td>
+          <td class="number-cell ${wasteIndex > 1 ? "danger-cell" : ""}">${renderDangerNumber(wasteIndex, wasteIndex > 1)}</td>
+          <td class="number-cell">${formatDecimal(theoreticalMinutes)}</td>
+          <td class="number-cell ${wastedMinutes > 0 ? "danger-cell" : ""}">${renderDangerNumber(wastedMinutes, wastedMinutes > 0)}</td>
           <td class="number-cell">${formatDecimal(row.averageEvaluation || 0)}</td>
           <td>${renderLevel(level)}</td>
         `;
@@ -2275,27 +2941,48 @@
     function normalizePerformanceResult_(result) {
       result = result || { success: false, records: [], summary: {} };
       const records = result.records || result.data || [];
-      result.records = records.map(row => ({
-        date: row.date || row.production_date || "",
-        workerId: row.workerId || row.worker_id || "",
-        workerName: row.workerName || row.worker_name || "",
-        totalQuantity: Number(row.totalQuantity ?? row.total_quantity ?? 0),
-        actualWaste: Number(row.actualWaste ?? row.actual_waste ?? row.total_raw_waste ?? 0),
-        expectedWaste: Number(row.expectedWaste ?? row.expected_waste ?? 0),
-        wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? 0),
-        theoreticalHours: Number(row.theoreticalHours ?? row.theoretical_hours ?? 0),
-        averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? 0)
-      }));
-      result.summary = result.summary || calculatePerformanceSummary_(result.records);
+      result.records = records.map(row => {
+        const explicitMinutes = row.theoreticalMinutes ?? row.theoretical_minutes ?? row.theoreticalProductionMinutes ?? row.theoretical_production_minutes;
+        const theoreticalHours = Number(row.theoreticalHours ?? row.theoretical_hours ?? 0);
+        const theoreticalMinutes = explicitMinutes !== undefined && explicitMinutes !== null && explicitMinutes !== ""
+          ? Number(explicitMinutes || 0)
+          : theoreticalHours * 60;
+
+        return {
+          date: row.date || row.production_date || "",
+          workerId: row.workerId || row.worker_id || "",
+          workerName: row.workerName || row.worker_name || "",
+          totalQuantity: Number(row.totalQuantity ?? row.total_quantity ?? 0),
+          actualWaste: Number(row.actualWaste ?? row.actual_waste ?? row.total_raw_waste ?? 0),
+          expectedWaste: Number(row.expectedWaste ?? row.expected_waste ?? 0),
+          wasteIndex: Number(row.wasteIndex ?? row.waste_index ?? 0),
+          theoreticalHours: theoreticalHours,
+          theoreticalMinutes: theoreticalMinutes,
+          wastedMinutes: STANDARD_WORK_MINUTES - theoreticalMinutes,
+          averageEvaluation: Number(row.averageEvaluation ?? row.average_evaluation ?? 0)
+        };
+      });
+
+      const calculatedSummary = calculatePerformanceSummary_(result.records);
+      result.summary = {
+        ...calculatedSummary,
+        ...(result.summary || {})
+      };
+
+      if (!Number(result.summary.theoreticalMinutes || 0)) {
+        result.summary.theoreticalMinutes = calculatedSummary.theoreticalMinutes;
+      }
+
       return result;
     }
 
     function calculatePerformanceSummary_(records) {
-      const summary = { totalQuantity: 0, averageEvaluation: 0, actualWaste: 0, expectedWaste: 0, wasteIndex: 0 };
+      const summary = { totalQuantity: 0, theoreticalMinutes: 0, averageEvaluation: 0, actualWaste: 0, expectedWaste: 0, wasteIndex: 0 };
       let evalSum = 0;
       let evalCount = 0;
       (records || []).forEach(row => {
         summary.totalQuantity += Number(row.totalQuantity || 0);
+        summary.theoreticalMinutes += getTheoreticalMinutes(row);
         summary.actualWaste += Number(row.actualWaste || 0);
         summary.expectedWaste += Number(row.expectedWaste || 0);
         if (Number(row.averageEvaluation || 0) > 0) {
