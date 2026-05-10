@@ -1061,6 +1061,10 @@
         <span data-i18n="spareParts">قطع الغيار</span>
         <span class="nav-icon">🧰</span>
       </a>
+      <a href="permits.html" data-permission="permitsPage">
+        <span data-i18n="permitsTracking">متابعة التصاريح</span>
+        <span class="nav-icon">🧾</span>
+      </a>
     </nav>
   </aside>
 
@@ -1337,6 +1341,36 @@
             </div>
           </div>
 
+
+          <div class="permissions-section">
+            <label class="perm-label">
+              <input type="checkbox" data-perm="permitsPage">
+              <span data-i18n="permPermitsPage">صلاحية دخول صفحة متابعة التصاريح</span>
+            </label>
+
+            <div class="sub-permissions">
+              <label class="perm-label">
+                <input type="checkbox" data-perm="permitAddTransaction">
+                <span data-i18n="permPermitAddTransaction">صلاحية إضافة معاملة جديدة</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="permitAddActivity">
+                <span data-i18n="permPermitAddActivity">صلاحية إضافة نشاط جديد</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="permitAddLocation">
+                <span data-i18n="permPermitAddLocation">صلاحية إضافة موقع جديد</span>
+              </label>
+
+              <label class="perm-label">
+                <input type="checkbox" data-perm="permitUpdateTransaction">
+                <span data-i18n="permPermitUpdateTransaction">صلاحية تحديث المعاملات</span>
+              </label>
+            </div>
+          </div>
+
           <div class="permissions-section">
             <label class="perm-label">
               <input type="checkbox" data-perm="usersPage">
@@ -1398,6 +1432,11 @@
       "inventoryDeletePart",
       "inventoryAddCategory",
       "inventoryMovementHistory",
+      "permitsPage",
+      "permitAddTransaction",
+      "permitAddActivity",
+      "permitAddLocation",
+      "permitUpdateTransaction",
       "usersPage"
     ];
 
@@ -1420,6 +1459,7 @@
         products: "المنتجات",
         machines: "المكائن",
         spareParts: "قطع الغيار",
+        permitsTracking: "متابعة التصاريح",
         usersManagement: "إدارة المستخدمين",
         profile: "الملف الشخصي",
         logout: "تسجيل الخروج",
@@ -1485,6 +1525,11 @@
         permInventoryDeletePart: "صلاحية حذف قطعة غيار",
         permInventoryAddCategory: "صلاحية إضافة تصنيف قطع غيار",
         permInventoryMovementHistory: "صلاحية عرض سجل حركات المخزون",
+        permPermitsPage: "صلاحية دخول صفحة متابعة التصاريح",
+        permPermitAddTransaction: "صلاحية إضافة معاملة جديدة",
+        permPermitAddActivity: "صلاحية إضافة نشاط جديد",
+        permPermitAddLocation: "صلاحية إضافة موقع جديد",
+        permPermitUpdateTransaction: "صلاحية تحديث المعاملات",
         permUsersPage: "صلاحية دخول صفحة المستخدمين"
       },
       en: {
@@ -1505,6 +1550,7 @@
         products: "Products",
         machines: "Machines",
         spareParts: "Spare Parts",
+        permitsTracking: "Permits Tracking",
         usersManagement: "Users Management",
         profile: "Profile",
         logout: "Logout",
@@ -1570,6 +1616,11 @@
         permInventoryDeletePart: "Delete spare part",
         permInventoryAddCategory: "Add spare part category",
         permInventoryMovementHistory: "View inventory movement history",
+        permPermitsPage: "Access Permits Tracking page",
+        permPermitAddTransaction: "Add new transaction",
+        permPermitAddActivity: "Add new activity",
+        permPermitAddLocation: "Add new location",
+        permPermitUpdateTransaction: "Update transactions",
         permUsersPage: "Access Users page"
       }
     };
