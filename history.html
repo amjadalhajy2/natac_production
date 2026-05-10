@@ -700,48 +700,6 @@
       background: var(--input);
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .summary-card {
-      background: #fff;
-      border: 1px solid rgba(16,24,39,0.10);
-      border-radius: 20px;
-      padding: 15px;
-      box-shadow: 0 10px 24px rgba(16,24,39,0.06);
-      text-align: start;
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(0,102,255,0.25);
-      box-shadow: 0 16px 32px rgba(0,102,255,0.10);
-    }
-
-    .summary-card span {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 900;
-      margin-bottom: 7px;
-    }
-
-    .summary-card strong {
-      display: block;
-      color: var(--text);
-      font-size: 25px;
-      font-weight: 900;
-      direction: ltr;
-      text-align: start;
-      font-family: Arial, sans-serif;
-    }
-
     .table-wrap {
       border-radius: 18px;
       overflow-x: auto;
@@ -1011,10 +969,6 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
       .entry-form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -1067,7 +1021,6 @@
       }
 
       .filters-grid,
-      .summary-grid,
       .entry-form-grid {
         grid-template-columns: 1fr;
       }
@@ -1280,28 +1233,6 @@
           <div class="field">
             <label>&nbsp;</label>
             <button class="btn btn-secondary" type="button" id="refreshBtn" data-i18n="refresh">تحديث</button>
-          </div>
-        </div>
-
-        <div class="summary-grid">
-          <div class="summary-card" data-indicator="avgWorkHours">
-            <span data-i18n="avgWorkHours">متوسط ساعات العمل</span>
-            <strong id="avgWorkHoursValue">0</strong>
-          </div>
-
-          <div class="summary-card" data-indicator="rawWasteIndex">
-            <span data-i18n="rawWasteIndex">مؤشر هدر المواد الخام</span>
-            <strong id="wasteIndexValue">0</strong>
-          </div>
-
-          <div class="summary-card" data-indicator="wastedHours">
-            <span data-i18n="wastedHours">إجمالي ساعات العمل المهدرة</span>
-            <strong id="wastedHoursValue">0</strong>
-          </div>
-
-          <div class="summary-card" data-indicator="totalProduction">
-            <span data-i18n="totalProduction">إجمالي الإنتاج</span>
-            <strong id="totalProductionValue">0</strong>
           </div>
         </div>
 
@@ -2099,6 +2030,10 @@
     }
 
     function renderSummary() {
+      if (!avgWorkHoursValue || !wasteIndexValue || !wastedHoursValue || !totalProductionValue) {
+        return;
+      }
+
       const groups = getGroupedHistory();
 
       let totalQuantity = 0;
