@@ -1311,10 +1311,6 @@
             </select>
           </div>
 
-          <div class="field">
-            <label>&nbsp;</label>
-            <button class="btn btn-secondary" type="button" id="refreshBtn" data-i18n="refresh">تحديث</button>
-          </div>
         </div>
 
         <div class="summary-grid">
@@ -2128,7 +2124,7 @@
         const tr = document.createElement("tr");
         const validity = getPermitValidity(permit);
         const status = normalizePermitStatus(permit.Status || permit.status || "Active");
-        const imagePath = permit.ImageURL || permit.imageUrl || permit.ImagePath || permit.imagePath || "";
+        const imagePath = getPermitImagePath(permit);
 
         tr.innerHTML = `
           <td>${escapeHtml(permit.TransactionName || permit.transactionName || "")}</td>
@@ -2179,7 +2175,7 @@
     function renderCurrentPermitBox(permit) {
       const validity = getPermitValidity(permit);
       const status = normalizePermitStatus(permit.Status || permit.status || "Active");
-      const imagePath = permit.ImageURL || permit.imageUrl || permit.ImagePath || permit.imagePath || "";
+      const imagePath = getPermitImagePath(permit);
 
       currentPermitDataBox.innerHTML = `
         ${renderDataItem(t("transactionName"), permit.TransactionName || permit.transactionName || "")}
@@ -2220,7 +2216,7 @@
         openModal(locationModal);
       });
 
-      refreshBtn.addEventListener("click", () => loadPermits(true));
+      if (refreshBtn) refreshBtn.addEventListener("click", () => loadPermits(true));
       transactionSearchInput.addEventListener("input", renderPermitsTable);
       activityFilterInput.addEventListener("change", renderPermitsTable);
       locationFilterInput.addEventListener("change", renderPermitsTable);
@@ -2497,6 +2493,8 @@
     async function uploadImage_(imageData) {
       if (!imageData) return "";
 
+      let lastError = null;
+
       try {
         const result = await fetch(STORAGE_FUNCTION_URL, {
           method: "POST",
@@ -2515,15 +2513,67 @@
         });
 
         const json = await result.json().catch(() => ({}));
-        if (!result.ok || !json.success) {
-          throw new Error(json.message || "Upload failed");
+        if (result.ok && json.success) {
+          const uploadedPath = json.path || json.imagePath || json.filePath || json.publicUrl || json.public_url || json.url || "";
+          if (uploadedPath) return uploadedPath;
         }
 
-        return json.path || json.publicUrl || json.url || "";
+        lastError = new Error(json.message || "Upload failed");
       } catch (error) {
-        console.warn("Image upload failed:", error);
-        return imageData.dataUrl;
+        lastError = error;
       }
+
+      try {
+        if (!supabaseClient || !supabaseClient.storage) {
+          throw lastError || new Error("Supabase storage is not available");
+        }
+
+        const blob = dataUrlToBlob_(imageData.dataUrl);
+        const extension = getFileExtension_(imageData.fileName, imageData.mimeType);
+        const filePath = "permits/" + Date.now() + "-" + Math.random().toString(36).slice(2) + extension;
+        const uploadResult = await supabaseClient.storage
+          .from(STORAGE_BUCKET)
+          .upload(filePath, blob, {
+            contentType: imageData.mimeType || "image/jpeg",
+            upsert: true
+          });
+
+        if (uploadResult.error) {
+          throw uploadResult.error;
+        }
+
+        const publicResult = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+        return publicResult?.data?.publicUrl || filePath;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        throw new Error(error.message || t("serverError"));
+      }
+    }
+
+    function dataUrlToBlob_(dataUrl) {
+      const parts = String(dataUrl || "").split(",");
+      const meta = parts[0] || "";
+      const base64 = parts[1] || "";
+      const mimeMatch = meta.match(/data:([^;]+);base64/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      return new Blob([bytes], { type: mimeType });
+    }
+
+    function getFileExtension_(fileName, mimeType) {
+      const cleanName = String(fileName || "").toLowerCase();
+      const match = cleanName.match(/\.[a-z0-9]+$/);
+      if (match) return match[0];
+      if (mimeType === "image/png") return ".png";
+      if (mimeType === "image/webp") return ".webp";
+      if (mimeType === "image/gif") return ".gif";
+      return ".jpg";
     }
 
     function validatePermitDates(issueDate, expiryDate) {
@@ -2540,6 +2590,37 @@
       if (!issueDate || !expiryDate || expiryDate < issueDate) return;
       const days = daysBetween(issueDate, expiryDate);
       durationInput.value = formatNumber(days) + (currentLang === "ar" ? " يوم" : " days");
+    }
+
+    function getPermitImagePath(permit) {
+      return permit.ImageURL ||
+        permit.imageUrl ||
+        permit.image_url ||
+        permit.ImagePath ||
+        permit.imagePath ||
+        permit.image_path ||
+        permit.PermitImagePath ||
+        permit.permitImagePath ||
+        permit.permit_image_path ||
+        "";
+    }
+
+    function resolveImageUrl(path) {
+      const value = String(path || "").trim();
+      if (!value) return "";
+      if (/^(https?:|data:|blob:)/i.test(value)) return value;
+
+      let cleanPath = value.replace(/^\/+/, "");
+      if (cleanPath.indexOf(STORAGE_BUCKET + "/") === 0) {
+        cleanPath = cleanPath.slice(STORAGE_BUCKET.length + 1);
+      }
+
+      try {
+        const result = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(cleanPath);
+        return result?.data?.publicUrl || value;
+      } catch (error) {
+        return value;
+      }
     }
 
     function getPermitValidity(permit) {
@@ -2723,9 +2804,10 @@
           IssueDate: item.IssueDate || item.issueDate || item.issue_date || "",
           ExpiryDate: item.ExpiryDate || item.expiryDate || item.expiry_date || "",
           ValidityDuration: item.ValidityDuration || item.validityDuration || item.validity_duration || "",
-          ImagePath: item.ImagePath || item.imagePath || item.image_path || "",
-          ImageURL: item.ImageURL || item.imageUrl || item.image_url || item.ImagePath || item.image_path || "",
-          Status: item.Status || item.status || "Active"
+          PermitImagePath: item.PermitImagePath || item.permitImagePath || item.permit_image_path || "",
+          ImagePath: item.ImagePath || item.imagePath || item.image_path || item.PermitImagePath || item.permitImagePath || item.permit_image_path || "",
+          ImageURL: item.ImageURL || item.imageUrl || item.image_url || item.publicUrl || item.public_url || item.ImagePath || item.imagePath || item.image_path || item.PermitImagePath || item.permitImagePath || item.permit_image_path || "",
+          Status: item.Status || item.status || item.TransactionStatus || item.transactionStatus || item.transaction_status || "Active"
         }))
       };
     }
@@ -2938,7 +3020,7 @@
 
     function openImagePath(path) {
       if (!path) return;
-      window.open(path, "_blank", "noopener,noreferrer");
+      window.open(resolveImageUrl(path), "_blank", "noopener,noreferrer");
     }
 
     async function logoutUser() {
