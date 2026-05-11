@@ -1121,6 +1121,7 @@
               <th data-i18n="fullName">الاسم الكامل</th>
               <th data-i18n="username">اسم المستخدم</th>
               <th data-i18n="role">الصلاحية</th>
+              <th data-i18n="lastLogin">اخر تسجيل دخول</th>
               <th data-i18n="status">الحالة</th>
               <th data-i18n="actions">الإجراء</th>
             </tr>
@@ -1473,6 +1474,7 @@
         passwordHint: "عند التعديل، اترك كلمة المرور فارغة إذا كنت لا تريد تغييرها.",
         usernameLockedHint: "لا يمكن تغيير اسم المستخدم بعد الإنشاء.",
         role: "الصلاحية",
+        lastLogin: "اخر تسجيل دخول",
         status: "الحالة",
         actions: "الإجراء",
         allRoles: "كل الصلاحيات",
@@ -1564,6 +1566,7 @@
         passwordHint: "When editing, leave password empty if you do not want to change it.",
         usernameLockedHint: "Username cannot be changed after creation.",
         role: "Role",
+        lastLogin: "Last Login",
         status: "Status",
         actions: "Action",
         allRoles: "All Roles",
@@ -1910,7 +1913,7 @@
       if (!filteredUsers.length) {
         usersTableBody.innerHTML = `
           <tr>
-            <td colspan="6">
+            <td colspan="7">
               <div class="empty-state">${t("emptyData")}</div>
             </td>
           </tr>
@@ -1925,6 +1928,7 @@
         const status = normalizeStatus(user.Status || "");
         const active = status === "Active";
         const admin = role === "Admin";
+        const lastLogin = formatLastLogin(user.LastLogin || user.LastLoginAt || user.lastLogin || user.lastLoginAt || user.last_login || user.last_login_at || "");
 
         const tr = document.createElement("tr");
 
@@ -1937,6 +1941,7 @@
               ${admin ? t("roleAdmin") : t("roleSupervisor")}
             </span>
           </td>
+          <td class="id-cell">${escapeHtml(lastLogin)}</td>
           <td>
             <span class="status-pill ${active ? "status-active" : "status-inactive"}">
               ${active ? t("active") : t("inactive")}
@@ -2648,12 +2653,16 @@
         Username: user.Username || user.username || "",
         Role: user.Role || user.role || "",
         Status: user.Status || user.status || "",
+        LastLogin: user.LastLogin || user.LastLoginAt || user.lastLogin || user.last_login || user.last_login_at || "",
+        LastLoginAt: user.LastLoginAt || user.LastLogin || user.lastLoginAt || user.last_login_at || user.last_login || "",
         Permissions: permissions,
         id: user.id || user.UserID || user.userId || "",
         fullName: user.fullName || user.FullName || user.full_name || "",
         username: user.username || user.Username || "",
         role: user.role || user.Role || "",
         status: user.status || user.Status || "",
+        lastLogin: user.lastLogin || user.LastLogin || user.last_login || user.LastLoginAt || user.last_login_at || "",
+        lastLoginAt: user.lastLoginAt || user.LastLoginAt || user.LastLogin || user.last_login_at || user.last_login || "",
         permissions: permissions
       };
     }
@@ -3011,6 +3020,26 @@
       clearTimeout(messageTimer);
       messageBox.textContent = "";
       messageBox.className = "message";
+    }
+
+    function formatLastLogin(value) {
+      if (!value) return "---";
+
+      const rawValue = String(value || "").trim();
+      const date = new Date(rawValue);
+
+      if (Number.isNaN(date.getTime())) {
+        return rawValue || "---";
+      }
+
+      return date.toLocaleString(currentLang === "ar" ? "ar-OM" : "en-OM", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
     }
 
     function escapeHtml(value) {
