@@ -1244,6 +1244,7 @@
           <table>
             <thead>
               <tr>
+                <th data-i18n="date">التاريخ</th>
                 <th data-i18n="worker">العامل</th>
                 <th data-i18n="productCategory">صنف المنتج</th>
                 <th data-i18n="productName">اسم المنتج</th>
@@ -2032,7 +2033,15 @@
         groupsMap[productionId].items.push(record);
       });
 
-      return Object.values(groupsMap);
+      return Object.values(groupsMap).sort((a, b) => {
+        const dateA = String(a.Date || "");
+        const dateB = String(b.Date || "");
+        const dateCompare = dateA.localeCompare(dateB);
+
+        if (dateCompare !== 0) return dateCompare;
+
+        return String(a.ProductionID || "").localeCompare(String(b.ProductionID || ""));
+      });
     }
 
     function renderSummary() {
@@ -2083,7 +2092,7 @@
       if (!groups.length) {
         historyTableBody.innerHTML = `
           <tr>
-            <td colspan="9">
+            <td colspan="10">
               <div class="empty-state">${t("emptyData")}</div>
             </td>
           </tr>
@@ -2096,6 +2105,10 @@
 
         group.items.forEach((item, itemIndex) => {
           const tr = document.createElement("tr");
+
+          const dateCell = itemIndex === 0
+            ? `<td rowspan="${rowSpan}" class="number-cell">${escapeHtml(group.Date || item.Date || "")}</td>`
+            : "";
 
           const workerCell = itemIndex === 0
             ? `<td rowspan="${rowSpan}">${escapeHtml(group.WorkerName || group.WorkerID || "")}</td>`
@@ -2121,6 +2134,7 @@
             : "";
 
           tr.innerHTML = `
+            ${dateCell}
             ${workerCell}
             <td>${escapeHtml(item.ProductCategory || "")}</td>
             <td>${escapeHtml(item.ProductName || item.ProductID || "")}</td>
