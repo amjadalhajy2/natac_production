@@ -1196,6 +1196,12 @@
     .status-badge.warn { background: rgba(180,83,9,0.12); color: #b45309; }
     .status-badge.bad { background: rgba(220,38,38,0.13); color: var(--red); }
 
+    .status-cell {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     tr.row-bad td { background: rgba(220,38,38,0.045); }
     tr.row-warn td { background: rgba(180,83,9,0.045); }
 
@@ -1656,10 +1662,8 @@
         status: "الحالة",
         showShortfallOnly: "إظهار حالات التقصير فقط",
         statusGood: "ملتزم",
-        statusWarn: "تنبيه",
-        statusBad: "تقصير",
-        reasonLowOutput: "إنتاج أقل من المعتاد",
-        reasonHighWaste: "هدر مواد زائد",
+        reasonLowOutput: "إنتاج منخفض",
+        reasonHighWaste: "هدر زائد",
         noShortfallCases: "لا توجد حالات تقصير ضمن البيانات الحالية.",
         shortfallCasesFound: "{bad} حالة تقصير و {warn} حالة تحتاج متابعة ضمن السجلات المعروضة."
       },
@@ -1753,10 +1757,8 @@
         status: "Status",
         showShortfallOnly: "Show shortfall cases only",
         statusGood: "On Track",
-        statusWarn: "Attention",
-        statusBad: "Shortfall",
-        reasonLowOutput: "Below normal output",
-        reasonHighWaste: "Excess material waste",
+        reasonLowOutput: "Low Output",
+        reasonHighWaste: "Excess Waste",
         noShortfallCases: "No shortfall cases in the current data.",
         shortfallCasesFound: "{bad} shortfall case(s) and {warn} case(s) needing attention in the displayed records."
       }
@@ -2345,9 +2347,8 @@
       if (lowOutput && highWaste) level = "bad";
       else if (lowOutput || highWaste) level = "warn";
 
-      const reasons = [];
-      if (lowOutput) reasons.push(t("reasonLowOutput"));
-      if (highWaste) reasons.push(t("reasonHighWaste"));
+      // أعلى وزن = تقصير أكبر: إنتاج منخفض أكثر خطورة من هدر زائد
+      const severity = (lowOutput ? 2 : 0) + (highWaste ? 1 : 0);
 
       return {
         quantity,
@@ -2358,7 +2359,7 @@
         lowOutput,
         highWaste,
         level,
-        reasonText: reasons.join(" + ")
+        severity
       };
     }
 
@@ -2407,8 +2408,8 @@
 
       const levelWeight = { bad: 0, warn: 1, good: 2 };
       visible.sort((a, b) => {
-        const weightDiff = levelWeight[a.stats.level] - levelWeight[b.stats.level];
-        if (weightDiff !== 0) return weightDiff;
+        const severityDiff = b.stats.severity - a.stats.severity;
+        if (severityDiff !== 0) return severityDiff;
         return String(b.group.Date || "").localeCompare(String(a.group.Date || ""));
       });
 
@@ -2432,18 +2433,17 @@
         return;
       }
 
-      const statusLabels = { good: t("statusGood"), warn: t("statusWarn"), bad: t("statusBad") };
-
       visible.forEach(entry => {
         const { group, originalIndex, stats } = entry;
 
         const tr = document.createElement("tr");
-        if (stats.level === "bad") tr.classList.add("row-bad");
-        if (stats.level === "warn") tr.classList.add("row-warn");
+        if (stats.lowOutput) tr.classList.add("row-bad");
+        else if (stats.highWaste) tr.classList.add("row-warn");
 
-        const reasonHtml = stats.reasonText
-          ? `<span class="reason-text">${escapeHtml(stats.reasonText)}</span>`
-          : "";
+        const badges = [];
+        if (stats.lowOutput) badges.push(`<span class="status-badge bad">${t("reasonLowOutput")}</span>`);
+        if (stats.highWaste) badges.push(`<span class="status-badge warn">${t("reasonHighWaste")}</span>`);
+        if (!badges.length) badges.push(`<span class="status-badge good">${t("statusGood")}</span>`);
 
         tr.innerHTML = `
           <td class="number-cell">${escapeHtml(group.Date || "")}</td>
@@ -2452,10 +2452,7 @@
           <td class="number-cell">${formatNumber(stats.quantity)}</td>
           <td class="number-cell">${formatDecimal(stats.theoreticalHours)}</td>
           <td class="number-cell">${formatDecimal(stats.actualWaste)}</td>
-          <td>
-            <span class="status-badge ${stats.level}">${statusLabels[stats.level]}</span>
-            ${reasonHtml}
-          </td>
+          <td class="status-cell">${badges.join("")}</td>
           <td>
             <button class="btn btn-secondary btn-small details-btn" type="button" data-index="${originalIndex}">
               ${t("showDetails")}
