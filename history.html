@@ -1067,367 +1067,161 @@
       }
     }
 
-    /* ============ KPI Dashboard ============ */
-    .kpi-grid {
+    /* ============ Simplified stat strip ============ */
+    .stat-strip {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
+      gap: 12px;
       margin-bottom: 16px;
     }
 
-    .summary-card {
-      position: relative;
-      overflow: hidden;
+    .stat-pill {
       cursor: pointer;
-      border-radius: 22px;
-      padding: 18px 20px;
-      background: var(--card);
-      border: 1px solid rgba(16,24,39,0.10);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(20px) saturate(170%);
-      -webkit-backdrop-filter: blur(20px) saturate(170%);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-align: start;
-      transition: 0.18s ease;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 26px 60px rgba(16,24,39,0.16);
-    }
-
-    .summary-card .kpi-icon {
-      width: 50px;
-      height: 50px;
-      flex-shrink: 0;
       border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      background: linear-gradient(145deg, rgba(0,102,255,0.14), rgba(109,40,217,0.14));
+      padding: 14px 16px;
+      background: #fff;
+      border: 1px solid rgba(16,24,39,0.12);
+      text-align: start;
     }
 
-    .summary-card .kpi-body {
-      min-width: 0;
-    }
-
-    .summary-card .kpi-label {
-      font-size: 13px;
+    .stat-pill .stat-label {
+      display: block;
+      font-size: 12.5px;
       font-weight: 900;
       color: var(--muted);
-      margin: 0 0 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-bottom: 4px;
     }
 
-    .summary-card .kpi-value {
-      font-size: 26px;
+    .stat-pill .stat-value {
+      font-size: 22px;
       font-weight: 900;
       color: var(--text);
       direction: ltr;
       display: inline-block;
     }
 
-    .summary-card .kpi-unit {
-      font-size: 13px;
+    .stat-pill .stat-unit {
+      font-size: 12px;
       font-weight: 800;
       color: var(--muted);
       margin-inline-start: 4px;
     }
 
-    .summary-card.status-good .kpi-value { color: var(--green); }
-    .summary-card.status-warn .kpi-value { color: #b45309; }
-    .summary-card.status-bad .kpi-value { color: var(--red); }
+    .stat-pill.status-good .stat-value { color: var(--green); }
+    .stat-pill.status-warn .stat-value { color: #b45309; }
+    .stat-pill.status-bad .stat-value { color: var(--red); }
 
-    .summary-card.status-good .kpi-icon { background: rgba(22,163,74,0.14); }
-    .summary-card.status-warn .kpi-icon { background: rgba(180,83,9,0.14); }
-    .summary-card.status-bad .kpi-icon { background: rgba(220,38,38,0.14); }
-
-    /* ============ Insights panel ============ */
-    .insights-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .insight-box {
-      border-radius: 22px;
-      padding: 18px 20px;
-      background: var(--card);
-      border: 1px solid rgba(16,24,39,0.10);
-      box-shadow: var(--shadow);
-      text-align: start;
-    }
-
-    .insight-box h3 {
-      margin: 0 0 12px;
-      font-size: 15px;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .rank-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .rank-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 14px;
-      background: #f7f9fc;
-      border: 1px solid rgba(16,24,39,0.06);
-    }
-
-    .rank-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 900;
-      color: #fff;
-      background: linear-gradient(145deg, var(--blue), var(--purple));
-    }
-
-    .rank-row:nth-child(1) .rank-badge { background: linear-gradient(145deg, #f59e0b, #b45309); }
-    .rank-row:nth-child(2) .rank-badge { background: linear-gradient(145deg, #94a3b8, #475569); }
-    .rank-row:nth-child(3) .rank-badge { background: linear-gradient(145deg, #c2703d, #7c2d12); }
-
-    .rank-name {
-      flex: 1;
-      min-width: 0;
-      font-weight: 900;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .rank-value {
-      font-weight: 900;
-      font-size: 13px;
-      color: var(--blue-dark);
-      direction: ltr;
-    }
-
-    .alert-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(220,38,38,0.06);
-      border: 1px solid rgba(220,38,38,0.14);
-      margin-bottom: 8px;
-    }
-
-    .alert-row:last-child { margin-bottom: 0; }
-
-    .alert-row .alert-icon { font-size: 17px; flex-shrink: 0; }
-
-    .alert-row .alert-text {
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1.6;
-      color: #7f1d1d;
-    }
-
-    /* ============ Records grid (cards) ============ */
-    .records-toolbar {
+    /* ============ Alert banner ============ */
+    .alert-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .records-count {
-      font-size: 13px;
-      font-weight: 900;
-      color: var(--muted);
-    }
-
-    .records-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 14px;
-    }
-
-    .record-card {
-      border-radius: 20px;
-      background: #fff;
-      border: 1px solid rgba(16,24,39,0.12);
-      box-shadow: 0 10px 26px rgba(16,24,39,0.06);
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
       gap: 12px;
+      flex-wrap: wrap;
+      padding: 13px 18px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      background: rgba(220,38,38,0.08);
+      border: 1px solid rgba(220,38,38,0.20);
+      color: #7f1d1d;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .alert-banner.is-clear {
+      background: rgba(22,163,74,0.08);
+      border-color: rgba(22,163,74,0.20);
+      color: #14532d;
+    }
+
+    /* ============ Toggle ============ */
+    .shortfall-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .shortfall-toggle input {
+      width: 40px;
+      min-height: auto;
+      height: 22px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(16,24,39,0.18);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
       transition: 0.18s ease;
     }
 
-    .record-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 44px rgba(16,24,39,0.12);
-    }
-
-    .record-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .record-worker {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .record-avatar {
-      width: 38px;
-      height: 38px;
+    .shortfall-toggle input::before {
+      content: "";
+      position: absolute;
+      top: 3px;
+      inset-inline-start: 3px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      color: #fff;
-      font-size: 14px;
-      background: linear-gradient(145deg, var(--blue), var(--purple));
+      background: #fff;
+      transition: 0.18s ease;
     }
 
-    .record-worker-name {
-      font-weight: 900;
-      font-size: 15px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .shortfall-toggle input:checked {
+      background: var(--red);
     }
 
-    .record-date {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 800;
-      direction: ltr;
-      display: inline-block;
+    .shortfall-toggle input:checked::before {
+      inset-inline-start: 21px;
     }
 
-    .record-badge {
-      flex-shrink: 0;
-      font-size: 11px;
+    /* ============ Status badges ============ */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12.5px;
       font-weight: 900;
-      padding: 5px 10px;
+      padding: 6px 11px;
       border-radius: 999px;
       white-space: nowrap;
     }
 
-    .record-badge.good { background: rgba(22,163,74,0.12); color: var(--green); }
-    .record-badge.warn { background: rgba(180,83,9,0.12); color: #b45309; }
-    .record-badge.bad { background: rgba(220,38,38,0.12); color: var(--red); }
-    .record-badge.neutral { background: rgba(16,24,39,0.07); color: var(--muted); }
+    .status-badge.good { background: rgba(22,163,74,0.12); color: var(--green); }
+    .status-badge.warn { background: rgba(180,83,9,0.12); color: #b45309; }
+    .status-badge.bad { background: rgba(220,38,38,0.13); color: var(--red); }
 
-    .record-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
+    tr.row-bad td { background: rgba(220,38,38,0.045); }
+    tr.row-warn td { background: rgba(180,83,9,0.045); }
 
-    .item-chip {
-      font-size: 12px;
-      font-weight: 800;
-      padding: 6px 10px;
-      border-radius: 12px;
-      background: #eef4ff;
-      color: var(--blue-dark);
-      border: 1px solid rgba(0,102,255,0.14);
-      white-space: nowrap;
-    }
-
-    .item-chip .chip-qty {
-      direction: ltr;
-      display: inline-block;
-      font-weight: 900;
-    }
-
-    .record-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      padding: 10px 0;
-      border-top: 1px dashed rgba(16,24,39,0.12);
-      border-bottom: 1px dashed rgba(16,24,39,0.12);
-    }
-
-    .record-stat {
-      text-align: center;
-    }
-
-    .record-stat .stat-value {
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--text);
-      direction: ltr;
+    .reason-text {
       display: block;
-    }
-
-    .record-stat .stat-label {
-      font-size: 11px;
+      margin-top: 3px;
+      font-size: 11.5px;
       font-weight: 800;
       color: var(--muted);
-    }
-
-    .record-notes {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .record-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .record-foot .image-link {
-      font-size: 13px;
     }
 
     @media (max-width: 1180px) {
-      .kpi-grid {
+      .stat-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .insights-grid {
-        grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 760px) {
-      .kpi-grid {
+      .stat-strip {
         grid-template-columns: 1fr;
       }
 
-      .records-grid {
-        grid-template-columns: 1fr;
+      .alert-banner {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
       }
     }
   </style>
@@ -1566,53 +1360,31 @@
           </div>
         </div>
 
-        <div class="kpi-grid">
-          <div class="summary-card" data-indicator="totalProduction">
-            <div class="kpi-icon">📦</div>
-            <div class="kpi-body">
-              <p class="kpi-label" data-i18n="totalProduction">إجمالي الإنتاج</p>
-              <span class="kpi-value" id="totalProductionValue">0</span>
-            </div>
+        <div class="stat-strip">
+          <div class="stat-pill" data-indicator="totalProduction">
+            <span class="stat-label" data-i18n="totalProduction">إجمالي الإنتاج</span>
+            <span class="stat-value" id="totalProductionValue">0</span>
           </div>
 
-          <div class="summary-card" data-indicator="avgWorkHours">
-            <div class="kpi-icon">⏱️</div>
-            <div class="kpi-body">
-              <p class="kpi-label" data-i18n="avgWorkHours">متوسط ساعات العمل</p>
-              <span class="kpi-value" id="avgWorkHoursValue">0</span>
-              <span class="kpi-unit" data-i18n="hoursUnit">ساعة</span>
-            </div>
+          <div class="stat-pill" data-indicator="avgWorkHours">
+            <span class="stat-label" data-i18n="avgWorkHours">متوسط ساعات العمل</span>
+            <span class="stat-value" id="avgWorkHoursValue">0</span>
+            <span class="stat-unit" data-i18n="hoursUnit">ساعة</span>
           </div>
 
-          <div class="summary-card" data-indicator="rawWasteIndex">
-            <div class="kpi-icon">♻️</div>
-            <div class="kpi-body">
-              <p class="kpi-label" data-i18n="rawWasteIndex">مؤشر هدر المواد الخام</p>
-              <span class="kpi-value" id="wasteIndexValue">0</span>
-            </div>
+          <div class="stat-pill" data-indicator="rawWasteIndex">
+            <span class="stat-label" data-i18n="rawWasteIndex">مؤشر هدر المواد الخام</span>
+            <span class="stat-value" id="wasteIndexValue">0</span>
           </div>
 
-          <div class="summary-card" data-indicator="wastedHours">
-            <div class="kpi-icon">⚠️</div>
-            <div class="kpi-body">
-              <p class="kpi-label" data-i18n="wastedHours">ساعات العمل المهدرة</p>
-              <span class="kpi-value" id="wastedHoursValue">0</span>
-              <span class="kpi-unit" data-i18n="hoursUnit">ساعة</span>
-            </div>
+          <div class="stat-pill" data-indicator="wastedHours">
+            <span class="stat-label" data-i18n="wastedHours">ساعات العمل المهدرة</span>
+            <span class="stat-value" id="wastedHoursValue">0</span>
+            <span class="stat-unit" data-i18n="hoursUnit">ساعة</span>
           </div>
         </div>
 
-        <div class="insights-grid">
-          <div class="insight-box">
-            <h3><span>🏆</span><span data-i18n="topWorkers">الأعلى إنتاجًا</span></h3>
-            <div class="rank-list" id="topWorkersList"></div>
-          </div>
-
-          <div class="insight-box">
-            <h3><span>🚨</span><span data-i18n="wasteAlerts">تنبيهات الهدر</span></h3>
-            <div id="alertsList"></div>
-          </div>
-        </div>
+        <div class="alert-banner" id="shortfallBanner"></div>
 
         <div class="filters-grid">
           <div class="field">
@@ -1654,12 +1426,33 @@
 
         <div class="records-toolbar">
           <span class="records-count" id="recordsCount"></span>
+          <label class="shortfall-toggle">
+            <input type="checkbox" id="shortfallToggle">
+            <span data-i18n="showShortfallOnly">إظهار حالات التقصير فقط</span>
+          </label>
         </div>
 
-        <div class="records-grid" id="historyCardsGrid"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="date">التاريخ</th>
+                <th data-i18n="worker">العامل</th>
+                <th data-i18n="shift">الشفت</th>
+                <th data-i18n="quantity">الكمية</th>
+                <th data-i18n="theoreticalHours">ساعات العمل</th>
+                <th data-i18n="actualWaste">الهدر الفعلي</th>
+                <th data-i18n="status">الحالة</th>
+                <th data-i18n="details">العرض</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
+
 
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-card">
@@ -1855,14 +1648,20 @@
         wastedHoursExplain: "يمثل الفرق بين ساعات العمل القياسية المتوقعة للعمال وساعات الإنتاج النظرية الفعلية. يتم حسابه بناءً على 600 دقيقة كمعيار يومي لكل عامل.",
         totalProductionExplain: "يمثل مجموع الكميات المنتجة لجميع العمال في التاريخ المحدد وبعد تطبيق الفلاتر.",
         hoursUnit: "ساعة",
-        topWorkers: "الأعلى إنتاجًا",
-        wasteAlerts: "تنبيهات الهدر",
-        noAlerts: "لا توجد تنبيهات هدر ضمن البيانات الحالية.",
-        noRanking: "لا توجد بيانات كافية للترتيب.",
         recordsCountLabel: "سجل إنتاج",
         itemsUnit: "صنف",
         unitShort: "وحدة",
-        wasteAlertText: "هدر أعلى من المتوقع بمعدل"
+        wasteAlertText: "هدر أعلى من المتوقع بمعدل",
+        theoreticalHours: "ساعات العمل",
+        status: "الحالة",
+        showShortfallOnly: "إظهار حالات التقصير فقط",
+        statusGood: "ملتزم",
+        statusWarn: "تنبيه",
+        statusBad: "تقصير",
+        reasonLowOutput: "إنتاج أقل من المعتاد",
+        reasonHighWaste: "هدر مواد زائد",
+        noShortfallCases: "لا توجد حالات تقصير ضمن البيانات الحالية.",
+        shortfallCasesFound: "{bad} حالة تقصير و {warn} حالة تحتاج متابعة ضمن السجلات المعروضة."
       },
       en: {
         htmlLang: "en",
@@ -1946,14 +1745,20 @@
         wastedHoursExplain: "Represents the difference between standard expected working hours and actual theoretical production hours, based on 600 minutes per worker per day.",
         totalProductionExplain: "Represents the total produced quantity for the selected date after applying filters.",
         hoursUnit: "hrs",
-        topWorkers: "Top Producers",
-        wasteAlerts: "Waste Alerts",
-        noAlerts: "No waste alerts in the current data.",
-        noRanking: "Not enough data to rank.",
         recordsCountLabel: "production records",
         itemsUnit: "items",
         unitShort: "units",
-        wasteAlertText: "Waste above expected by"
+        wasteAlertText: "Waste above expected by",
+        theoreticalHours: "Work Hours",
+        status: "Status",
+        showShortfallOnly: "Show shortfall cases only",
+        statusGood: "On Track",
+        statusWarn: "Attention",
+        statusBad: "Shortfall",
+        reasonLowOutput: "Below normal output",
+        reasonHighWaste: "Excess material waste",
+        noShortfallCases: "No shortfall cases in the current data.",
+        shortfallCasesFound: "{bad} shortfall case(s) and {warn} case(s) needing attention in the displayed records."
       }
     };
 
@@ -2001,10 +1806,10 @@
     const wastedHoursValue = document.getElementById("wastedHoursValue");
     const totalProductionValue = document.getElementById("totalProductionValue");
 
-    const historyCardsGrid = document.getElementById("historyCardsGrid");
+    const historyTableBody = document.getElementById("historyTableBody");
     const recordsCount = document.getElementById("recordsCount");
-    const topWorkersList = document.getElementById("topWorkersList");
-    const alertsList = document.getElementById("alertsList");
+    const shortfallBanner = document.getElementById("shortfallBanner");
+    const shortfallToggle = document.getElementById("shortfallToggle");
 
     const detailsModal = document.getElementById("detailsModal");
     const closeDetailsModalBtn = document.getElementById("closeDetailsModalBtn");
@@ -2502,17 +2307,20 @@
       wastedHoursValue.textContent = formatDecimal(wastedHours);
       totalProductionValue.textContent = formatNumber(totalQuantity);
 
-      setCardStatus_(wasteIndexValue.closest(".summary-card"), wasteIndex <= 1 ? "good" : (wasteIndex <= 1.2 ? "warn" : "bad"));
-      setCardStatus_(wastedHoursValue.closest(".summary-card"), wastedHours <= 0.5 ? "good" : (wastedHours <= 2 ? "warn" : "bad"));
+      setPillStatus_(wasteIndexValue.closest(".stat-pill"), wasteIndex <= 1 ? "good" : (wasteIndex <= 1.2 ? "warn" : "bad"));
+      setPillStatus_(wastedHoursValue.closest(".stat-pill"), wastedHours <= 0.5 ? "good" : (wastedHours <= 2 ? "warn" : "bad"));
 
-      renderInsights_(groups);
+      renderShortfallBanner_(groups);
     }
 
-    function setCardStatus_(card, status) {
-      if (!card) return;
-      card.classList.remove("status-good", "status-warn", "status-bad");
-      card.classList.add("status-" + status);
+    function setPillStatus_(pill, status) {
+      if (!pill) return;
+      pill.classList.remove("status-good", "status-warn", "status-bad");
+      pill.classList.add("status-" + status);
     }
+
+    const LOW_OUTPUT_HOURS = (STANDARD_WORK_MINUTES / 60) * 0.8;
+    const HIGH_WASTE_RATIO = 1.2;
 
     function getRecordStats_(group) {
       let quantity = 0;
@@ -2528,153 +2336,134 @@
 
       const actualWaste = Number(group.RawWasteKg || 0);
       const wasteRatio = expectedWaste > 0 ? actualWaste / expectedWaste : (actualWaste > 0 ? 2 : 0);
+      const theoreticalHours = theoreticalMinutes / 60;
+
+      const lowOutput = theoreticalHours < LOW_OUTPUT_HOURS;
+      const highWaste = expectedWaste > 0 && wasteRatio > HIGH_WASTE_RATIO;
+
+      let level = "good";
+      if (lowOutput && highWaste) level = "bad";
+      else if (lowOutput || highWaste) level = "warn";
+
+      const reasons = [];
+      if (lowOutput) reasons.push(t("reasonLowOutput"));
+      if (highWaste) reasons.push(t("reasonHighWaste"));
 
       return {
         quantity,
-        theoreticalHours: theoreticalMinutes / 60,
+        theoreticalHours,
         expectedWaste,
         actualWaste,
-        wasteRatio
+        wasteRatio,
+        lowOutput,
+        highWaste,
+        level,
+        reasonText: reasons.join(" + ")
       };
     }
 
-    function renderInsights_(groups) {
-      if (!topWorkersList || !alertsList) return;
+    function renderShortfallBanner_(groups) {
+      if (!shortfallBanner) return;
 
-      const workerTotals = {};
+      const shortfallCount = groups.filter(group => getRecordStats_(group).level === "bad").length;
+      const warnCount = groups.filter(group => getRecordStats_(group).level === "warn").length;
 
-      groups.forEach(group => {
-        const key = group.WorkerID || group.WorkerName || group.ProductionID;
-        const name = group.WorkerName || group.WorkerID || "---";
-        const stats = getRecordStats_(group);
+      shortfallBanner.classList.toggle("is-clear", shortfallCount === 0);
 
-        if (!workerTotals[key]) {
-          workerTotals[key] = { name, quantity: 0 };
-        }
-
-        workerTotals[key].quantity += stats.quantity;
-      });
-
-      const ranking = Object.values(workerTotals)
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 5);
-
-      if (!ranking.length) {
-        topWorkersList.innerHTML = `<div class="empty-state">${t("noRanking")}</div>`;
-      } else {
-        topWorkersList.innerHTML = ranking.map((worker, index) => `
-          <div class="rank-row">
-            <div class="rank-badge">${index + 1}</div>
-            <div class="rank-name">${escapeHtml(worker.name)}</div>
-            <div class="rank-value">${formatNumber(worker.quantity)} ${t("unitShort")}</div>
-          </div>
-        `).join("");
+      if (!groups.length) {
+        shortfallBanner.textContent = "";
+        return;
       }
 
-      const alerts = groups
-        .map(group => ({ group, stats: getRecordStats_(group) }))
-        .filter(entry => entry.stats.expectedWaste > 0 && entry.stats.wasteRatio > 1.2)
-        .sort((a, b) => b.stats.wasteRatio - a.stats.wasteRatio)
-        .slice(0, 5);
-
-      if (!alerts.length) {
-        alertsList.innerHTML = `<div class="empty-state">${t("noAlerts")}</div>`;
-      } else {
-        alertsList.innerHTML = alerts.map(entry => `
-          <div class="alert-row">
-            <span class="alert-icon">⚠️</span>
-            <span class="alert-text">
-              ${escapeHtml(entry.group.WorkerName || entry.group.WorkerID || "---")}
-              — ${escapeHtml(entry.group.Date || "")} —
-              ${t("wasteAlertText")} ${formatDecimal(entry.stats.wasteRatio)}×
-            </span>
-          </div>
-        `).join("");
+      if (shortfallCount === 0 && warnCount === 0) {
+        shortfallBanner.innerHTML = `<span>✅ ${t("noShortfallCases")}</span>`;
+        return;
       }
+
+      shortfallBanner.innerHTML = `
+        <span>⚠️ ${t("shortfallCasesFound")
+          .replace("{bad}", formatNumber(shortfallCount))
+          .replace("{warn}", formatNumber(warnCount))}</span>
+      `;
     }
 
     function renderHistoryTable() {
-      if (!historyCardsGrid) return;
+      if (!historyTableBody) return;
 
-      historyCardsGrid.innerHTML = "";
+      historyTableBody.innerHTML = "";
 
-      const groups = getGroupedHistory();
+      let groups = getGroupedHistory();
+
+      const annotated = groups.map((group, originalIndex) => ({
+        group,
+        originalIndex,
+        stats: getRecordStats_(group)
+      }));
+
+      const showShortfallOnly = shortfallToggle && shortfallToggle.checked;
+      const visible = showShortfallOnly
+        ? annotated.filter(entry => entry.stats.level !== "good")
+        : annotated;
+
+      const levelWeight = { bad: 0, warn: 1, good: 2 };
+      visible.sort((a, b) => {
+        const weightDiff = levelWeight[a.stats.level] - levelWeight[b.stats.level];
+        if (weightDiff !== 0) return weightDiff;
+        return String(b.group.Date || "").localeCompare(String(a.group.Date || ""));
+      });
 
       if (recordsCount) {
         recordsCount.textContent = groups.length
-          ? `${formatNumber(groups.length)} ${t("recordsCountLabel")}`
+          ? `${formatNumber(visible.length)} / ${formatNumber(groups.length)} ${t("recordsCountLabel")}`
           : "";
       }
 
       if (!groups.length) {
-        historyCardsGrid.innerHTML = `<div class="empty-state">${t("emptyData")}</div>`;
+        historyTableBody.innerHTML = `
+          <tr><td colspan="8"><div class="empty-state">${t("emptyData")}</div></td></tr>
+        `;
         return;
       }
 
-      groups.forEach((group, groupIndex) => {
-        const stats = getRecordStats_(group);
-        const status = stats.expectedWaste > 0
-          ? (stats.wasteRatio <= 1 ? "good" : (stats.wasteRatio <= 1.2 ? "warn" : "bad"))
-          : "neutral";
+      if (!visible.length) {
+        historyTableBody.innerHTML = `
+          <tr><td colspan="8"><div class="empty-state">${t("noShortfallCases")}</div></td></tr>
+        `;
+        return;
+      }
 
-        const workerName = group.WorkerName || group.WorkerID || "---";
-        const initial = String(workerName).trim().charAt(0) || "?";
+      const statusLabels = { good: t("statusGood"), warn: t("statusWarn"), bad: t("statusBad") };
 
-        const itemsChips = group.items.map(item => `
-          <span class="item-chip">
-            ${escapeHtml(item.ProductName || item.ProductID || "")}
-            <span class="chip-qty">× ${formatNumber(item.Quantity || 0)}</span>
-          </span>
-        `).join("");
+      visible.forEach(entry => {
+        const { group, originalIndex, stats } = entry;
 
-        const imageCell = group.ImageURL
-          ? `<a class="image-link" href="#" data-image-path="${escapeAttribute(group.ImageURL)}">🖼️ ${t("openImage")}</a>`
-          : `<span class="hint-text">${escapeHtml(t("noImage"))}</span>`;
+        const tr = document.createElement("tr");
+        if (stats.level === "bad") tr.classList.add("row-bad");
+        if (stats.level === "warn") tr.classList.add("row-warn");
 
-        const card = document.createElement("div");
-        card.className = "record-card";
-        card.innerHTML = `
-          <div class="record-head">
-            <div class="record-worker">
-              <div class="record-avatar">${escapeHtml(initial)}</div>
-              <div>
-                <div class="record-worker-name">${escapeHtml(workerName)}</div>
-                <div class="record-date">${escapeHtml(group.Date || "")} · ${escapeHtml(group.Shift || "")}</div>
-              </div>
-            </div>
-            <span class="record-badge ${status}">
-              ${status === "neutral" ? "—" : formatDecimal(stats.wasteRatio) + "×"}
-            </span>
-          </div>
+        const reasonHtml = stats.reasonText
+          ? `<span class="reason-text">${escapeHtml(stats.reasonText)}</span>`
+          : "";
 
-          <div class="record-items">${itemsChips}</div>
-
-          <div class="record-stats">
-            <div class="record-stat">
-              <span class="stat-value">${formatNumber(stats.quantity)}</span>
-              <span class="stat-label" data-i18n="quantity">${t("quantity")}</span>
-            </div>
-            <div class="record-stat">
-              <span class="stat-value">${formatDecimal(stats.theoreticalHours)}</span>
-              <span class="stat-label">${t("hoursUnit")}</span>
-            </div>
-            <div class="record-stat">
-              <span class="stat-value">${formatDecimal(stats.actualWaste)}</span>
-              <span class="stat-label" data-i18n="actualWaste">${t("actualWaste")}</span>
-            </div>
-          </div>
-
-          <div class="record-notes">${escapeHtml(group.Notes || t("noNotes"))}</div>
-
-          <div class="record-foot">
-            ${imageCell}
-            <button class="btn btn-secondary btn-small details-btn" type="button" data-index="${groupIndex}">
+        tr.innerHTML = `
+          <td class="number-cell">${escapeHtml(group.Date || "")}</td>
+          <td>${escapeHtml(group.WorkerName || group.WorkerID || "")}</td>
+          <td>${escapeHtml(group.Shift || "")}</td>
+          <td class="number-cell">${formatNumber(stats.quantity)}</td>
+          <td class="number-cell">${formatDecimal(stats.theoreticalHours)}</td>
+          <td class="number-cell">${formatDecimal(stats.actualWaste)}</td>
+          <td>
+            <span class="status-badge ${stats.level}">${statusLabels[stats.level]}</span>
+            ${reasonHtml}
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-small details-btn" type="button" data-index="${originalIndex}">
               ${t("showDetails")}
             </button>
-          </div>
+          </td>
         `;
 
-        historyCardsGrid.appendChild(card);
+        historyTableBody.appendChild(tr);
       });
     }
 
@@ -3439,13 +3228,17 @@
       productFilterInput.addEventListener("change", loadHistory);
       machineFilterInput.addEventListener("change", loadHistory);
 
-      document.querySelectorAll(".summary-card").forEach(card => {
+      document.querySelectorAll(".stat-pill").forEach(card => {
         card.addEventListener("click", () => {
           openIndicatorInfo(card.dataset.indicator);
         });
       });
 
-      historyCardsGrid.addEventListener("click", event => {
+      if (shortfallToggle) {
+        shortfallToggle.addEventListener("change", renderHistoryTable);
+      }
+
+      historyTableBody.addEventListener("click", event => {
         const imageLink = event.target.closest(".image-link[data-image-path]");
 
         if (imageLink) {
