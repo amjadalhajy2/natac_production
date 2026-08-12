@@ -11,7 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
-<script src="supabase.min.js"></script>
+  <script src="supabase.min.js"></script>
+  <!-- مكتبة SheetJS لتصدير الإكسل -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   
   <style>
     :root {
@@ -561,8 +563,6 @@
       background: #fff;
     }
 
-
-    /* Searchable select: نفس شكل select الأصلي مع البحث داخل نفس الخانة */
     select.searchable-select-source {
       position: absolute !important;
       width: 1px !important;
@@ -1240,9 +1240,26 @@
     .status-badge.bad { background: rgba(220,38,38,0.13); color: var(--red); }
 
     .status-cell {
-      display: flex;
+      position: relative; /* ضروري لعمل Tooltip */
+    }
+
+    .status-cell.has-notes {
+      cursor: help;
+    }
+
+    .status-cell.has-notes::after {
+      content: "💬";
+      font-size: 12px;
+      margin-inline-start: 6px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .status-badges-wrap {
+      display: inline-flex;
       flex-wrap: wrap;
       gap: 6px;
+      align-items: center;
     }
 
     tr.row-bad td { background: rgba(220,38,38,0.045); }
@@ -1254,6 +1271,84 @@
       font-size: 11.5px;
       font-weight: 800;
       color: var(--muted);
+    }
+
+    /* ============ Quantity & Product UI ============ */
+    .qty-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+    }
+
+    .qty-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      padding: 6px 10px;
+      background: rgba(0, 102, 255, 0.04);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 102, 255, 0.12);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .qty-item strong {
+      color: var(--blue-dark);
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(16,24,39,0.05);
+    }
+
+    /* ============ CSS Tooltip (Balloon) ============ */
+    .notes-tooltip {
+      visibility: hidden;
+      background-color: rgba(16, 24, 39, 0.95);
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 8px 12px;
+      position: absolute;
+      z-index: 1000;
+      bottom: calc(100% + 8px);
+      inset-inline-start: 50%;
+      opacity: 0;
+      transition: opacity 0.2s, bottom 0.2s;
+      white-space: pre-wrap;
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 200px;
+      max-width: 300px;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    html[dir="rtl"] .notes-tooltip {
+      transform: translateX(50%);
+    }
+
+    html[dir="ltr"] .notes-tooltip {
+      transform: translateX(-50%);
+    }
+
+    .notes-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(16, 24, 39, 0.95) transparent transparent transparent;
+    }
+
+    .status-cell.has-notes:hover .notes-tooltip {
+      visibility: visible;
+      opacity: 1;
+      bottom: calc(100% + 2px);
     }
 
     @media (max-width: 1180px) {
@@ -1490,6 +1585,9 @@
         <div class="records-toolbar">
           <span class="records-count" id="recordsCount"></span>
           <div class="toolbar-controls">
+            <button class="btn btn-secondary btn-small" type="button" id="exportExcelBtn" data-i18n="exportExcel" style="margin-inline-end: auto;">
+              📥 تحميل إكسل
+            </button>
             <div class="field sort-field">
               <label for="sortModeInput" data-i18n="sortBy">الترتيب حسب</label>
               <select id="sortModeInput">
@@ -1729,14 +1827,15 @@
         status: "الحالة",
         showShortfallOnly: "إظهار حالات التقصير فقط",
         statusGood: "ملتزم",
-        reasonLowOutput: "إنتاج منخفض",
+        reasonLowOutput: "نقص في الإنتاج",
         reasonHighWaste: "هدر زائد",
         noShortfallCases: "لا توجد حالات تقصير ضمن البيانات الحالية.",
         shortfallCasesFound: "{bad} حالة تقصير و {warn} حالة تحتاج متابعة ضمن السجلات المعروضة.",
         sortBy: "الترتيب حسب",
         sortSeverity: "الأكثر تقصيرًا أولاً",
         sortDateDesc: "التاريخ (الأحدث أولاً)",
-        sortDateAsc: "التاريخ (الأقدم أولاً)"
+        sortDateAsc: "التاريخ (الأقدم أولاً)",
+        exportExcel: "📥 تحميل إكسل"
       },
       en: {
         htmlLang: "en",
@@ -1835,7 +1934,8 @@
         sortBy: "Sort by",
         sortSeverity: "Most shortfall first",
         sortDateDesc: "Date (Newest first)",
-        sortDateAsc: "Date (Oldest first)"
+        sortDateAsc: "Date (Oldest first)",
+        exportExcel: "📥 Export Excel"
       }
     };
 
@@ -1877,6 +1977,7 @@
     const productFilterInput = document.getElementById("productFilterInput");
     const machineFilterInput = document.getElementById("machineFilterInput");
     const refreshBtn = document.getElementById("refreshBtn");
+    const exportExcelBtn = document.getElementById("exportExcelBtn");
 
     const avgWorkHoursValue = document.getElementById("avgWorkHoursValue");
     const wasteIndexValue = document.getElementById("wasteIndexValue");
@@ -2397,7 +2498,8 @@
       pill.classList.add("status-" + status);
     }
 
-    const LOW_OUTPUT_HOURS = (STANDARD_WORK_MINUTES / 60) * 0.8;
+    // تم تغيير المعيار إلى 9 ساعات كما تم الطلب
+    const LOW_OUTPUT_HOURS = 9;
     const HIGH_WASTE_RATIO = 1.2;
 
     function getRecordStats_(group) {
@@ -2423,7 +2525,6 @@
       if (lowOutput && highWaste) level = "bad";
       else if (lowOutput || highWaste) level = "warn";
 
-      // أعلى وزن = تقصير أكبر: إنتاج منخفض أكثر خطورة من هدر زائد
       const severity = (lowOutput ? 2 : 0) + (highWaste ? 1 : 0);
 
       return {
@@ -2528,14 +2629,33 @@
         if (stats.highWaste) badges.push(`<span class="status-badge warn">${t("reasonHighWaste")}</span>`);
         if (!badges.length) badges.push(`<span class="status-badge good">${t("statusGood")}</span>`);
 
+        // تنسيق المنتجات والكمية داخل الخلية
+        let itemsHtml = "";
+        if (group.items && group.items.length) {
+          itemsHtml = group.items.map(item => {
+            const pName = escapeHtml(item.ProductName || t("product"));
+            const qty = formatNumber(item.Quantity);
+            return `<div class="qty-item"><span>${pName}</span> <strong>${qty}</strong></div>`;
+          }).join("");
+        } else {
+          itemsHtml = `<span class="number-cell">${formatNumber(stats.quantity)}</span>`;
+        }
+
+        // تنسيق البالون (Tooltip)
+        const tooltipHtml = group.Notes ? `<div class="notes-tooltip">${escapeHtml(group.Notes)}</div>` : '';
+        const hasNotesClass = group.Notes ? 'has-notes' : '';
+
         tr.innerHTML = `
           <td class="number-cell">${escapeHtml(group.Date || "")}</td>
           <td>${escapeHtml(group.WorkerName || group.WorkerID || "")}</td>
           <td>${escapeHtml(group.Shift || "")}</td>
-          <td class="number-cell">${formatNumber(stats.quantity)}</td>
+          <td><div class="qty-list">${itemsHtml}</div></td>
           <td class="number-cell">${formatDecimal(stats.theoreticalHours)}</td>
           <td class="number-cell">${formatDecimal(stats.actualWaste)}</td>
-          <td class="status-cell">${badges.join("")}</td>
+          <td class="status-cell ${hasNotesClass}">
+            <div class="status-badges-wrap">${badges.join("")}</div>
+            ${tooltipHtml}
+          </td>
           <td>
             <button class="btn btn-secondary btn-small details-btn" type="button" data-index="${originalIndex}">
               ${t("showDetails")}
@@ -2826,6 +2946,70 @@
       document.body.style.overflow = "hidden";
     }
 
+    function exportToExcel() {
+      if (!historyRecords || !historyRecords.length) {
+        showMessage(t("emptyData"), "warning");
+        return;
+      }
+
+      let groups = getGroupedHistory();
+      const annotated = groups.map((group, originalIndex) => ({
+        group,
+        originalIndex,
+        stats: getRecordStats_(group)
+      }));
+
+      const showShortfallOnly = shortfallToggle && shortfallToggle.checked;
+      let visible = showShortfallOnly
+        ? annotated.filter(entry => entry.stats.level !== "good")
+        : annotated;
+
+      const sortMode = sortModeInput ? sortModeInput.value : "severity";
+      if (sortMode === "dateAsc") {
+        visible.sort((a, b) => String(a.group.Date || "").localeCompare(String(b.group.Date || "")));
+      } else if (sortMode === "dateDesc") {
+        visible.sort((a, b) => String(b.group.Date || "").localeCompare(String(a.group.Date || "")));
+      } else {
+        visible.sort((a, b) => {
+          const severityDiff = b.stats.severity - a.stats.severity;
+          if (severityDiff !== 0) return severityDiff;
+          return String(b.group.Date || "").localeCompare(String(a.group.Date || ""));
+        });
+      }
+
+      const exportData = visible.map(entry => {
+        const { group, stats } = entry;
+        let statusText = [];
+        if (stats.lowOutput) statusText.push(t("reasonLowOutput"));
+        if (stats.highWaste) statusText.push(t("reasonHighWaste"));
+        if (!statusText.length) statusText.push(t("statusGood"));
+
+        let productsInfo = (group.items || []).map(item => `${item.ProductName || t("product")}: ${item.Quantity}`).join(" | ");
+
+        return {
+          [t("date")]: group.Date || "",
+          [t("worker")]: group.WorkerName || group.WorkerID || "",
+          [t("shift")]: group.Shift || "",
+          [t("productionItems")]: productsInfo,
+          [t("theoreticalHours")]: formatDecimal(stats.theoreticalHours),
+          [t("actualWaste")]: formatDecimal(stats.actualWaste),
+          [t("status")]: statusText.join(" + "),
+          [t("notes")]: group.Notes || ""
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      ws['!dir'] = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+      const colWidths = [
+        { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 30 }
+      ];
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Production History");
+      XLSX.writeFile(wb, `Production_History_${toISODate(new Date())}.xlsx`);
+    }
 
     function initSearchableSelectEvents() {
       if (searchableSelectEventsReady) return;
@@ -3301,6 +3485,10 @@
 
     function bindEvents() {
       refreshBtn.addEventListener("click", loadHistory);
+      
+      if (exportExcelBtn) {
+        exportExcelBtn.addEventListener("click", exportToExcel);
+      }
 
       dateInput.addEventListener("change", loadHistory);
       toDateInput.addEventListener("change", loadHistory);
