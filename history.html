@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <script src="supabase.min.js"></script>
-  <!-- مكتبة SheetJS لتصدير الإكسل -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- مكتبة ExcelJS لتصدير الإكسل مع التنسيقات والألوان -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
   
   <style>
     :root {
@@ -1590,10 +1590,11 @@
             </button>
             <div class="field sort-field">
               <label for="sortModeInput" data-i18n="sortBy">الترتيب حسب</label>
+              <!-- تم التعديل لجعل الترتيب من الأقدم للأحدث هو الخيار الافتراضي -->
               <select id="sortModeInput">
-                <option value="severity" data-i18n="sortSeverity">الأكثر تقصيرًا أولاً</option>
-                <option value="dateDesc" data-i18n="sortDateDesc">التاريخ (الأحدث أولاً)</option>
                 <option value="dateAsc" data-i18n="sortDateAsc">التاريخ (الأقدم أولاً)</option>
+                <option value="dateDesc" data-i18n="sortDateDesc">التاريخ (الأحدث أولاً)</option>
+                <option value="severity" data-i18n="sortSeverity">الأكثر تقصيرًا أولاً</option>
               </select>
             </div>
             <label class="shortfall-toggle">
@@ -1612,7 +1613,7 @@
                 <th data-i18n="shift">الشفت</th>
                 <th data-i18n="quantity">الكمية</th>
                 <th data-i18n="theoreticalHours">ساعات العمل</th>
-                <th data-i18n="actualWaste">الهدر الفعلي</th>
+                <th data-i18n="actualWaste">الهدر الفعلي (كجم)</th>
                 <th data-i18n="status">الحالة</th>
                 <th data-i18n="details">العرض</th>
               </tr>
@@ -1729,7 +1730,7 @@
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
 
-    const API_URL = SUPABASE_URL; // للتوافق مع شروط التحقق القديمة داخل الصفحة
+    const API_URL = SUPABASE_URL;
     const SESSION_KEY = "factoryUserSession";
     const LANGUAGE_KEY = "factoryLanguage";
     const INITIAL_CACHE_KEY = "history_initial_data_v2";
@@ -1781,7 +1782,7 @@
         productName: "اسم المنتج",
         machineName: "المكينة",
         quantity: "الكمية",
-        actualWaste: "الهدر الفعلي",
+        actualWaste: "الهدر الفعلي (كجم)",
         actualWasteKg: "هدر المواد الخام (كجم)",
         notes: "الملاحظات",
         image: "الصورة",
@@ -1881,7 +1882,7 @@
         productName: "Product Name",
         machineName: "Machine",
         quantity: "Quantity",
-        actualWaste: "Actual Waste",
+        actualWaste: "Actual Waste (Kg)",
         actualWasteKg: "Raw Material Waste (Kg)",
         notes: "Notes",
         image: "Image",
@@ -2498,7 +2499,6 @@
       pill.classList.add("status-" + status);
     }
 
-    // تم تغيير المعيار إلى 9 ساعات كما تم الطلب
     const LOW_OUTPUT_HOURS = 9;
     const HIGH_WASTE_RATIO = 1.2;
 
@@ -2565,6 +2565,15 @@
       `;
     }
 
+    // دالة تحويلية للغة الشفت
+    function getTranslatedShift(shiftVal) {
+      if (!shiftVal) return "";
+      const val = String(shiftVal).toLowerCase();
+      if (val === "صباحي" || val === "morning") return t("morningShift");
+      if (val === "مسائي" || val === "evening") return t("eveningShift");
+      return shiftVal;
+    }
+
     function renderHistoryTable() {
       if (!historyTableBody) return;
 
@@ -2583,7 +2592,7 @@
         ? annotated.filter(entry => entry.stats.level !== "good")
         : annotated;
 
-      const sortMode = sortModeInput ? sortModeInput.value : "severity";
+      const sortMode = sortModeInput ? sortModeInput.value : "dateAsc";
 
       if (sortMode === "dateAsc") {
         visible.sort((a, b) => String(a.group.Date || "").localeCompare(String(b.group.Date || "")));
@@ -2629,7 +2638,6 @@
         if (stats.highWaste) badges.push(`<span class="status-badge warn">${t("reasonHighWaste")}</span>`);
         if (!badges.length) badges.push(`<span class="status-badge good">${t("statusGood")}</span>`);
 
-        // تنسيق المنتجات والكمية داخل الخلية
         let itemsHtml = "";
         if (group.items && group.items.length) {
           itemsHtml = group.items.map(item => {
@@ -2641,14 +2649,13 @@
           itemsHtml = `<span class="number-cell">${formatNumber(stats.quantity)}</span>`;
         }
 
-        // تنسيق البالون (Tooltip)
         const tooltipHtml = group.Notes ? `<div class="notes-tooltip">${escapeHtml(group.Notes)}</div>` : '';
         const hasNotesClass = group.Notes ? 'has-notes' : '';
 
         tr.innerHTML = `
           <td class="number-cell">${escapeHtml(group.Date || "")}</td>
           <td>${escapeHtml(group.WorkerName || group.WorkerID || "")}</td>
-          <td>${escapeHtml(group.Shift || "")}</td>
+          <td>${escapeHtml(getTranslatedShift(group.Shift))}</td>
           <td><div class="qty-list">${itemsHtml}</div></td>
           <td class="number-cell">${formatDecimal(stats.theoreticalHours)}</td>
           <td class="number-cell">${formatDecimal(stats.actualWaste)}</td>
@@ -2946,7 +2953,8 @@
       document.body.style.overflow = "hidden";
     }
 
-    function exportToExcel() {
+    // تصدير الإكسل باستخدام مكتبة ExcelJS مع الألوان والتنسيقات
+    async function exportToExcel() {
       if (!historyRecords || !historyRecords.length) {
         showMessage(t("emptyData"), "warning");
         return;
@@ -2964,7 +2972,7 @@
         ? annotated.filter(entry => entry.stats.level !== "good")
         : annotated;
 
-      const sortMode = sortModeInput ? sortModeInput.value : "severity";
+      const sortMode = sortModeInput ? sortModeInput.value : "dateAsc";
       if (sortMode === "dateAsc") {
         visible.sort((a, b) => String(a.group.Date || "").localeCompare(String(b.group.Date || "")));
       } else if (sortMode === "dateDesc") {
@@ -2977,38 +2985,89 @@
         });
       }
 
-      const exportData = visible.map(entry => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Production History', {
+        views: [{ rightToLeft: currentLang === 'ar' }]
+      });
+
+      // إعداد الأعمدة
+      worksheet.columns = [
+        { header: t("date"), key: 'date', width: 15 },
+        { header: t("worker"), key: 'worker', width: 25 },
+        { header: t("shift"), key: 'shift', width: 15 },
+        { header: t("productionItems"), key: 'items', width: 40 },
+        { header: t("theoreticalHours"), key: 'hours', width: 15 },
+        { header: t("actualWaste"), key: 'waste', width: 20 },
+        { header: t("status"), key: 'status', width: 25 },
+        { header: t("notes"), key: 'notes', width: 35 }
+      ];
+
+      // تنسيق الرأس (Header)
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFEEEEEE' }
+      };
+
+      // تعبئة البيانات وتلوين خلية الحالة
+      visible.forEach(entry => {
         const { group, stats } = entry;
         let statusText = [];
-        if (stats.lowOutput) statusText.push(t("reasonLowOutput"));
-        if (stats.highWaste) statusText.push(t("reasonHighWaste"));
-        if (!statusText.length) statusText.push(t("statusGood"));
+        let statusColor = 'FFFFFFFF'; // الأبيض افتراضيًا
+
+        // تحديد اللون والنص للحالة
+        if (stats.lowOutput) {
+          statusText.push(t("reasonLowOutput"));
+          statusColor = 'FFFFC7CE'; // لون أحمر خفيف (نقص إنتاج)
+        }
+        if (stats.highWaste) {
+          statusText.push(t("reasonHighWaste"));
+          if (statusColor === 'FFFFFFFF') {
+            statusColor = 'FFFFEB9C'; // لون أصفر خفيف (هدر زائد)
+          }
+        }
+        if (!statusText.length) {
+          statusText.push(t("statusGood"));
+          statusColor = 'FFC6EFCE'; // لون أخضر خفيف (ملتزم)
+        }
 
         let productsInfo = (group.items || []).map(item => `${item.ProductName || t("product")}: ${item.Quantity}`).join(" | ");
 
-        return {
-          [t("date")]: group.Date || "",
-          [t("worker")]: group.WorkerName || group.WorkerID || "",
-          [t("shift")]: group.Shift || "",
-          [t("productionItems")]: productsInfo,
-          [t("theoreticalHours")]: formatDecimal(stats.theoreticalHours),
-          [t("actualWaste")]: formatDecimal(stats.actualWaste),
-          [t("status")]: statusText.join(" + "),
-          [t("notes")]: group.Notes || ""
+        const row = worksheet.addRow({
+          date: group.Date || "",
+          worker: group.WorkerName || group.WorkerID || "",
+          shift: getTranslatedShift(group.Shift || ""),
+          items: productsInfo,
+          hours: formatDecimal(stats.theoreticalHours),
+          waste: formatDecimal(stats.actualWaste),
+          status: statusText.join(" + "),
+          notes: group.Notes || ""
+        });
+
+        // تطبيق اللون على خلية "الحالة" فقط
+        const statusCell = row.getCell('status');
+        statusCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: statusColor }
         };
       });
 
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      ws['!dir'] = currentLang === 'ar' ? 'rtl' : 'ltr';
-
-      const colWidths = [
-        { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 40 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 30 }
-      ];
-      ws['!cols'] = colWidths;
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Production History");
-      XLSX.writeFile(wb, `Production_History_${toISODate(new Date())}.xlsx`);
+      // إنشاء الملف وتحميله
+      try {
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Production_History_${toISODate(new Date())}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error(error);
+        showMessage(t("serverError"), "error");
+      }
     }
 
     function initSearchableSelectEvents() {
